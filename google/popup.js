@@ -15,7 +15,13 @@ document.getElementById("scrape").onclick = function() {
           /* Array containing URLs for each recording */
           var urls = data.map(entry => entry[24][0]);
           var url_regex = /https:\/\/myactivity\.google\.com\/history\/audio\/play\/(\S{61})/;
-          console.log(urls.map(url => url.match(url_regex)[1]));
+          console.log("Audio IDs", urls.map(url => url.match(url_regex)[1]));
+          /* Whether the opened tab should become the active tab. Set to false to debug / view logs with "Inspect popup" */
+          var setActiveTab = true;
+          chrome.tabs.create({
+            "url": urls[Math.floor(Math.random() * urls.length)],
+            active: setActiveTab
+          });
         }
       };
       data_xhr.send('{"sig":"' + sig + '"}');
