@@ -2,7 +2,10 @@
   "name": "Google Activity Scraper",
   "version": "1.0",
   "description": "Scrape stored audio recordings from Google Activity.",
-  "permissions": ["https://myactivity.google.com/"],
+  "permissions": [
+    "https://myactivity.google.com/",
+    "storage"
+  ],
   "browser_action": {
     "default_popup": "popup.html",
     "default_icon": "icsi.png"

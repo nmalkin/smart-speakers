@@ -12,6 +12,9 @@ document.getElementById("scrape").onclick = function() {
       data_xhr.onreadystatechange = function() {
         if (data_xhr.readyState === 4 && data_xhr.status === 200) {
           var data = JSON.parse(data_xhr.response.slice(6))[0];
+          chrome.storage.local.set({"audio": data}, function() {
+            console.log("Successfully stored audio data");
+          });
           /* Array containing URLs for each recording */
           var urls = data.map(entry => entry[24][0]);
           var url_regex = /https:\/\/myactivity\.google\.com\/history\/audio\/play\/(\S{61})/;
@@ -19,7 +22,7 @@ document.getElementById("scrape").onclick = function() {
           /* Whether the opened tab should become the active tab. Set to false to debug / view logs with "Inspect popup" */
           var setActiveTab = true;
           chrome.tabs.create({
-            "url": urls[Math.floor(Math.random() * urls.length)],
+            "url": "./sample.html",
             active: setActiveTab
           });
         }
