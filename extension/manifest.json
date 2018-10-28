@@ -1,0 +1,28 @@
+{
+  "name": "Passive Listening Activity Scraper",
+  "version": "1.0",
+  "description": "Scrape stored audio recordings from Google/Alexa Activity.",
+  "permissions": [
+    "https://myactivity.google.com/",
+    "storage",
+    "https://www.amazon.com/"
+  ],
+  // "browser_action": {
+  //   "default_popup": "popup.html",
+  //   "default_icon": "icsi.png"
+  // },
+  "background": {
+      "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_icon": "icsi.png"
+  },
+  "incognito": "split",
+  "icons": {
+    "16": "icsi.png",
+    "32": "icsi.png",
+    "48": "icsi.png",
+    "128": "icsi.png"
+  },
+  "manifest_version": 2
+}
