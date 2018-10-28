@@ -4,15 +4,11 @@
   "description": "Scrape stored audio recordings from Google/Alexa Activity.",
   "permissions": [
     "https://myactivity.google.com/",
-    "storage",
-    "https://www.amazon.com/"
+    "https://www.amazon.com/",
+    "storage"
   ],
-  // "browser_action": {
-  //   "default_popup": "popup.html",
-  //   "default_icon": "icsi.png"
-  // },
   "background": {
-      "scripts": ["background.js"]
+    "scripts": ["background.js"]
   },
   "browser_action": {
     "default_icon": "icsi.png"

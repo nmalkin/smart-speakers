@@ -1,4 +1,4 @@
-document.getElementById("scrape").onclick = function() {
+document.getElementById("google").onclick = function() {
   /* First request: get xsrf token from My Activity page */
   var token_xhr = new XMLHttpRequest();
   token_xhr.open("GET", "https://myactivity.google.com/item?product=29", true);
@@ -6,9 +6,7 @@ document.getElementById("scrape").onclick = function() {
     if (token_xhr.readyState === 4 && token_xhr.status === 200) {
       var signedout_regex = /FootprintsMyactivitySignedoutUi/;
       if (token_xhr.response.search(signedout_regex) > -1) {
-        chrome.tabs.create({
-          "url": "./login-prompt.html"
-        });
+        window.location.href = "google/login-prompt.html";
         return;
       }
       var token_regex = /window\.HISTORY_xsrf='(\S{44})'/;
@@ -26,12 +24,7 @@ document.getElementById("scrape").onclick = function() {
           var urls = data.map(entry => entry[24][0]);
           var url_regex = /https:\/\/myactivity\.google\.com\/history\/audio\/play\/(\S{61})/;
           console.log("Audio IDs", urls.map(url => url.match(url_regex)[1]));
-          /* Whether the opened tab should become the active tab. Set to false to debug / view logs with "Inspect popup" */
-          var setActiveTab = true;
-          chrome.tabs.create({
-            "url": "./sample.html",
-            active: setActiveTab
-          });
+          window.location.href = "google/sample.html";
         }
       };
       data_xhr.send('{"sig":"' + sig + '"}');
