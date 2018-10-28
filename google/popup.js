@@ -4,6 +4,13 @@ document.getElementById("scrape").onclick = function() {
   token_xhr.open("GET", "https://myactivity.google.com/item?product=29", true);
   token_xhr.onreadystatechange = function() {
     if (token_xhr.readyState === 4 && token_xhr.status === 200) {
+      var signedout_regex = /FootprintsMyactivitySignedoutUi/;
+      if (token_xhr.response.search(signedout_regex) > -1) {
+        chrome.tabs.create({
+          "url": "./login-prompt.html"
+        });
+        return;
+      }
       var token_regex = /window\.HISTORY_xsrf='(\S{44})'/;
       var sig = token_xhr.response.match(token_regex)[1];
       /* Second request: get activity data */
@@ -12,6 +19,9 @@ document.getElementById("scrape").onclick = function() {
       data_xhr.onreadystatechange = function() {
         if (data_xhr.readyState === 4 && data_xhr.status === 200) {
           var data = JSON.parse(data_xhr.response.slice(6))[0];
+          chrome.storage.local.set({"audio": data}, function() {
+            console.log("Successfully stored audio data");
+          });
           /* Array containing URLs for each recording */
           var urls = data.map(entry => entry[24][0]);
           var url_regex = /https:\/\/myactivity\.google\.com\/history\/audio\/play\/(\S{61})/;
@@ -19,7 +29,7 @@ document.getElementById("scrape").onclick = function() {
           /* Whether the opened tab should become the active tab. Set to false to debug / view logs with "Inspect popup" */
           var setActiveTab = true;
           chrome.tabs.create({
-            "url": urls[Math.floor(Math.random() * urls.length)],
+            "url": "./sample.html",
             active: setActiveTab
           });
         }
