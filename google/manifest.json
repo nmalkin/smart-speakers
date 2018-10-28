@@ -10,6 +10,7 @@
     "default_popup": "popup.html",
     "default_icon": "icsi.png"
   },
+  "incognito": "split",
   "icons": {
     "16": "icsi.png",
     "32": "icsi.png",

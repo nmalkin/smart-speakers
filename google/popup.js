@@ -4,6 +4,13 @@ document.getElementById("scrape").onclick = function() {
   token_xhr.open("GET", "https://myactivity.google.com/item?product=29", true);
   token_xhr.onreadystatechange = function() {
     if (token_xhr.readyState === 4 && token_xhr.status === 200) {
+      var signedout_regex = /FootprintsMyactivitySignedoutUi/;
+      if (token_xhr.response.search(signedout_regex) > -1) {
+        chrome.tabs.create({
+          "url": "./login-prompt.html"
+        });
+        return;
+      }
       var token_regex = /window\.HISTORY_xsrf='(\S{44})'/;
       var sig = token_xhr.response.match(token_regex)[1];
       /* Second request: get activity data */
