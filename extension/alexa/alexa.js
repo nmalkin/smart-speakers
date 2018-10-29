@@ -1,6 +1,5 @@
-
-document.getElementById("alexa").addEventListener("click", load_audio);
+document.getElementById('alexa').addEventListener('click', load_audio);
 
 function load_audio() {
- 	window.location.href = "/alexa/audio.html"
-}	
+    window.location.href = '/alexa/audio.html';
+}
