@@ -14,30 +14,32 @@ function choose(){
 	var audio_url = "https://www.amazon.com/hz/mycd/playOption?id=" + random
 	console.log(audio_url)
 	//console.log(audio_url)
-
+																																	
 	// audio = new Audio();
 	audio.src = audio_url;
 	audio.controls = true;
 	document.getElementById("transcript").innerHTML = dict[random];
 }
 
+															var success = false
+
 function fetch(){
 
 	var i = 0
 
-	while (i < 70){
+	while (i<10){
 
-		var get0 = new XMLHttpRequest();
-		get0.open("GET", "https://www.amazon.com", true);
-		var getprime = new XMLHttpRequest();
-		getprime.open("GET", "https://www.amazon.com/hz/mycd/ajax", true);
+		// var get0 = new XMLHttpRequest();
+		// get0.open("GET", "https://www.amazon.com", true);
+		// var getprime = new XMLHttpRequest();
+		// getprime.open("GET", "https://www.amazon.com/hz/mycd/ajax", true);
 
 		/* initial get request for overview page */
 		var get1 = new XMLHttpRequest();
 		get1.open("GET", "https://www.amazon.com/hz/mycd/myx#/home/content/booksAll/dateDsc/", true);
 
 		var csrfToken;
-		get1.onload = function() {
+		get1.onreadystatechange = function() {
 			if (get1.readyState === get1.DONE && get1.status === 200) {
 
 				resp = get1.responseText
@@ -55,7 +57,7 @@ function fetch(){
 	            var final_post = new XMLHttpRequest();
 				final_post.open("POST", 'https://www.amazon.com/hz/mycd/alexa/activityTranscripts', true);
 				final_post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-				final_post.onload = function() {
+				final_post.onreadystatechange = function() {
 					if (final_post.readyState === final_post.DONE && final_post.status === 200) {
 			            // console.log("* * * * * * * * * * *")
 			           
@@ -78,7 +80,7 @@ function fetch(){
 			            if (urls.length == 0){
 
 			            	/* This ABSOLUTELY needs to be hardened. Failure means extension crashes */
-			            	if (i > 65){
+			            	if (i > 8){
 								document.getElementById("demo").innerHTML = "Timeout Reached. Please try again";
 			            	}
 			            }
@@ -98,6 +100,7 @@ function fetch(){
 						    document.body.appendChild(audio);
 							
 							document.getElementById("demo").innerHTML = "Success!";
+							success = true;
 							
 							audio.controls = true;
 							document.getElementById("transcript").innerHTML = dict[random];
