@@ -1,19 +1,19 @@
-var urls;
-var dict;
-var audio;
+let urls;
+let dict;
+let audio;
 
-let reg = /csrfToken = "(.*)"/g;
-let audio_reg = /<audio id="(.*)">/g;
-let exp_reg = /<audio id="audio-(.*)"> <s.*<\/audio>\n\s*.*\n\s*.*\n\s*.*\n\s*.*summaryCss">\n\s*(.*)<\/div/g;
+const reg = /csrfToken = "(.*)"/g;
+const audio_reg = /<audio id="(.*)">/g;
+const exp_reg = /<audio id="audio-(.*)"> <s.*<\/audio>\n\s*.*\n\s*.*\n\s*.*\n\s*.*summaryCss">\n\s*(.*)<\/div/g;
 
 // document.getElementById("play").addEventListener("click", play);
 document.getElementById('choose').addEventListener('click', choose);
 
 function choose() {
-    var random = urls[Math.floor(Math.random() * urls.length)];
-    var audio_url = 'https://www.amazon.com/hz/mycd/playOption?id=' + random;
+    const random = urls[Math.floor(Math.random() * urls.length)];
+    const audio_url = `https://www.amazon.com/hz/mycd/playOption?id=${random}`;
     console.log(audio_url);
-    //console.log(audio_url)
+    // console.log(audio_url)
 
     // audio = new Audio();
     audio.src = audio_url;
@@ -21,10 +21,10 @@ function choose() {
     document.getElementById('transcript').innerHTML = dict[random];
 }
 
-var success = false;
+let success = false;
 
 function fetch() {
-    var i = 0;
+    let i = 0;
 
     while (i < 10) {
         // var get0 = new XMLHttpRequest();
@@ -44,7 +44,7 @@ function fetch() {
         get1.onreadystatechange = function() {
             if (get1.readyState === get1.DONE && get1.status === 200) {
                 resp = get1.responseText;
-                var match = resp.match(reg);
+                let match = resp.match(reg);
 
                 if (match == null) {
                     document.getElementById('demo').innerHTML =
@@ -56,7 +56,7 @@ function fetch() {
                 console.log(csrfToken);
 
                 /* final AJAX post for the activity transcripts */
-                var final_post = new XMLHttpRequest();
+                const final_post = new XMLHttpRequest();
                 final_post.open(
                     'POST',
                     'https://www.amazon.com/hz/mycd/alexa/activityTranscripts',
@@ -79,7 +79,7 @@ function fetch() {
                         urls = new Array();
                         dict = {};
                         while ((match = exp_reg.exec(final_resp))) {
-                            /* prune malformed ids. May want to revisit which of these are still accessible*/
+                            /* prune malformed ids. May want to revisit which of these are still accessible */
                             if (match[0][121] === '/') {
                                 urls.push(match[1]);
                                 dict[match[1]] = match[2];
@@ -87,7 +87,7 @@ function fetch() {
                             }
                         }
 
-                        /* requests often fail the first 1-2 times. Try again if we get nothing*/
+                        /* requests often fail the first 1-2 times. Try again if we get nothing */
                         if (urls.length == 0) {
                             /* This ABSOLUTELY needs to be hardened. Failure means extension crashes */
                             if (i > 8) {
@@ -95,21 +95,19 @@ function fetch() {
                                     'Timeout Reached. Please try again';
                             }
                         } else {
-                            var random =
+                            const random =
                                 urls[Math.floor(Math.random() * urls.length)];
-                            //console.log(random)
+                            // console.log(random)
 
-                            var audio_url =
-                                'https://www.amazon.com/hz/mycd/playOption?id=' +
-                                random;
-                            //console.log(audio_url)
+                            const audio_url = `https://www.amazon.com/hz/mycd/playOption?id=${random}`;
+                            // console.log(audio_url)
 
                             // audio = new Audio();
                             // audio.src = audio_url;
 
                             audio = document.createElement('audio');
                             audio.src = audio_url;
-                            audio.autoplay = false; //avoid the user has not interacted with your page issue
+                            audio.autoplay = false; // avoid the user has not interacted with your page issue
                             document.body.appendChild(audio);
 
                             document.getElementById('demo').innerHTML =
@@ -119,17 +117,13 @@ function fetch() {
                             audio.controls = true;
                             document.getElementById('transcript').innerHTML =
                                 dict[random];
-
-                            return;
                         }
                     }
                 };
 
-                /* Manually set date start to 00...0 and end to 99...9. Set batchsize as high as possible*/
+                /* Manually set date start to 00...0 and end to 99...9. Set batchsize as high as possible */
                 final_post.send(
-                    'csrfToken=' +
-                        csrfToken +
-                        '&rangeType=custom&startDate=000000000000&endDate=9999999999999&batchSize=999999&shouldParseStartDate=false&shouldParseEndDate=false'
+                    `csrfToken=${csrfToken}&rangeType=custom&startDate=000000000000&endDate=9999999999999&batchSize=999999&shouldParseStartDate=false&shouldParseEndDate=false`
                 );
             }
         };
