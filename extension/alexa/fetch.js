@@ -2,148 +2,97 @@ let urls;
 let dict;
 let audio;
 
-const reg = /csrfToken = "(.*)"/g;
+const csrf_reg = /csrfToken = "(.*)"/g;
 const audio_reg = /<audio id="(.*)">/g;
 const exp_reg = /<audio id="audio-(.*)"> <s.*<\/audio>\n\s*.*\n\s*.*\n\s*.*\n\s*.*summaryCss">\n\s*(.*)<\/div/g;
-
-// document.getElementById("play").addEventListener("click", play);
-document.getElementById('choose').addEventListener('click', choose);
 
 function choose() {
     const random = urls[Math.floor(Math.random() * urls.length)];
     const audio_url = `https://www.amazon.com/hz/mycd/playOption?id=${random}`;
     console.log(audio_url);
-    // console.log(audio_url)
-
-    // audio = new Audio();
     audio.src = audio_url;
     audio.controls = true;
     document.getElementById('transcript').innerHTML = dict[random];
 }
 
-let success = false;
-
-function fetch() {
-    let i = 0;
-
-    while (i < 10) {
-        // var get0 = new XMLHttpRequest();
-        // get0.open("GET", "https://www.amazon.com", true);
-        // var getprime = new XMLHttpRequest();
-        // getprime.open("GET", "https://www.amazon.com/hz/mycd/ajax", true);
-
-        /* initial get request for overview page */
-        var get1 = new XMLHttpRequest();
-        get1.open(
-            'GET',
+function get(){
+	const getreq = new XMLHttpRequest();
+	getreq.open('GET',
             'https://www.amazon.com/hz/mycd/myx#/home/content/booksAll/dateDsc/',
-            true
-        );
-
-        var csrfToken;
-        get1.onreadystatechange = function() {
-            if (get1.readyState === get1.DONE && get1.status === 200) {
-                resp = get1.responseText;
-                let match = resp.match(reg);
-
-                if (match == null) {
-                    document.getElementById('demo').innerHTML =
-                        'Fetching Audio failed. Please make sure you are logged in and try again';
+            true)
+	getreq.onreadystatechange = function() {
+		if (getreq.readyState === getreq.DONE && getreq.status === 200){
+			resp = getreq.responseText
+			var match = resp.match(csrf_reg);
+			if (match == null) {
+                    document.getElementById('status').innerHTML =
+                        'Fetching Audio failed. Please make sure you are logged in and try again (no CSRF match)';
                     return;
                 }
+            var csrfToken = match[0].slice(13, -1);
+            console.log(csrfToken);
+            post(csrfToken);
+		}
+	}
+	getreq.send();
+}
 
-                csrfToken = match[0].slice(13, -1);
-                console.log(csrfToken);
-
-                /* final AJAX post for the activity transcripts */
-                const final_post = new XMLHttpRequest();
-                final_post.open(
+function post(csrfToken){
+	const postreq = new XMLHttpRequest();
+	postreq.open(
                     'POST',
                     'https://www.amazon.com/hz/mycd/alexa/activityTranscripts',
                     true
                 );
-                final_post.setRequestHeader(
+	postreq.setRequestHeader(
                     'Content-Type',
                     'application/x-www-form-urlencoded'
                 );
-                final_post.onreadystatechange = function() {
-                    if (
-                        final_post.readyState === final_post.DONE &&
-                        final_post.status === 200
-                    ) {
-                        // console.log("* * * * * * * * * * *")
+	postreq.onreadystatechange = function() {
+		if (postreq.readyState == postreq.DONE && postreq.status == 200){
+			postresp = postreq.responseText;
+			console.log(postresp)
+			urls = new Array();
+			dict = {}
 
-                        final_resp = final_post.responseText;
-                        console.log(final_resp);
-
-                        urls = new Array();
-                        dict = {};
-                        while ((match = exp_reg.exec(final_resp))) {
-                            /* prune malformed ids. May want to revisit which of these are still accessible */
-                            if (match[0][121] === '/') {
-                                urls.push(match[1]);
-                                dict[match[1]] = match[2];
-                                console.log(match[1]);
-                            }
-                        }
-
-                        /* requests often fail the first 1-2 times. Try again if we get nothing */
-                        if (urls.length == 0) {
-                            /* This ABSOLUTELY needs to be hardened. Failure means extension crashes */
-                            if (i > 8) {
-                                document.getElementById('demo').innerHTML =
-                                    'Timeout Reached. Please try again';
-                            }
-                        } else {
-                            const random =
-                                urls[Math.floor(Math.random() * urls.length)];
-                            // console.log(random)
-
-                            const audio_url = `https://www.amazon.com/hz/mycd/playOption?id=${random}`;
-                            // console.log(audio_url)
-
-                            // audio = new Audio();
-                            // audio.src = audio_url;
-
-                            audio = document.createElement('audio');
-                            audio.src = audio_url;
-                            audio.autoplay = false; // avoid the user has not interacted with your page issue
-                            document.body.appendChild(audio);
-
-                            document.getElementById('demo').innerHTML =
-                                'Success!';
-                            success = true;
-
-                            audio.controls = true;
-                            document.getElementById('transcript').innerHTML =
-                                dict[random];
-                        }
-                    }
-                };
-
-                /* Manually set date start to 00...0 and end to 99...9. Set batchsize as high as possible */
-                final_post.send(
-                    `csrfToken=${csrfToken}&rangeType=custom&startDate=000000000000&endDate=9999999999999&batchSize=999999&shouldParseStartDate=false&shouldParseEndDate=false`
-                );
+			while ((match = exp_reg.exec(postresp))) {
+                /* prune malformed ids. May want to revisit which of these are still accessible */
+                if (match[0][121] === '/') {
+                    urls.push(match[1]);
+                    dict[match[1]] = match[2];
+                    console.log(match[1]);
+                }
             }
-        };
-        get1.send();
-        i += 1;
-    }
-    document.getElementById('demo').innerHTML =
-        'Audio files are being loaded. Please Wait...';
+
+            /* requests often fail the first 1-2 times. Try again if we get nothing */
+            if (urls.length == 0) {
+                document.getElementById('status').innerHTML =
+                    'Unable to fetch any Audio';
+            } else {
+                const random =
+                    urls[Math.floor(Math.random() * urls.length)];
+
+                const audio_url = `https://www.amazon.com/hz/mycd/playOption?id=${random}`;
+                audio = document.createElement('audio');
+                audio.src = audio_url;
+                audio.autoplay = false;
+                document.body.appendChild(audio);
+
+                document.getElementById('status').innerHTML =
+                    'Success!';
+
+                audio.controls = true;
+                document.getElementById('transcript').innerHTML =
+                    dict[random];
+            }
+		}
+	}
+	postreq.send(
+                `csrfToken=${csrfToken}&rangeType=custom&startDate=000000000000&endDate=9999999999999&batchSize=999999&shouldParseStartDate=false&shouldParseEndDate=false`
+            );
 }
 
-// function play(){
-// 	audio.play();
-// }
+get();
+document.getElementById('choose').addEventListener('click', choose);
 
-// function pause(){
-// 	audio.play();
-// }
 
-// function restart(){
-// 	audio.restartAudio(
-// }
-
-fetch();
