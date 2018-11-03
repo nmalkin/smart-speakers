@@ -2,7 +2,8 @@ module.exports = {
     extends: ['airbnb-base', 'prettier'],
     env: {
         browser: true,
-        webextensions: true
+        webextensions: true,
+        jest: true
     },
     rules: {
         camelcase: 1,
