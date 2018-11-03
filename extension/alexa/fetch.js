@@ -1,6 +1,7 @@
 let urls;
 let dict;
 let audio;
+let csrfToken = 'ERROR';
 
 const csrf_reg = /csrfToken = "(.*)"/g;
 const exp_reg = /<audio id="audio-(.*)"> <s.*<\/audio>\n\s*.*\n\s*.*\n\s*.*\n\s*.*summaryCss">\n\s*(.*)<\/div/g;
@@ -25,10 +26,12 @@ function getRecordings() {
                     'Fetching Audio failed. Please make sure you are logged in and try again (no CSRF match)';
                 return;
             }
-            const csrfToken = match[0].slice(13, -1);
+            csrfToken = match[0].slice(13, -1);
             console.log(csrfToken);
         })
-        .then(csrfToken => {
+        .then(arg => {
+            console.log(arg);
+
             /* make the AJAX request for the activity transcripts */
             fetch('https://www.amazon.com/hz/mycd/alexa/activityTranscripts', {
                 method: 'POST',
