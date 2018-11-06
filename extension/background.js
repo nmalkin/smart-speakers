@@ -1,6 +1,6 @@
 function buttonClicked() {
     chrome.tabs.create({
-        url: '/choose.html'
+        url: 'index.html'
     });
 }
 
