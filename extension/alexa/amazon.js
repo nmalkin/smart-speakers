@@ -1,9 +1,3 @@
-let urls;
-let dict;
-let audio;
-const seen = [];
-let csrfToken;
-
 const csrfReg = /csrfToken = "(.*)"/g;
 const expReg = /<audio id="audio-(.*)"> <s.*<\/audio>\n\s*.*\n\s*.*\n\s*.*\n\s*.*summaryCss">\n\s*(.*)<\/div/g;
 
@@ -31,17 +25,20 @@ var matchCSRF = function matchCSRF(pageText) {
     if (match == null) {
         return null;
     }
+    console.log(match);
     return match[0].slice(13, -1);
 };
 
 var matchAudio = function matchAudio(pageText) {
-    dict = {};
+    let dict = {};
     let match = expReg.exec(pageText);
     while (match) {
         /* prune malformed ids. May want to revisit which of these are still accessible */
         if (match[0][121] === '/') {
             const transcript = match[2];
-            const url = match[1];
+            const url = `https://www.amazon.com/hz/mycd/playOption?id=${
+                match[1]
+            }`;
             dict[url] = transcript;
             console.log(url);
         }
@@ -59,6 +56,7 @@ function getCSRF() {
         .then(text => matchCSRF(text))
         .catch(err => {
             console.log(err);
+            return null;
         });
 }
 
@@ -90,28 +88,18 @@ async function getRecordings() {
     csrfToken = await getCSRF();
     console.log(csrfToken);
     if (csrfToken == null) {
-        /* convert this later to its own error page */
-        document.getElementById('status').innerHTML =
-            'Fetching Audio failed. Please make sure you are logged in and try again (no CSRF match)';
+        return [];
     } else {
-        dict = await getAudio();
-        console.log(urls);
+        let dict = await getAudio();
         if (dict == null) {
-            getRecordings();
-        } else if (Object.keys(dict).length === 0) {
-            document.getElementById('status').innerHTML =
-                "Retrieved no audio ID's. Please make sure you selected the correct device";
+            /* harden this just in case*/
+            return await getRecordings();
         } else {
-            audio = document.createElement('audio');
-            document.body.appendChild(audio);
-            document.getElementById('status').innerHTML = 'Success!';
-            audio.controls = true;
-            urls = Object.keys(dict);
-            choose();
+            return Object.keys(dict);
         }
     }
 }
 
-exports.matchCSRF = matchCSRF;
-exports.matchAudio = matchAudio;
-exports.choose = choose;
+// exports.matchCSRF = matchCSRF;
+// exports.matchAudio = matchAudio;
+// exports.choose = choose;
