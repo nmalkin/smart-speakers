@@ -1,4 +1,6 @@
-document.getElementById('google').onclick = function() {
+let googleData = null;
+
+function fetchAudioGoogle() {
     /* First request: get xsrf token from My Activity page */
     const token_xhr = new XMLHttpRequest();
     token_xhr.open(
@@ -10,7 +12,6 @@ document.getElementById('google').onclick = function() {
         if (token_xhr.readyState === 4 && token_xhr.status === 200) {
             const signedout_regex = /FootprintsMyactivitySignedoutUi/;
             if (token_xhr.response.search(signedout_regex) > -1) {
-                window.location.href = 'google/login-prompt.html';
                 return;
             }
             const token_regex = /window\.HISTORY_xsrf='(\S{44})'/;
@@ -25,9 +26,7 @@ document.getElementById('google').onclick = function() {
             data_xhr.onreadystatechange = function() {
                 if (data_xhr.readyState === 4 && data_xhr.status === 200) {
                     const data = JSON.parse(data_xhr.response.slice(6))[0];
-                    chrome.storage.local.set({ audio: data }, () => {
-                        console.log('Successfully stored audio data');
-                    });
+                    googleData = data;
                     /* Array containing URLs for each recording */
                     const urls = data.map(entry => entry[24][0]);
                     const url_regex = /https:\/\/myactivity\.google\.com\/history\/audio\/play\/(\S{61})/;
@@ -35,11 +34,10 @@ document.getElementById('google').onclick = function() {
                         'Audio IDs',
                         urls.map(url => url.match(url_regex)[1])
                     );
-                    window.location.href = 'google/sample.html';
                 }
             };
             data_xhr.send(`{"sig":"${sig}"}`);
         }
     };
     token_xhr.send();
-};
+}

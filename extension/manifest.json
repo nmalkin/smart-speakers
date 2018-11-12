@@ -3,16 +3,19 @@
     "version": "1.0",
     "description": "Scrape stored audio recordings from Google/Alexa Activity.",
     "permissions": [
-        "declarativeContent",
         "https://myactivity.google.com/",
         "https://www.amazon.com/",
+        "declarativeContent",
         "storage"
     ],
     "background": {
-        "scripts": ["background.js", "alexa/amazon.js"]
+        "scripts": ["background.js", "alexa/amazon.js", "google/google.js"]
     },
     "browser_action": {
         "default_icon": "icsi.png"
+    },
+    "externally_connectable": {
+        "matches": ["*://berkeley.qualtrics.com/*"]
     },
     "incognito": "split",
     "icons": {
@@ -20,9 +23,6 @@
         "32": "icsi.png",
         "48": "icsi.png",
         "128": "icsi.png"
-    },
-    "externally_connectable": {
-        "matches": ["*://berkeley.qualtrics.com/*"]
     },
     "manifest_version": 2
 }

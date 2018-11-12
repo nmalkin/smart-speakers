@@ -17,7 +17,7 @@ const manage_messages = async function manage_messages(
         if (consented) {
             console.log('alexa chosen');
             if (home) {
-                /* in case someone wants to reselect the device they've chosen*/
+                /* in case someone wants to reselect the device they've chosen */
                 urls = [];
                 seen = [];
             }
@@ -27,8 +27,8 @@ const manage_messages = async function manage_messages(
                 urls = await getRecordings();
             }
             if (urls.length === 0) {
-                /* send participants to a page that asks them to make sure 
-		    		they are logged in and have selected the correct device*/
+                /* send participants to a page that asks them to make sure
+		    		they are logged in and have selected the correct device */
             }
             console.log(urls);
         } else {
@@ -38,7 +38,7 @@ const manage_messages = async function manage_messages(
         if (consented) {
             console.log('home chosen');
             if (alexa) {
-                /* in case someone wants to reselect the device they've chosen*/
+                /* in case someone wants to reselect the device they've chosen */
                 urls = [];
                 seen = [];
             }
@@ -46,6 +46,7 @@ const manage_messages = async function manage_messages(
             alexa = false;
             if (urls.length === 0) {
                 urls = '...'; /* still need to refactor google fetching */
+                fetchAudioGoogle();
             }
         } else {
             /* send message that triggers survey back to consent page */
@@ -53,10 +54,18 @@ const manage_messages = async function manage_messages(
     } else if (request === 'recording') {
         /* do something */
         if (consented) {
+            if (home) {
+                urls = googleData.map(entry => entry[24][0]);
+                transcripts = googleData.map(entry => entry[9][0]);
+            }
             console.log('sending_recording');
-            let url = urls[Math.floor(Math.random() * urls.length)];
-            while (seen.includes(url)) {
-                url = urls[Math.floor(Math.random() * urls.length)];
+            let index = Math.floor(Math.random() * urls.length);
+            while (seen.includes(urls[index])) {
+                index = Math.floor(Math.random() * urls.length);
+            }
+            url = urls[index];
+            if (home) {
+                transcript = transcripts[index];
             }
             console.log(url);
             seen.push(url);

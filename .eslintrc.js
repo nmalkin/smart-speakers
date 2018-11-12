@@ -9,6 +9,7 @@ module.exports = {
         camelcase: 1,
         'spaced-comment': 1,
         'no-console': 0,
-        'prefer-destructuring': 1
+        'prefer-destructuring': 1,
+        'linebreak-style': 0
     }
 };
