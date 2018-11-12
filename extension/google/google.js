@@ -1,21 +1,28 @@
-function fetchCsrfGoogle() {
+function checkSignedOut(text) {
+    const regex = /FootprintsMyactivitySignedoutUi/;
+    return text.search(regex) > -1;
+}
+
+function extractCsrfToken(text) {
+    const regex = /window\.HISTORY_xsrf='(\S{44})'/;
+    const token = text.match(regex)[1];
+    return token;
+}
+
+function fetchCsrfToken() {
     return fetch('https://myactivity.google.com/item?product=29').then(
         async response => {
-            const signedout_regex = /FootprintsMyactivitySignedoutUi/;
             const restxt = await response.text();
-            console.log(restxt);
-            if (restxt.search(signedout_regex) > -1) {
+            if (checkSignedOut(restxt)) {
                 return '';
             }
-            const token_regex = /window\.HISTORY_xsrf='(\S{44})'/;
-            const sig = restxt.match(token_regex)[1];
-            return sig;
+            return extractCsrfToken(restxt);
         }
     );
 }
 
 async function fetchAudioGoogle() {
-    const sig = await fetchCsrfGoogle();
+    const sig = await fetchCsrfToken();
     if (sig === '') {
         return [];
     }
@@ -31,3 +38,5 @@ async function fetchAudioGoogle() {
         return data;
     });
 }
+
+module.exports = { checkSignedOut, extractCsrfToken };
