@@ -95,7 +95,7 @@ async function getRecordings() {
             /* harden this just in case*/
             return await getRecordings();
         } else {
-            return Object.keys(dict);
+            return dict;
         }
     }
 }

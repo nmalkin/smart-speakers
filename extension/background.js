@@ -25,7 +25,9 @@ const manage_messages = async function manage_messages(
             alexa = true;
             home = false;
             if (urls.length === 0) {
-                urls = await getRecordings();
+                dict = await getRecordings();
+                urls = Object.keys(dict);
+                transcripts = Object.values(dict);
             }
             if (urls.length === 0) {
                 /* send participants to a page that asks them to make sure
@@ -66,12 +68,11 @@ const manage_messages = async function manage_messages(
                 index = Math.floor(Math.random() * urls.length);
             }
             const url = urls[index];
-            if (home) {
-                const transcript = transcripts[index];
-            }
+            const transcript = transcripts[index];
             console.log(url);
+            console.log(transcript);
             seen.push(index);
-            sendResponse(url);
+            sendResponse([url, transcript]);
         } else {
             /* send message that triggers survey back to consent page */
         }
