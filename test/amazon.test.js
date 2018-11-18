@@ -1,4 +1,4 @@
-const fetchlib = require('../extension/alexa/fetchlib');
+const amazon = require('../extension/alexa/amazon');
 
 const sampleCSRF =
     'var isDesktop = "true"; \
@@ -15,21 +15,21 @@ const sampleTranscript =
     '                          “when is kingdom hearts three coming out”</div>\n' +
     '                      </span>\n';
 
-test('finds csrf token', () => {
+test('finds and encodes csrf token', () => {
     expect.assertions(1);
-    let contents = sampleCSRF;
-
     const token =
-        'gMEhI0aNH1xlXvtJF/wsG4uemtItdFMJBHDp9xYAAAAJAAAAAFvfRMJyYXcAAAAA';
-    expect(fetchlib.matchCSRF(contents)).toEqual(token);
+        'gMEhI0aNH1xlXvtJF%2FwsG4uemtItdFMJBHDp9xYAAAAJAAAAAFvfRMJyYXcAAAAA';
+    expect(amazon.matchCSRF(sampleCSRF)).toEqual(token);
 });
 
 test('displays the correct transcript', () => {
     let transcript =
         'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
-    fetchlib.dict = fetchlib.matchAudio(sampleTranscript);
-    expect(Object.keys(fetchlib.dict).length).toEqual(1);
-    expect(fetchlib.dict[transcript]).toEqual(
+    let dict = amazon.matchAudio(sampleTranscript);
+    expect(Object.keys(dict).length).toEqual(1);
+    expect(dict[`https://www.amazon.com/hz/mycd/playOption?id=${
+                transcript
+            }`]).toEqual(
         '“when is kingdom hearts three coming out”'
     );
 });

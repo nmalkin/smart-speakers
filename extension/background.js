@@ -5,7 +5,7 @@ let seen;
 let urls;
 let transcripts;
 
-const manage_messages = async function manage_messages(
+const manageMessages = async function manageMessages(
     request,
     sender,
     sendResponse
@@ -25,7 +25,7 @@ const manage_messages = async function manage_messages(
             alexa = true;
             home = false;
             if (urls.length === 0) {
-                dict = await getRecordings();
+                const dict = await getRecordings();
                 urls = Object.keys(dict);
                 transcripts = Object.values(dict);
             }
@@ -79,7 +79,7 @@ const manage_messages = async function manage_messages(
     }
 };
 
-chrome.runtime.onMessageExternal.addListener(manage_messages);
+chrome.runtime.onMessageExternal.addListener(manageMessages);
 
 function buttonClicked() {
     alexa = false;

@@ -1,36 +1,18 @@
 const csrfReg = /csrfToken = "(.*)"/g;
 const expReg = /<audio id="audio-(.*)"> <s.*<\/audio>\n\s*.*\n\s*.*\n\s*.*\n\s*.*summaryCss">\n\s*(.*)<\/div/g;
+let csrfToken;
 
-var choose = function choose() {
-    if (seen.length === urls.length) {
-        document.getElementById('status').innerHTML =
-            'all recordings have been shown';
-    } else {
-        const random = urls[Math.floor(Math.random() * urls.length)];
-        const audioUrl = `https://www.amazon.com/hz/mycd/playOption?id=${random}`;
-        console.log(audioUrl);
-        if (seen.includes(audioUrl)) {
-            choose();
-        } else {
-            audio.src = audioUrl;
-            audio.controls = true;
-            document.getElementById('transcript').innerHTML = dict[random];
-            seen.push(audioUrl);
-        }
-    }
-};
-
-var matchCSRF = function matchCSRF(pageText) {
+function matchCSRF(pageText) {
     const match = pageText.match(csrfReg);
     if (match == null) {
         return null;
     }
     console.log(match);
-    return match[0].slice(13, -1);
+    return encodeURIComponent(match[0].slice(13, -1));
 };
 
-var matchAudio = function matchAudio(pageText) {
-    let dict = {};
+function matchAudio(pageText) {
+    const dict = {};
     let match = expReg.exec(pageText);
     while (match) {
         /* prune malformed ids. May want to revisit which of these are still accessible */
@@ -89,17 +71,13 @@ async function getRecordings() {
     console.log(csrfToken);
     if (csrfToken == null) {
         return [];
-    } else {
-        let dict = await getAudio();
-        if (dict == null) {
-            /* harden this just in case*/
-            return await getRecordings();
-        } else {
-            return dict;
-        }
     }
+    const dict = await getAudio();
+    if (dict == null) {
+        /* harden this just in case */
+        return getRecordings();
+    } 
+    return dict;
 }
 
-// exports.matchCSRF = matchCSRF;
-// exports.matchAudio = matchAudio;
-// exports.choose = choose;
+ module.exports = { matchCSRF, matchAudio, getRecordings }; 

@@ -39,4 +39,4 @@ async function fetchAudioGoogle() {
     });
 }
 
-module.exports = { checkSignedOut, extractCsrfToken };
+ module.exports = { checkSignedOut, extractCsrfToken, fetchAudioGoogle }; 
