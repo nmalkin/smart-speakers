@@ -4,6 +4,7 @@ let home;
 let seen;
 let urls;
 let transcripts;
+let loggedOut;
 
 const manageMessages = async function manageMessages(
     request,
@@ -29,9 +30,10 @@ const manageMessages = async function manageMessages(
                 urls = Object.keys(dict);
                 transcripts = Object.values(dict);
             }
-            if (urls.length === 0) {
+            if (urls.length > 0) {
                 /* send participants to a page that asks them to make sure
 		    		they are logged in and have selected the correct device */
+                loggedOut = false;
             }
             console.log(urls);
         } else {
@@ -52,9 +54,10 @@ const manageMessages = async function manageMessages(
                 urls = googleData.map(entry => entry[24][0]);
                 transcripts = googleData.map(entry => entry[9][0]);
             }
-            if (urls.length === 0) {
+            if (urls.length > 0) {
                 /* send participants to a page that asks them to make sure
 		    		they are logged in and have selected the correct device */
+                loggedOut = false;
             }
         } else {
             /* send message that triggers survey back to consent page */
@@ -76,6 +79,19 @@ const manageMessages = async function manageMessages(
         } else {
             /* send message that triggers survey back to consent page */
         }
+    } 
+    else if (request === 'login') {
+        if (loggedOut){
+            if (alexa){
+                sendResponse('loggedOutA');
+            }
+            else if (home){
+                sendResponse('loggedOutH');
+            }
+        }
+        else {
+            sendResponse("loggedIn");
+        }
     }
 };
 
@@ -85,6 +101,7 @@ function buttonClicked() {
     alexa = false;
     home = false;
     consented = false;
+    loggedOut = true;
     urls = [];
     seen = [];
     chrome.tabs.create({
