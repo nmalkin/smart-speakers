@@ -51,8 +51,10 @@ const manageMessages = async function manageMessages(
             alexa = false;
             if (urls.length === 0) {
                 const googleData = await fetchAudioGoogle();
-                urls = googleData.map(entry => entry[24][0]);
-                transcripts = googleData.map(entry => entry[9][0]);
+                if (googleData) {
+                    urls = googleData.map(entry => entry[24][0]);
+                    transcripts = googleData.map(entry => entry[9][0]);
+                }
             }
             if (urls.length > 0) {
                 /* send participants to a page that asks them to make sure
@@ -79,18 +81,15 @@ const manageMessages = async function manageMessages(
         } else {
             /* send message that triggers survey back to consent page */
         }
-    } 
-    else if (request === 'login') {
-        if (loggedOut){
-            if (alexa){
+    } else if (request === 'login') {
+        if (loggedOut) {
+            if (alexa) {
                 sendResponse('loggedOutA');
-            }
-            else if (home){
+            } else if (home) {
                 sendResponse('loggedOutH');
             }
-        }
-        else {
-            sendResponse("loggedIn");
+        } else {
+            sendResponse('loggedIn');
         }
     }
 };

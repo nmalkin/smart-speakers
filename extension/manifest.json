@@ -2,12 +2,7 @@
     "name": "Passive Listening Activity Scraper",
     "version": "1.0",
     "description": "Scrape stored audio recordings from Google/Alexa Activity.",
-    "permissions": [
-        "https://myactivity.google.com/",
-        "https://www.amazon.com/",
-        "declarativeContent",
-        "storage"
-    ],
+    "manifest_version": 2,
     "background": {
         "scripts": ["background.js", "alexa/amazon.js", "google/google.js"]
     },
@@ -15,14 +10,15 @@
         "default_icon": "icsi.png"
     },
     "externally_connectable": {
-        "matches": ["*://berkeley.qualtrics.com/*"]
+        "matches": ["https://berkeley.qualtrics.com/*"]
     },
-    "incognito": "split",
     "icons": {
         "16": "icsi.png",
         "32": "icsi.png",
         "48": "icsi.png",
         "128": "icsi.png"
     },
-    "manifest_version": 2
+    "incognito": "split",
+    "options_page": "options.html",
+    "permissions": ["https://myactivity.google.com/", "https://www.amazon.com/"]
 }
