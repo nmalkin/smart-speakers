@@ -1,3 +1,7 @@
+const ENTRY_INDEX = 65;
+const URL_INDEX = 24;
+const TRANSCRIPT_INDEX = 9;
+
 function checkSignedOut(text) {
     const regex = /FootprintsMyactivitySignedoutUi/;
     return text.search(regex) > -1;
@@ -60,16 +64,37 @@ async function fetchAudioGoogle() {
     });
 }
 
+function checkArray(data, name) {
+    if (data === null) {
+        throw new Error(`Detected no ${name}`);
+    }
+    if (!Array.isArray(data)) {
+        throw new Error(`Detected ${name} was not stored in array`);
+    }
+    if (data.length === 0) {
+        throw new Error(`Detected empty ${name} array`);
+    }
+}
+
+function checkString(data, name) {
+    if (data === null) {
+        throw new Error(`Detected null ${name}`);
+    }
+    if (typeof data !== 'string') {
+        throw new Error(`Detected ${name} was not a string`);
+    }
+}
+
 async function testInBrowser() {
     let result = 'Test passed!';
     try {
         const token = await fetchCsrfToken();
         if (token === '') {
-            throw new Error('Detected signed out');
+            throw new Error('Detected user signed out');
         }
         if (token === null) {
             throw new Error(
-                "Didn't match either signed out or CSRF token regex"
+                "Response didn't match either signed out or CSRF token regex"
             );
         }
         const json = await fetchJsonData(token);
@@ -77,38 +102,24 @@ async function testInBrowser() {
             throw new Error('CSRF token failed');
         }
         const data = tryParseJson(json);
+        console.log(data);
         if (data === null) {
-            throw new Error('Sliced response text was not JSON-parsable');
+            throw new Error('Sliced response text was not valid JSON array');
         }
         if (data.length === 0) {
-            throw new Error(
-                'Data was not encapsulated in single array element'
-            );
+            throw new Error('Detected empty response array');
         }
-        if (!Array.isArray(data[0])) {
-            throw new Error('Recordings were not stored in array');
-        }
-        if (data[0].length === 0) {
-            throw new Error('Detected no recordings');
-        }
-        const entry = data[0][65];
-        if (!Array.isArray(entry[24])) {
-            throw new Error('URL was not stored in array');
-        }
-        if (entry[24].length === 0) {
-            throw new Error('Did not detect URL');
-        }
-        const url = entry[24][0];
+        checkArray(data[0], 'activity');
+        const entry = data[0][ENTRY_INDEX];
+        checkArray(entry[URL_INDEX], 'URL');
+        const url = entry[URL_INDEX][0];
+        checkString(url, 'URL');
         if (url.slice(-16) !== '1534466983744010') {
             throw new Error('Audio ID did not match');
         }
-        if (!Array.isArray(entry[9])) {
-            throw new Error('Transcript was not stored in array');
-        }
-        if (entry[9].length === 0) {
-            throw new Error('Did not detect transcript');
-        }
-        const transcript = entry[9][0];
+        checkArray(entry[TRANSCRIPT_INDEX], 'transcript');
+        const transcript = entry[TRANSCRIPT_INDEX][0];
+        checkString(transcript, 'transcript');
         if (transcript !== 'do you want to read my proposal') {
             throw new Error('Transcript did not match');
         }
@@ -121,5 +132,5 @@ async function testInBrowser() {
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
 } else if (document.getElementById('testSmartSpeakers') != null) {
-    document.getElementById('google').onclick = testInBrowser();
+    document.getElementById('google').onclick = testInBrowser;
 }
