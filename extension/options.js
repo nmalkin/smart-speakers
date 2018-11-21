@@ -4,7 +4,7 @@ import {
     fetchCsrfToken,
     fetchJsonData,
     tryParseJson
-} from './google/google.js';
+} from './google/google';
 
 const ENTRY_INDEX = 65;
 
