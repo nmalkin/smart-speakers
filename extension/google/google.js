@@ -12,29 +12,27 @@ function extractCsrfToken(text) {
     return token;
 }
 
-function fetchCsrfToken() {
-    return fetch('https://myactivity.google.com/item?product=29').then(
-        async response => {
-            const restxt = await response.text();
-            if (checkSignedOut(restxt)) {
-                return '';
-            }
-            return extractCsrfToken(restxt);
-        }
+async function fetchCsrfToken() {
+    const response = await fetch(
+        'https://myactivity.google.com/item?product=29'
     );
+    const restxt = await response.text();
+    if (checkSignedOut(restxt)) {
+        return '';
+    }
+    return extractCsrfToken(restxt);
 }
 
-function fetchJsonData(token) {
-    return fetch(
+async function fetchJsonData(token) {
+    const response = await fetch(
         'https://myactivity.google.com/item?product=29&jspb=1&jsv=myactivity_20181016-0717_1',
         {
             method: 'POST',
             body: `{"sig":"${token}"}`
         }
-    ).then(async response => {
-        const restxt = await response.text();
-        return restxt.slice(6);
-    });
+    );
+    const restxt = await response.text();
+    return restxt.slice(6);
 }
 
 function tryParseJson(jsonString) {
@@ -54,13 +52,12 @@ async function fetchDataGoogle() {
     if (token === '') {
         return null;
     }
-    return fetchJsonData(token).then(response => {
-        const data = tryParseJson(response);
-        if (data && data.length > 0) {
-            return data[0];
-        }
-        return null;
-    });
+    const response = await fetchJsonData(token);
+    const data = tryParseJson(response);
+    if (data && data.length > 0) {
+        return data[0];
+    }
+    return null;
 }
 
 async function fetchAudioGoogle() {
