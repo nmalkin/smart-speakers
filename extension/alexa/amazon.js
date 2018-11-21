@@ -9,7 +9,7 @@ function matchCSRF(pageText) {
     }
     console.log(match);
     return encodeURIComponent(match[0].slice(13, -1));
-};
+}
 
 function matchAudio(pageText) {
     const dict = {};
@@ -27,7 +27,7 @@ function matchAudio(pageText) {
         match = expReg.exec(pageText);
     }
     return dict;
-};
+}
 
 function getCSRF() {
     /* fetch the overview page */
@@ -76,8 +76,8 @@ async function getRecordings() {
     if (dict == null) {
         /* harden this just in case */
         return getRecordings();
-    } 
+    }
     return dict;
 }
 
- module.exports = { matchCSRF, matchAudio, getRecordings }; 
+export { matchCSRF, matchAudio, getRecordings };

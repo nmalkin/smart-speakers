@@ -71,9 +71,7 @@ async function fetchAudioGoogle() {
     return { urls, transcripts };
 }
 
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-    module.exports = { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
-}
+export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
 
 export {
     URL_INDEX,
