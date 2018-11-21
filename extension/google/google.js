@@ -50,18 +50,29 @@ function tryParseJson(jsonString) {
     return null;
 }
 
-async function fetchAudioGoogle() {
+async function fetchDataGoogle() {
     const token = await fetchCsrfToken();
     if (token === '') {
         return null;
     }
     return fetchJsonData(token).then(response => {
         const data = tryParseJson(response);
-        if (data.length > 0) {
+        if (data && data.length > 0) {
             return data[0];
         }
         return null;
     });
+}
+
+async function fetchAudioGoogle() {
+    const data = await fetchDataGoogle();
+    let urls = [];
+    let transcripts = [];
+    if (data !== null) {
+        urls = data.map(entry => entry[URL_INDEX][0]);
+        transcripts = data.map(entry => entry[TRANSCRIPT_INDEX][0]);
+    }
+    return { urls, transcripts };
 }
 
 function checkArray(data, name) {

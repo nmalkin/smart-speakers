@@ -50,11 +50,9 @@ const manageMessages = async function manageMessages(
             home = true;
             alexa = false;
             if (urls.length === 0) {
-                const googleData = await fetchAudioGoogle();
-                if (googleData) {
-                    urls = googleData.map(entry => entry[24][0]);
-                    transcripts = googleData.map(entry => entry[9][0]);
-                }
+                const data = await fetchAudioGoogle();
+                urls = data.urls;
+                transcripts = data.transcripts;
             }
             if (urls.length > 0) {
                 /* send participants to a page that asks them to make sure
