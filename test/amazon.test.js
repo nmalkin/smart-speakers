@@ -1,10 +1,10 @@
-const amazon = require('../src/common/alexa/amazon');
+import { matchCSRF, matchAudio } from '../src/common/alexa/amazon';
 
 const sampleCSRF =
-    'var isDesktop = "true"; \
-					var csrfToken = "gMEhI0aNH1xlXvtJF/wsG4uemtItdFMJBHDp9xYAAAAJAAAAAFvfRMJyYXcAAAAA"; \
-			        var kindleAppsSupported = false; \
-			        var myxWebsiteConfig = {};';
+    'var isDesktop = "true"; ' +
+    '				var csrfToken = "gMEhI0aNH1xlXvtJF/wsG4uemtItdFMJBHDp9xYAAAAJAAAAAFvfRMJyYXcAAAAA"; ' +
+    '		        var kindleAppsSupported = false; ' +
+    '		        var myxWebsiteConfig = {};';
 
 const sampleTranscript =
     '<audio id="audio-A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1"> <source id="audioSource-A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1"></audio>\n' +
@@ -19,13 +19,13 @@ test('finds and encodes csrf token', () => {
     expect.assertions(1);
     const token =
         'gMEhI0aNH1xlXvtJF%2FwsG4uemtItdFMJBHDp9xYAAAAJAAAAAFvfRMJyYXcAAAAA';
-    expect(amazon.matchCSRF(sampleCSRF)).toEqual(token);
+    expect(matchCSRF(sampleCSRF)).toEqual(token);
 });
 
 test('displays the correct transcript', () => {
-    let transcript =
+    const transcript =
         'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
-    let dict = amazon.matchAudio(sampleTranscript);
+    const dict = matchAudio(sampleTranscript);
     expect(Object.keys(dict).length).toEqual(1);
     expect(
         dict[`https://www.amazon.com/hz/mycd/playOption?id=${transcript}`]
