@@ -7,16 +7,16 @@
         "scripts": ["background.js"]
     },
     "browser_action": {
-        "default_icon": "icsi.png"
+        "default_icon": "assets/icsi.png"
     },
     "externally_connectable": {
         "matches": ["https://berkeley.qualtrics.com/*"]
     },
     "icons": {
-        "16": "icsi.png",
-        "32": "icsi.png",
-        "48": "icsi.png",
-        "128": "icsi.png"
+        "16": "assets/icsi.png",
+        "32": "assets/icsi.png",
+        "48": "assets/icsi.png",
+        "128": "assets/icsi.png"
     },
     "incognito": "split",
     "options_page": "options.html",

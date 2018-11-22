@@ -5,7 +5,7 @@ const BUILD_PATH = path.resolve(__dirname, 'chrome_extension');
 
 module.exports = [
     {
-        entry: './src/background/background.js',
+        entry: './src/chrome/background/background.js',
         output: {
             filename: 'background.js',
             path: BUILD_PATH
@@ -14,24 +14,30 @@ module.exports = [
         plugins: [
             new CopyWebpackPlugin([
                 {
+                    from: 'src/chrome/manifest.json',
+                    to: ''
+                },
+                {
                     from: 'assets/*',
-                    to: '',
-                    transformPath(targetPath) {
-                        // Strip off the first directory in the target path, to place file in top-level directory
-                        return targetPath.substring(
-                            targetPath.indexOf(path.sep)
-                        );
-                    }
+                    to: ''
                 }
             ])
         ]
     },
     {
-        entry: './src/content/options.js',
+        entry: './src/chrome/content/options.js',
         output: {
             filename: 'options.js',
             path: BUILD_PATH
         },
-        mode: 'none'
+        mode: 'none',
+        plugins: [
+            new CopyWebpackPlugin([
+                {
+                    from: 'src/chrome/options.html',
+                    to: ''
+                }
+            ])
+        ]
     }
 ];
