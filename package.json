@@ -37,7 +37,8 @@
     },
     "scripts": {
         "build": "webpack",
-        "test": "jest --env=jsdom"
+        "test": "jest --env=jsdom",
+        "watch": "webpack --watch"
     },
     "jest": {
         "automock": false,

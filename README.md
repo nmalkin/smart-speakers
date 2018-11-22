@@ -12,6 +12,10 @@ The code uses [webpack](https://webpack.js.org/) to transform the modularized so
 
     npm run build
 
+To avoid rerunning this command every time you change the source code, you can use webpack's watch feature:
+
+    npm run watch
+
 ## Linting
 
 The linters will run automatically when you commit any code. However, you can also run them manually:
