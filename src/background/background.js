@@ -1,3 +1,6 @@
+import { fetchAudioGoogle } from '../common/google/google';
+import { getRecordings } from '../common/alexa/amazon';
+
 let consented;
 let alexa;
 let home;

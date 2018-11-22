@@ -1,4 +1,4 @@
-const amazon = require('../extension/alexa/amazon');
+const amazon = require('../src/common/alexa/amazon');
 
 const sampleCSRF =
     'var isDesktop = "true"; \
@@ -27,9 +27,7 @@ test('displays the correct transcript', () => {
         'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
     let dict = amazon.matchAudio(sampleTranscript);
     expect(Object.keys(dict).length).toEqual(1);
-    expect(dict[`https://www.amazon.com/hz/mycd/playOption?id=${
-                transcript
-            }`]).toEqual(
-        '“when is kingdom hearts three coming out”'
-    );
+    expect(
+        dict[`https://www.amazon.com/hz/mycd/playOption?id=${transcript}`]
+    ).toEqual('“when is kingdom hearts three coming out”');
 });

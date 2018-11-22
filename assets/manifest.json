@@ -4,7 +4,7 @@
     "description": "Scrape stored audio recordings from Google/Alexa Activity.",
     "manifest_version": 2,
     "background": {
-        "scripts": ["background.js", "alexa/amazon.js", "google/google.js"]
+        "scripts": ["background.js"]
     },
     "browser_action": {
         "default_icon": "icsi.png"

@@ -1,4 +1,4 @@
-const ext = require('../extension/google/google');
+const ext = require('../src/common/google/google');
 
 const sampleSignedOut = `<script data-id="_gd" nonce="uixwhjmrssmc5z+Rx+M177vsgqc">window.WIZ_global_data = {"DpimGf":false,"EP1ykd":["/_/*","/assistant/*","/history/privacyadvisor/*","/item","/more-activity","/myactivity","/page","/privacyadvisor","/privacyadvisor/*"],"FdrFJe":"8556083745304281846","Im6cmf":"_/FootprintsMyactivitySignedoutUi","JxkZB":{"pHJ34":"1","LtIVze":"1","k4b1Td":"1","y3VFHd":"1","Kuqpfe":"1","qSiTpe":"1","TmdDAd":"2","pbyFdc":"2","ZktbSe":"2"},"LVIXXb":1,"LoQv7e":false,"QrtxK":"","S06Grb":"","Yllh3e":"%.@.1542055183842000,174199643,2852457189]\n","cfb2h":"boq_footprintsmyactivityuiserver_20181107.03_p0","eNnkwf":"1542013000","eptZe":"/_/FootprintsMyactivitySignedoutUi/","fPDxwd":[],"fuqsbf":{},"gGcLoe":true,"nQyAE":{"tBSlob":"false"},"qwAQke":"FootprintsMyactivitySignedoutUi","qymVe":"bAkmVt80tRuoAdFBQ_RRb_Ovq6M","rtQCxc":480,"w2btAe":"%.@.null,null,\"\",false,null,null,true]\n","zChJod":"%.@.]\n"};</script>`;
 

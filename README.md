@@ -6,6 +6,12 @@ Make sure you have [node.js](https://nodejs.org) and npm installed, then run:
 
     npm install --only=dev
 
+## Building
+
+The code uses [webpack](https://webpack.js.org/) to transform the modularized source code into the final extension. To build the code, run:
+
+    npm run build
+
 ## Linting
 
 The linters will run automatically when you commit any code. However, you can also run them manually:
