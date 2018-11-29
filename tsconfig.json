@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "lib": ["esnext", "dom"],
+        "strictNullChecks": true,
+        "target": "ES2017"
+    }
+}
