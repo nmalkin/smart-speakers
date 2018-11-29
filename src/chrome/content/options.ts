@@ -70,7 +70,7 @@ async function testInBrowser() {
     } catch (e) {
         result = e;
     }
-    document.getElementById('result').innerHTML = result;
+    document.getElementById('result')!.innerHTML = result;
 }
 
-document.getElementById('google').onclick = testInBrowser;
+document.getElementById('google')!.onclick = testInBrowser;
