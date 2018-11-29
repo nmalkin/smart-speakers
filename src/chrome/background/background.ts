@@ -9,11 +9,7 @@ let urls;
 let transcripts;
 let loggedOut;
 
-const manageMessages = async function manageMessages(
-    request,
-    sender,
-    sendResponse
-) {
+const manageMessages = async (request, sender, sendResponse) => {
     console.log(request);
     if (request === 'consented') {
         console.log('success!!');
