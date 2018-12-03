@@ -25,6 +25,14 @@ module.exports = [
         ]
     },
     {
+        entry: './src/chrome/content/content.js',
+        output: {
+            filename: 'content.js',
+            path: BUILD_PATH
+        },
+        mode: 'none'
+    },
+    {
         entry: './src/chrome/content/options.js',
         output: {
             filename: 'options.js',
