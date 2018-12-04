@@ -1,6 +1,6 @@
-workflow "Run tests" {
+workflow "Run checks" {
   on = "push"
-  resolves = ["Test"]
+  resolves = ["Build", "Test", "Lint"]
 }
 
 action "Setup" {
@@ -15,7 +15,7 @@ action "Build" {
 }
 
 action "Test" {
-  needs = "Build"
+  needs = "Setup"
   uses = "actions/npm@master"
   args = "test"
 }
