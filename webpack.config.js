@@ -5,7 +5,19 @@ const BUILD_PATH = path.resolve(__dirname, 'chrome_extension');
 
 module.exports = [
     {
-        entry: './src/chrome/background/background.js',
+        entry: './src/chrome/background/background.ts',
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/
+                }
+            ]
+        },
+        resolve: {
+            extensions: ['.ts', '.js']
+        },
         output: {
             filename: 'background.js',
             path: BUILD_PATH
@@ -25,7 +37,19 @@ module.exports = [
         ]
     },
     {
-        entry: './src/chrome/content/content.js',
+        entry: './src/chrome/content/content.ts',
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/
+                }
+            ]
+        },
+        resolve: {
+            extensions: ['.ts', '.js']
+        },
         output: {
             filename: 'content.js',
             path: BUILD_PATH
@@ -33,7 +57,19 @@ module.exports = [
         mode: 'none'
     },
     {
-        entry: './src/chrome/content/options.js',
+        entry: './src/chrome/content/options.ts',
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/
+                }
+            ]
+        },
+        resolve: {
+            extensions: ['.ts', '.js']
+        },
         output: {
             filename: 'options.js',
             path: BUILD_PATH
