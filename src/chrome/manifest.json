@@ -4,11 +4,20 @@
     "description": "Scrape stored audio recordings from Google/Alexa Activity.",
     "manifest_version": 2,
     "background": {
-        "scripts": ["background.js"]
+        "scripts": ["background.js"],
+        "persistent": false
     },
     "browser_action": {
         "default_icon": "assets/icsi.png"
     },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05"
+            ],
+            "js": ["content.js"]
+        }
+    ],
     "externally_connectable": {
         "matches": ["https://berkeley.qualtrics.com/*"]
     },
