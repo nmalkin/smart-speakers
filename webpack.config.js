@@ -10,7 +10,8 @@ module.exports = [
             rules: [
                 {
                     test: /\.ts$/,
-                    use: 'ts-loader',
+                    loader: 'ts-loader',
+                    options: { onlyCompileBundledFiles: true },
                     exclude: /node_modules/
                 }
             ]
@@ -42,7 +43,8 @@ module.exports = [
             rules: [
                 {
                     test: /\.ts$/,
-                    use: 'ts-loader',
+                    loader: 'ts-loader',
+                    options: { onlyCompileBundledFiles: true },
                     exclude: /node_modules/
                 }
             ]
@@ -62,7 +64,8 @@ module.exports = [
             rules: [
                 {
                     test: /\.ts$/,
-                    use: 'ts-loader',
+                    loader: 'ts-loader',
+                    options: { onlyCompileBundledFiles: true },
                     exclude: /node_modules/
                 }
             ]
