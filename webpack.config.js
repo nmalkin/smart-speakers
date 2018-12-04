@@ -2,6 +2,7 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const BUILD_PATH = path.resolve(__dirname, 'chrome_extension');
+const FIREFOX_BUILD_PATH = path.resolve(__dirname, 'firefox_extension');
 
 module.exports = [
     {
@@ -32,6 +33,46 @@ module.exports = [
             new CopyWebpackPlugin([
                 {
                     from: 'src/chrome/manifest.json',
+                    to: ''
+                },
+                {
+                    from: 'assets/*',
+                    to: ''
+                },
+                {
+                    from: 'src/chrome/options.html',
+                    to: ''
+                }
+            ])
+        ]
+    },
+    {
+        entry: {
+            background: './src/firefox/background/background.ts',
+            options: './src/firefox/content/options.ts'
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    loader: 'ts-loader',
+                    options: { onlyCompileBundledFiles: true },
+                    exclude: /node_modules/
+                }
+            ]
+        },
+        resolve: {
+            extensions: ['.ts', '.js']
+        },
+        output: {
+            filename: '[name].js',
+            path: FIREFOX_BUILD_PATH
+        },
+        mode: 'none',
+        plugins: [
+            new CopyWebpackPlugin([
+                {
+                    from: 'src/firefox/manifest.json',
                     to: ''
                 },
                 {
