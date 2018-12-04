@@ -47,6 +47,7 @@
         ]
     },
     "scripts": {
+        "lint": "tslint -c tslint.json 'src/**/*.ts' && eslint test",
         "build": "webpack",
         "test": "jest --env=jsdom",
         "watch": "webpack --watch"

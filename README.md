@@ -20,7 +20,7 @@ To avoid rerunning this command every time you change the source code, you can u
 
 The linters will run automatically when you commit any code. However, you can also run them manually:
 
-    ./node_modules/eslint/bin/eslint.js src
+    npm run lint
 
 ## Jest
 
