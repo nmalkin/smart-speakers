@@ -3,11 +3,11 @@ import { getRecordings } from '../../common/alexa/amazon';
 
 let device = '';
 let verified = false;
-let urls = [];
-let transcripts = [];
-const seen = [];
+let urls: string[] = [];
+let transcripts: string[] = [];
+const seen: number[] = [];
 
-const messageListener = async function messageListener(event) {
+const messageListener = async event => {
     if (event.source !== window) {
         // pass
     } else if (event.data === 'alexa') {

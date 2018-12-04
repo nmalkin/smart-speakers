@@ -37,7 +37,19 @@ module.exports = [
         ]
     },
     {
-        entry: './src/chrome/content/content.js',
+        entry: './src/chrome/content/content.ts',
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/
+                }
+            ]
+        },
+        resolve: {
+            extensions: ['.ts', '.js']
+        },
         output: {
             filename: 'content.js',
             path: BUILD_PATH
