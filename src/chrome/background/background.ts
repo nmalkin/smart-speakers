@@ -5,3 +5,5 @@ function buttonClicked() {
 }
 
 chrome.browserAction.onClicked.addListener(buttonClicked);
+
+export { buttonClicked };

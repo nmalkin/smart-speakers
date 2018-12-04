@@ -2,7 +2,8 @@
     "name": "smart-speakers",
     "version": "0.0.0",
     "dependencies": {
-        "@types/chrome": "0.0.75"
+        "@types/chrome": "0.0.75",
+        "@types/firefox-webext-browser": "^64.0.0"
     },
     "devDependencies": {
         "@babel/core": "^7.2.0",

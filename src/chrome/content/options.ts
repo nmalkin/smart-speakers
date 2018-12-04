@@ -74,3 +74,5 @@ async function testInBrowser() {
 }
 
 document.getElementById('google')!.onclick = testInBrowser;
+
+export { testInBrowser };
