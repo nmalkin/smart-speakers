@@ -19,3 +19,9 @@ action "Test" {
   uses = "actions/npm@master"
   args = "test"
 }
+
+action "Lint" {
+  needs = "Setup"
+  uses = "actions/npm@master"
+  args = "run lint"
+}
