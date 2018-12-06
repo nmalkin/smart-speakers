@@ -76,3 +76,53 @@ async function testInBrowser() {
 document.getElementById('google')!.onclick = testInBrowser;
 
 export { testInBrowser };
+
+// Test using Mocha
+
+mocha.setup({
+    ui: 'bdd',
+    bail: true
+});
+
+describe('Google', () => {
+    let token;
+
+    context('fetching the CSRF token', async () => {
+        before(async () => {
+            token = await fetchCsrfToken();
+        });
+
+        it('user is signed in', () => {
+            if (token === '') {
+                throw new Error('Detected user signed out');
+            }
+        });
+
+        it('Response should match either signed out or CSRF token regex', () => {
+            if (token === null) {
+                throw new Error(
+                    "Response didn't match either signed out or CSRF token regex"
+                );
+            }
+        });
+    });
+
+    context('fetching JSON data', async () => {
+        let json;
+        before(async () => {
+            json = await fetchJsonData(token);
+        });
+
+        it('the CSRF token should work', () => {
+            if (json === '[]') {
+                throw new Error('CSRF token failed');
+            }
+        });
+    });
+});
+
+mocha.checkLeaks();
+document.getElementById('test')!.onclick = () => {
+    document.getElementById('mocha')!.innerHTML = '';
+    mocha.run();
+};
