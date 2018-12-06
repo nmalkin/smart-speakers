@@ -3,7 +3,8 @@
     "version": "0.0.0",
     "dependencies": {
         "@types/chrome": "0.0.75",
-        "@types/firefox-webext-browser": "^64.0.0"
+        "@types/firefox-webext-browser": "^64.0.0",
+        "@types/mocha": "^5.2.5"
     },
     "devDependencies": {
         "@babel/core": "^7.2.0",
@@ -34,23 +35,28 @@
         }
     },
     "lint-staged": {
-        "*.js": [
-            "eslint --fix",
-            "git add"
-        ],
-        "*.ts": [
-            "tslint -c tslint.json 'src/**/*.ts' --fix",
-            "git add"
-        ],
-        "*.{js,json,css,md}": [
-            "prettier --write",
-            "git add"
+        "linters": {
+            "*.js": [
+                "eslint --fix",
+                "git add"
+            ],
+            "*.ts": [
+                "tslint -c tslint.json 'src/**/*.ts' --fix",
+                "git add"
+            ],
+            "*.{js,json,css,md}": [
+                "prettier --write",
+                "git add"
+            ]
+        },
+        "ignore": [
+            "assets/*"
         ]
     },
     "scripts": {
         "lint": "tslint -c tslint.json 'src/**/*.ts' && eslint test",
         "build": "webpack",
-        "test": "jest --env=jsdom",
+        "test": "jest --env=jsdom --verbose",
         "watch": "webpack --watch"
     },
     "jest": {
