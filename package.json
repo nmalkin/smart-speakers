@@ -50,7 +50,8 @@
             ]
         },
         "ignore": [
-            "assets/*"
+            "assets/*",
+            "src/qualtrics/*"
         ]
     },
     "scripts": {
