@@ -7,6 +7,34 @@ let urls: string[] = [];
 let transcripts: string[] = [];
 const seen: number[] = [];
 
+/**
+ * Process request for a recording
+ *
+ * Selects a recording and adds it to the survey page
+ *
+ * @param targetElement the id of the DOM element of the question under which the recording should be inserted
+ */
+function processRecordingRequest(targetElement: string): void {
+    // Select recording to show
+    let index = Math.floor(Math.random() * urls.length);
+    while (seen.includes(index)) {
+        index = Math.floor(Math.random() * urls.length);
+    }
+    seen.push(index);
+    const url = urls[index];
+    const transcript = transcripts[index];
+
+    // Display recording on page
+    const tag =
+        '<audio controls><source src="' +
+        url +
+        '" type="audio/mp3"></audio> <br> Transcript: ' +
+        transcript;
+    document
+        .getElementById(targetElement)!
+        .getElementsByClassName('QuestionText')[0].innerHTML = tag;
+}
+
 const messageListener = async event => {
     if (event.source !== window) {
         // pass
@@ -35,15 +63,22 @@ const messageListener = async event => {
         setTimeout(() => {
             window.postMessage('verify', '*');
         }, 2000);
-    } else if (event.data === 'recording') {
-        let index = Math.floor(Math.random() * urls.length);
-        while (seen.includes(index)) {
-            index = Math.floor(Math.random() * urls.length);
+    } else if (event.data.hasOwnProperty('type')) {
+        switch (event.data.type) {
+            case 'recordingRequest': {
+                // A recording request is expected to contain the id of the element where the result should be inserted.
+                if (!('element' in event.data)) {
+                    console.error(
+                        'Message from webpage missing target element ID'
+                    );
+                    return;
+                }
+
+                processRecordingRequest(event.data.element);
+
+                break;
+            }
         }
-        seen.push(index);
-        const url = urls[index];
-        const transcript = transcripts[index];
-        window.postMessage({ type: 'audio', url, transcript }, '*');
     }
 };
 
