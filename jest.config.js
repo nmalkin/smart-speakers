@@ -65,8 +65,8 @@ module.exports = {
     // An array of file extensions your modules use
     moduleFileExtensions: [
         'js',
-        'ts'
-        //   "json",
+        'ts',
+        'json' // for Puppeteer. See: https://github.com/GoogleChrome/puppeteer/issues/2754
         //   "jsx",
         //   "node"
     ],
