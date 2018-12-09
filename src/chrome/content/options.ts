@@ -6,8 +6,6 @@ import {
     tryParseJson
 } from '../../common/google/google';
 
-const ENTRY_INDEX = 65;
-
 function checkArray(data, name) {
     if (data === null) {
         throw new Error(`Detected no ${name}`);
@@ -54,7 +52,7 @@ async function testInBrowser() {
             throw new Error('Detected empty response array');
         }
         checkArray(data[0], 'activity');
-        const entry = data[0][ENTRY_INDEX];
+        const entry = data[0][data[0].length - 1];
         checkArray(entry[URL_INDEX], 'URL');
         const url = entry[URL_INDEX][0];
         checkString(url, 'URL');
