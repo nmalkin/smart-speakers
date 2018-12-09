@@ -1,8 +1,8 @@
-import { join } from 'path';
 import * as puppeteer from 'puppeteer';
 
+import { getBrowser } from './browser';
+
 const SURVEY_URL = 'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05';
-const pathToExtension = join(__dirname, '../chrome_extension');
 
 /** Default timeout for tests, in ms */
 const DEFAULT_TIMEOUT = 5000;
@@ -23,14 +23,7 @@ describe('test in browser', () => {
     let page: puppeteer.Page;
 
     beforeAll(async () => {
-        browser = await puppeteer.launch({
-            headless: false,
-            // slowMo: 100, // pause between actions
-            args: [
-                `--disable-extensions-except=${pathToExtension}`,
-                `--load-extension=${pathToExtension}`
-            ]
-        });
+        browser = await getBrowser();
 
         // Hooks for testing the extension's background page
         const targets = await browser.targets();
