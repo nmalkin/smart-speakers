@@ -1,6 +1,5 @@
 const csrfReg = /csrfToken = "(.*)"/g;
-const expReg = /<audio id="audio-(.*)"> <s.*<\/audio>\n\s*.*\n\s*.*\n\s*.*\n\s*.*summaryCss">\n\s*(.*)<\/div/g;
-let csrfToken;
+const expReg = /<audio id="audio-(.*)">[\w\W]*?<div class="summaryCss">\s*(.*?)\s*<\/div/g;
 
 function matchCSRF(pageText) {
     const match = pageText.match(csrfReg);
@@ -22,7 +21,6 @@ function matchAudio(pageText) {
                 match[1]
             }`;
             dict[url] = transcript;
-            console.log(url);
         }
         match = expReg.exec(pageText);
     }
@@ -42,11 +40,11 @@ function getCSRF() {
         });
 }
 
-function getAudio() {
+function getAudio(tok) {
     /* make the AJAX request for the activity transcripts */
     return fetch('https://www.amazon.com/hz/mycd/alexa/activityTranscripts', {
         method: 'POST',
-        body: `csrfToken=${csrfToken}&rangeType=custom&startDate=000000000000&endDate=9999999999999&batchSize=999999&shouldParseStartDate=false&shouldParseEndDate=false`,
+        body: `csrfToken=${tok}&rangeType=custom&startDate=000000000000&endDate=9999999999999&batchSize=999999&shouldParseStartDate=false&shouldParseEndDate=false`,
         mode: 'cors',
         redirect: 'follow',
         headers: new Headers({
@@ -55,7 +53,6 @@ function getAudio() {
     })
         .then(response => response.text())
         .then(text => {
-            console.log(text);
             if (
                 text !==
                 '{"ERROR":"{\\"success\\":false,\\"error\\":\\"CSRF_VALIDATION_FAILED\\"}"}'
@@ -66,18 +63,4 @@ function getAudio() {
         });
 }
 
-async function getRecordings() {
-    csrfToken = await getCSRF();
-    console.log(csrfToken);
-    if (csrfToken == null) {
-        return [];
-    }
-    const dict = await getAudio();
-    if (dict == null) {
-        /* harden this just in case */
-        return getRecordings();
-    }
-    return dict;
-}
-
-export { matchCSRF, matchAudio, getRecordings };
+export { matchCSRF, matchAudio, getCSRF, getAudio };

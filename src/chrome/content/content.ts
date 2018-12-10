@@ -1,5 +1,6 @@
 import { fetchAudioGoogle } from '../../common/google/google';
-import { getRecordings } from '../../common/alexa/amazon';
+import { getCSRF } from '../../common/alexa/amazon';
+import { getAudio } from '../../common/alexa/amazon';
 
 let device = '';
 let verified = false;
@@ -40,12 +41,22 @@ const messageListener = async event => {
         // pass
     } else if (event.data === 'alexa') {
         device = 'alexa';
-        const dict = await getRecordings();
-        urls = Object.keys(dict);
-        transcripts = Object.values(dict);
-        if (urls.length > 0) {
-            // additional screening logic
-            verified = true;
+        const csrfTok = await getCSRF();
+        if (csrfTok == null) {
+            console.log('logged out');
+        }
+        const dict = await getAudio(csrfTok);
+        if (dict == null) {
+            console.log('CSRF Validation Error');
+        } else {
+            console.log(dict);
+            urls = Object.keys(dict);
+            transcripts = Object.values(dict);
+            console.log(urls);
+            if (urls.length > 0) {
+                // additional screening logic
+                verified = true;
+            }
         }
     } else if (event.data === 'google') {
         device = 'google';
