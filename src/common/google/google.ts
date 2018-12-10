@@ -60,8 +60,7 @@ async function fetchDataGoogle() {
     return null;
 }
 
-async function fetchAudioGoogle() {
-    const data = await fetchDataGoogle();
+function extractData(data) {
     let urls = [];
     let transcripts = [];
     if (data !== null) {
@@ -71,6 +70,11 @@ async function fetchAudioGoogle() {
     return { urls, transcripts };
 }
 
+async function fetchAudioGoogle() {
+    const data = await fetchDataGoogle();
+    return extractData(data);
+}
+
 export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
 
 export {
@@ -78,5 +82,6 @@ export {
     TRANSCRIPT_INDEX,
     fetchCsrfToken,
     fetchJsonData,
-    tryParseJson
+    tryParseJson,
+    extractData
 };
