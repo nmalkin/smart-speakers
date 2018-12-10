@@ -75,7 +75,7 @@ async function fetchAudioGoogle() {
     return extractData(data);
 }
 
-export { checkSignedOut, extractCsrfToken, fetchAudioGoogle, extractData };
+export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
 
 export {
     URL_INDEX,
