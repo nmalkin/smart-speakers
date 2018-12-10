@@ -24,7 +24,7 @@ function checkVerification(value: string): void {
     } else if (value === 'loggedOut') {
         placeholder.style.display = 'block';
         alert('Please ensure that you are logged in to your Amazon/Google account. This is required for our study, so we can customize our questions to your specific device. Please relog and click on the retry button below.');
-        const tag = "<button onClick=\"window.postMessage('retry', '*')\">Retry</button>";
+        const tag = "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     } else if (value === 'ineligible') {
         /* we can (should?) rephrase this when we get a chance */
@@ -122,22 +122,32 @@ const validateGoogle = async () => {
     }
 };
 
+async function fetchDeviceData(): void {
+    if (device === 'alexa') {
+        await validateAmazon();
+    } else if (device === 'google') {
+        await validateGoogle();
+    } else {
+        console.error(`Unrecognized device: ${device}`);
+    }
+}
+
 const messageListener = async event => {
     if (event.source !== window) {
         // pass
-    } else if (event.data === 'alexa') {
-        await validateAmazon();
-    } else if (event.data === 'google') {
-        await validateGoogle();
     } else if (event.data === 'verify') {
+        await fetchDeviceData();
         window.postMessage({ type: 'verification', value: verified }, '*');
-    } else if (event.data === 'retry') {
-        window.postMessage(device, '*');
-        setTimeout(() => {
-            window.postMessage('verify', '*');
-        }, 2000);
     } else if (event.data.hasOwnProperty('type')) {
         switch (event.data.type) {
+            case 'device':
+                if (!('device' in event.data)) {
+                    console.error('Message from webpage missing device');
+                    return;
+                }
+                device = event.data.device;
+                break;
+
             case 'verification':
                 if (!('value' in event.data)) {
                     console.error(
