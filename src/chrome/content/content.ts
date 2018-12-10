@@ -1,4 +1,4 @@
-import { fetchCsrfToken, fetchJsonData, tryParseJson } from '../../common/google/google';
+import { fetchCsrfToken, fetchJsonData, tryParseJson, extractData } from '../../common/google/google';
 import { getCSRF, getAudio } from '../../common/alexa/amazon';
 
 /**
@@ -121,8 +121,7 @@ const validateGoogle = async () => {
         verified = VCode.error;
         return;
     }
-    urls = data[0].urls;
-    transcripts = data[0].transcripts;
+    ({urls, transcripts} = extractData(data[0]));
     if (urls.length > 0) {
         verified = VCode.loggedIn;
         return;
@@ -132,7 +131,7 @@ const validateGoogle = async () => {
     }
 };
 
-async function fetchDeviceData() {
+async function fetchDeviceData(): Promise<void> {
     if (device === 'alexa') {
         await validateAmazon();
     } else if (device === 'google') {
