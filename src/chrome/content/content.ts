@@ -2,7 +2,7 @@ import { fetchCsrfToken, fetchJsonData, tryParseJson } from '../../common/google
 import { getCSRF, getAudio } from '../../common/alexa/amazon';
 
 let device = '';
-let verified = false;
+let verified = '';
 let urls: string[] = [];
 let transcripts: string[] = [];
 const seen: number[] = [];
@@ -14,17 +14,24 @@ const seen: number[] = [];
  *
  * @param value the user's verification status
  */
-function checkVerification(value: boolean): void {
+function checkVerification(value: string): void {
     const placeholder = document.getElementById('QID17')!;
     const nextButton = document.getElementById('NextButton')! as HTMLInputElement;
     placeholder.style.display = 'none';
-    if (value) {
+    if (value === 'loggedIn') {
         nextButton.disabled = false;
         nextButton.click();
-    } else {
-        // we may want to add some saved params to tell them "signed out of Amazon/Google acct"
+    } else if (value === 'loggedOut') {
         placeholder.style.display = 'block';
         alert('Please ensure that you are logged in to your Amazon/Google account. This is required for our study, so we can customize our questions to your specific device. Please relog and click on the retry button below.');
+        const tag = "<button onClick=\"window.postMessage('retry', '*')\">Retry</button>";
+        placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
+    } else if (value === 'ineligible') {
+        /* we can (should?) rephrase this when we get a chance */
+        alert('It looks like you don\'t have enough recordings. Sorry but you are ineligible for this survery');
+    } else {
+        placeholder.style.display = 'block';
+        alert('There may have been an error in fetching your device recordings. Please try again');
         const tag = "<button onClick=\"window.postMessage('retry', '*')\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     }
@@ -58,56 +65,59 @@ function processRecordingRequest(targetElement: string): void {
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
 }
 
+/**
+ * Validate Echo user status and eligibility
+ *
+ * Determines whether a user can proceed with the survey
+ */
 const validateAmazon = async () => {
     device = 'alexa';
     const csrfTok = await getCSRF();
     if (csrfTok == null) {
-        /* TODO: post relevant message */
-        console.log('logged out Alexa');
+        verified = 'loggedOut';
         return;
     }
     const dict = await getAudio(csrfTok);
     if (dict == null) {
-        /* TODO: post relevant message */
-        console.log('CSRF Validation Error');
+        verified = 'error';
         return;
     }
     urls = Object.keys(dict);
     transcripts = Object.values(dict);
     if (urls.length > 0) {
-        verified = true;
+        verified = 'loggedIn';
         return;
     } else {
-        /* TODO: post relevant message */
-        console.log('Not enough recordings');
+        verified = 'ineligible';
         return;
     }
 };
 
+/**
+ * Validate Home user status and eligibility
+ *
+ * Determines whether a user can proceed with the survey
+ */
 const validateGoogle = async () => {
     device = 'google';
     const csrfTok = await fetchCsrfToken();
     if (csrfTok === '') {
-        /* TODO: post relevant message */
-        console.log('logged out Google');
+        verified = 'loggedOut';
         return;
     }
     const response = await fetchJsonData(csrfTok);
     const data = await tryParseJson(response);
     if (data === null) {
-        /* TODO: post relevant message*/
-        console.log('something went wrong');
+        verified = 'error';
         return;
     }
     urls = data[0].urls;
     transcripts = data[0].transcripts;
     if (urls.length > 0) {
-        // additional screening logic
-        verified = true;
+        verified = 'loggedIn';
         return;
     } else {
-        /* TODO: post relevant message */
-        console.log('Not enough recordings');
+        verified = 'ineligible';
         return;
     }
 };
