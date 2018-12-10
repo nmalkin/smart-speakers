@@ -56,11 +56,19 @@ function checkVerification(value: VCode): void {
  */
 function processRecordingRequest(targetElement: string): void {
     // Select recording to show
-    let index = Math.floor(Math.random() * urls.length);
-    while (seen.includes(index)) {
+    let index;
+    const questionNumber = parseInt(targetElement, 10);
+    if (questionNumber <= seen.length) {
+        // User is on an old question
+        index = seen[questionNumber - 1];
+    } else {
+        // Select new recording
         index = Math.floor(Math.random() * urls.length);
+        while (seen.includes(index)) {
+            index = Math.floor(Math.random() * urls.length);
+        }
+        seen.push(index);
     }
-    seen.push(index);
     const url = urls[index];
     const transcript = transcripts[index];
 
@@ -71,7 +79,7 @@ function processRecordingRequest(targetElement: string): void {
         '" type="audio/mp3"></audio> <br> Transcript: ' +
         transcript;
     document
-        .getElementById(targetElement)!
+        .getElementById(targetElement + '_QID9')!
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
 }
 
