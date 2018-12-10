@@ -1,6 +1,6 @@
 import * as puppeteer from 'puppeteer';
 
-import { getBrowser } from './browser';
+import { getBrowser, describeOutsideCI } from './browser';
 
 const SURVEY_URL = 'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05';
 
@@ -17,7 +17,7 @@ async function clickNext(page: puppeteer.Page) {
     await page.click('#NextButton');
 }
 
-describe('test in browser', () => {
+describeOutsideCI('test in browser', () => {
     let browser: puppeteer.Browser;
     let backgroundPage: puppeteer.Page; // currently unused
     let page: puppeteer.Page;
