@@ -1,8 +1,18 @@
 import { fetchCsrfToken, fetchJsonData, tryParseJson } from '../../common/google/google';
 import { getCSRF, getAudio } from '../../common/alexa/amazon';
 
+/**
+ * User Verification Code
+ */
+enum VCode {
+    loggedIn = 'loggedIn',
+    loggedOut = 'loggedOut',
+    ineligible = 'ineligible',
+    error = 'error',
+}
+
 let device = '';
-let verified = '';
+let verified: VCode;
 let urls: string[] = [];
 let transcripts: string[] = [];
 const seen: number[] = [];
@@ -14,7 +24,7 @@ const seen: number[] = [];
  *
  * @param value the user's verification status
  */
-function checkVerification(value: string): void {
+function checkVerification(value: VCode): void {
     const placeholder = document.getElementById('QID17')!;
     const nextButton = document.getElementById('NextButton')! as HTMLInputElement;
     placeholder.style.display = 'none';
@@ -27,7 +37,7 @@ function checkVerification(value: string): void {
         const tag = "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     } else if (value === 'ineligible') {
-        /* we can (should?) rephrase this when we get a chance */
+        /* we can (should?) rephrase this when we get a chance. Also this just leaves them stuck which is weird UX. */
         alert('It looks like you don\'t have enough recordings. Sorry but you are ineligible for this survery');
     } else {
         placeholder.style.display = 'block';
@@ -73,22 +83,22 @@ function processRecordingRequest(targetElement: string): void {
 const validateAmazon = async () => {
     device = 'alexa';
     const csrfTok = await getCSRF();
-    if (csrfTok == null) {
-        verified = 'loggedOut';
+    if (csrfTok === null) {
+        verified = VCode.loggedOut;
         return;
     }
     const dict = await getAudio(csrfTok);
-    if (dict == null) {
-        verified = 'error';
+    if (dict === null) {
+        verified = VCode.error;
         return;
     }
     urls = Object.keys(dict);
     transcripts = Object.values(dict);
-    if (urls.length > 0) {
-        verified = 'loggedIn';
+    if (urls.length > 10) {
+        verified = VCode.loggedIn;
         return;
     } else {
-        verified = 'ineligible';
+        verified = VCode.ineligible;
         return;
     }
 };
@@ -102,27 +112,27 @@ const validateGoogle = async () => {
     device = 'google';
     const csrfTok = await fetchCsrfToken();
     if (csrfTok === '') {
-        verified = 'loggedOut';
+        verified = VCode.loggedOut;
         return;
     }
     const response = await fetchJsonData(csrfTok);
-    const data = await tryParseJson(response);
-    if (data === null) {
-        verified = 'error';
+    const data = tryParseJson(response);
+    if (data === null || data.length === 0) {
+        verified = VCode.error;
         return;
     }
     urls = data[0].urls;
     transcripts = data[0].transcripts;
     if (urls.length > 0) {
-        verified = 'loggedIn';
+        verified = VCode.loggedIn;
         return;
     } else {
-        verified = 'ineligible';
+        verified = VCode.ineligible;
         return;
     }
 };
 
-async function fetchDeviceData(): void {
+async function fetchDeviceData() {
     if (device === 'alexa') {
         await validateAmazon();
     } else if (device === 'google') {
