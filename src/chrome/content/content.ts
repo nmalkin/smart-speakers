@@ -122,7 +122,7 @@ const validateGoogle = async () => {
     }
 };
 
-async function fetchDeviceData(): void {
+async function fetchDeviceData(): Promise<void> {
     if (device === 'alexa') {
         await validateAmazon();
     } else if (device === 'google') {
