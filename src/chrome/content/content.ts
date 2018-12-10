@@ -1,6 +1,5 @@
-import { fetchAudioGoogle } from '../../common/google/google';
-import { getCSRF } from '../../common/alexa/amazon';
-import { getAudio } from '../../common/alexa/amazon';
+import { fetchCsrfToken, fetchJsonData, tryParseJson } from '../../common/google/google';
+import { getCSRF, getAudio } from '../../common/alexa/amazon';
 
 let device = '';
 let verified = false;
@@ -36,37 +35,67 @@ function processRecordingRequest(targetElement: string): void {
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
 }
 
+const validateAmazon = async () => {
+    device = 'alexa';
+    const csrfTok = await getCSRF();
+    if (csrfTok == null) {
+        /* TODO: post relevant message */
+        console.log('logged out Alexa');
+        return;
+    }
+    const dict = await getAudio(csrfTok);
+    if (dict == null) {
+        /* TODO: post relevant message */
+        console.log('CSRF Validation Error');
+        return;
+    }
+    urls = Object.keys(dict);
+    transcripts = Object.values(dict);
+    if (urls.length > 0) {
+        verified = true;
+        return;
+    } else {
+        /* TODO: post relevant message */
+        console.log('Not enough recordings');
+        return;
+    }
+};
+
+const validateGoogle = async () => {
+    device = 'google';
+    const csrfTok = await fetchCsrfToken();
+    if (csrfTok === '') {
+        /* TODO: post relevant message */
+        console.log('logged out Google');
+        return;
+    }
+    const response = await fetchJsonData(csrfTok);
+    const data = await tryParseJson(response);
+    if (data === null) {
+        /* TODO: post relevant message*/
+        console.log('something went wrong');
+        return;
+    }
+    urls = data[0].urls;
+    transcripts = data[0].transcripts;
+    if (urls.length > 0) {
+        // additional screening logic
+        verified = true;
+        return;
+    } else {
+        /* TODO: post relevant message */
+        console.log('Not enough recordings');
+        return;
+    }
+};
+
 const messageListener = async event => {
     if (event.source !== window) {
         // pass
     } else if (event.data === 'alexa') {
-        device = 'alexa';
-        const csrfTok = await getCSRF();
-        if (csrfTok == null) {
-            console.log('logged out');
-        }
-        const dict = await getAudio(csrfTok);
-        if (dict == null) {
-            console.log('CSRF Validation Error');
-        } else {
-            console.log(dict);
-            urls = Object.keys(dict);
-            transcripts = Object.values(dict);
-            console.log(urls);
-            if (urls.length > 0) {
-                // additional screening logic
-                verified = true;
-            }
-        }
+        await validateAmazon();
     } else if (event.data === 'google') {
-        device = 'google';
-        const data = await fetchAudioGoogle();
-        urls = data.urls;
-        transcripts = data.transcripts;
-        if (urls.length > 0) {
-            // additional screening logic
-            verified = true;
-        }
+        await validateGoogle();
     } else if (event.data === 'verify') {
         window.postMessage({ type: 'verification', value: verified }, '*');
     } else if (event.data === 'retry') {

@@ -1,5 +1,5 @@
 const csrfReg = /csrfToken = "(.*)"/g;
-const expReg = /<audio id="audio-(.*)">[\w\W]*?<div class="summaryCss">\s*(.*?)\s*<\/div/g;
+const expReg = /<audio id="audio-(.*)"> <source[\w\W]*?<div class="summaryCss">\s*(.*?)\s*<\/div/g;
 
 function matchCSRF(pageText) {
     const match = pageText.match(csrfReg);
@@ -24,6 +24,7 @@ function matchAudio(pageText) {
         }
         match = expReg.exec(pageText);
     }
+    console.log(dict);
     return dict;
 }
 
