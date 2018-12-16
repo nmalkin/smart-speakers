@@ -1,11 +1,33 @@
-import { getBrowser, testOutsideCI } from './browser';
+import { getBrowser, describeOutsideCI } from './browser';
+import { exec } from 'child_process';
 
-testOutsideCI(
-    'the extension can be installed',
-    async () => {
+/**
+ * Run the given command asynchronously using node's child_process.exec
+ *
+ * @param command the command to run
+ * @returns a promise that resolves when the command completes
+ */
+async function execAsync(command: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                console.log(`stderr: ${stderr}`);
+                reject(error);
+            }
+            resolve();
+        });
+    });
+}
+
+describeOutsideCI('test installation', () => {
+    beforeAll(async () => {
+        await execAsync('npm run build');
+    });
+
+    test('the extension can be installed', async () => {
         const browser = await getBrowser();
         expect(browser).toBeTruthy();
         await browser.close();
-    },
-    3000
-);
+    }, 3000);
+});
