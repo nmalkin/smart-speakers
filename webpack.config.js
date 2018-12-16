@@ -36,7 +36,7 @@ module.exports = [
                     to: ''
                 },
                 {
-                    from: 'assets/*',
+                    from: 'assets/**/*',
                     to: ''
                 },
                 {
@@ -76,7 +76,7 @@ module.exports = [
                     to: ''
                 },
                 {
-                    from: 'assets/*',
+                    from: 'assets/**/*',
                     to: ''
                 },
                 {
