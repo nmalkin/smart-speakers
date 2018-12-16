@@ -4,6 +4,7 @@
     "jsRules": {},
     "rules": {
         "arrow-parens": false,
+        "interface-name": false,
         "max-line-length": false,
         "no-console": false,
         "object-literal-sort-keys": false,
