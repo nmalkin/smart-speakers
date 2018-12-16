@@ -6,7 +6,7 @@ import {
     tryParseJson
 } from '../../common/google/google';
 
-function checkArray(data, name) {
+function checkArray(data: any, name: string) {
     if (data === null) {
         throw new Error(`Detected no ${name}`);
     }
@@ -18,7 +18,7 @@ function checkArray(data, name) {
     }
 }
 
-function checkString(data, name) {
+function checkString(data: any, name: string) {
     if (data === null) {
         throw new Error(`Detected null ${name}`);
     }

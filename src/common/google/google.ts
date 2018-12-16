@@ -1,18 +1,19 @@
 const URL_INDEX = 24;
 const TRANSCRIPT_INDEX = 9;
 
-function checkSignedOut(text) {
+function checkSignedOut(text: string) {
     const regex = /FootprintsMyactivitySignedoutUi/;
     return text.search(regex) > -1;
 }
 
-function extractCsrfToken(text) {
+function extractCsrfToken(text: string): string | null {
     const regex = /window\.HISTORY_xsrf='(\S{44})'/;
-    const token = text.match(regex)[1];
+    const match = text.match(regex);
+    const token = match ? match[1] : null;
     return token;
 }
 
-async function fetchCsrfToken() {
+async function fetchCsrfToken(): Promise<string | null> {
     const response = await fetch(
         'https://myactivity.google.com/item?product=29'
     );
@@ -23,7 +24,7 @@ async function fetchCsrfToken() {
     return extractCsrfToken(restxt);
 }
 
-async function fetchJsonData(token) {
+async function fetchJsonData(token: string): Promise<string> {
     const response = await fetch(
         'https://myactivity.google.com/item?product=29&jspb=1&jsv=myactivity_20181016-0717_1',
         {
@@ -35,7 +36,7 @@ async function fetchJsonData(token) {
     return restxt.slice(6);
 }
 
-function tryParseJson(jsonString) {
+function tryParseJson(jsonString: string): string[] | null {
     try {
         const obj = JSON.parse(jsonString);
         if (Array.isArray(obj)) {
@@ -49,7 +50,7 @@ function tryParseJson(jsonString) {
 
 async function fetchDataGoogle() {
     const token = await fetchCsrfToken();
-    if (token === '') {
+    if (token === null || token === '') {
         return null;
     }
     const response = await fetchJsonData(token);

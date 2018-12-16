@@ -11,7 +11,12 @@ enum VCode {
     error = 'error',
 }
 
-let device = '';
+enum Device {
+    alexa = 'alexa',
+    google = 'google'
+}
+
+let device: Device;
 let verified: VCode;
 let urls: string[] = [];
 let transcripts: string[] = [];
@@ -56,7 +61,7 @@ function checkVerification(value: VCode): void {
  */
 function processRecordingRequest(targetElement: string): void {
     // Select recording to show
-    let index;
+    let index: number;
     const questionNumber = parseInt(targetElement, 10);
     if (questionNumber <= seen.length) {
         // User is on an old question
@@ -88,8 +93,8 @@ function processRecordingRequest(targetElement: string): void {
  *
  * Determines whether a user can proceed with the survey
  */
-const validateAmazon = async () => {
-    device = 'alexa';
+async function validateAmazon(): Promise<void> {
+    device = Device.alexa;
     const csrfTok = await getCSRF();
     if (csrfTok === null) {
         verified = VCode.loggedOut;
@@ -109,17 +114,17 @@ const validateAmazon = async () => {
         verified = VCode.ineligible;
         return;
     }
-};
+}
 
 /**
  * Validate Home user status and eligibility
  *
  * Determines whether a user can proceed with the survey
  */
-const validateGoogle = async () => {
-    device = 'google';
+async function validateGoogle(): Promise<void> {
+    device = Device.google;
     const csrfTok = await fetchCsrfToken();
-    if (csrfTok === '') {
+    if (!csrfTok || csrfTok === '') {
         verified = VCode.loggedOut;
         return;
     }
@@ -137,19 +142,19 @@ const validateGoogle = async () => {
         verified = VCode.ineligible;
         return;
     }
-};
+}
 
 async function fetchDeviceData(): Promise<void> {
-    if (device === 'alexa') {
+    if (device === Device.alexa) {
         await validateAmazon();
-    } else if (device === 'google') {
+    } else if (device === Device.google) {
         await validateGoogle();
     } else {
         console.error(`Unrecognized device: ${device}`);
     }
 }
 
-const messageListener = async event => {
+async function messageListener(event: MessageEvent): Promise<void> {
     if (event.source !== window) {
         // pass
     } else if (event.data === 'verify') {
@@ -162,7 +167,13 @@ const messageListener = async event => {
                     console.error('Message from webpage missing device');
                     return;
                 }
-                device = event.data.device;
+
+                if (event.data.device === 'alexa') {
+                    device = Device.alexa;
+                } else if (event.data.device === 'google') {
+                    device = Device.google;
+                }
+
                 break;
 
             case 'verification':
@@ -188,6 +199,6 @@ const messageListener = async event => {
             }
         }
     }
-};
+}
 
 window.addEventListener('message', messageListener, false);
