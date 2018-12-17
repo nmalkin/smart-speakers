@@ -1,14 +1,14 @@
 {
-    "name": "Passive Listening Activity Scraper",
-    "version": "1.0",
-    "description": "Scrape stored audio recordings from Google/Alexa Activity.",
+    "name": "Berkeley Smart Speaker Study",
+    "version": "0.0.0",
+    "description": "An extension that allows you to participate in the Berkeley Smart Speaker Study",
     "manifest_version": 2,
     "background": {
         "scripts": ["background.js"],
         "persistent": false
     },
     "browser_action": {
-        "default_icon": "assets/icsi.png"
+        "default_icon": "assets/logo.png"
     },
     "content_scripts": [
         {
@@ -22,10 +22,10 @@
         "matches": ["https://berkeley.qualtrics.com/*"]
     },
     "icons": {
-        "16": "assets/icsi.png",
-        "32": "assets/icsi.png",
-        "48": "assets/icsi.png",
-        "128": "assets/icsi.png"
+        "16": "assets/logo.png",
+        "32": "assets/logo.png",
+        "48": "assets/logo.png",
+        "128": "assets/logo.png"
     },
     "incognito": "split",
     "options_page": "options.html",
