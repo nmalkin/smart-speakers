@@ -29,5 +29,9 @@
     },
     "incognito": "split",
     "options_page": "options.html",
-    "permissions": ["https://myactivity.google.com/", "https://www.amazon.com/"]
+    "permissions": [
+        "storage",
+        "https://myactivity.google.com/",
+        "https://www.amazon.com/"
+    ]
 }

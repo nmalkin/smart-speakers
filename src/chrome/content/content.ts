@@ -1,5 +1,11 @@
-import { fetchCsrfToken, fetchJsonData, tryParseJson, extractData } from '../../common/google/google';
+import {
+    fetchCsrfToken,
+    fetchJsonData,
+    tryParseJson,
+    extractData
+} from '../../common/google/google';
 import { getCSRF, getAudio } from '../../common/alexa/amazon';
+import { getDebugStatus } from '../common/debug';
 
 /**
  * User Verification Code
@@ -8,7 +14,7 @@ enum VCode {
     loggedIn = 'loggedIn',
     loggedOut = 'loggedOut',
     ineligible = 'ineligible',
-    error = 'error',
+    error = 'error'
 }
 
 enum Device {
@@ -31,23 +37,33 @@ const seen: number[] = [];
  */
 function checkVerification(value: VCode): void {
     const placeholder = document.getElementById('QID17')!;
-    const nextButton = document.getElementById('NextButton')! as HTMLInputElement;
+    const nextButton = document.getElementById(
+        'NextButton'
+    )! as HTMLInputElement;
     placeholder.style.display = 'none';
     if (value === 'loggedIn') {
         nextButton.disabled = false;
         nextButton.click();
     } else if (value === 'loggedOut') {
         placeholder.style.display = 'block';
-        alert('Please ensure that you are logged in to your Amazon/Google account. This is required for our study, so we can customize our questions to your specific device. Please relog and click on the retry button below.');
-        const tag = "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
+        alert(
+            'Please ensure that you are logged in to your Amazon/Google account. This is required for our study, so we can customize our questions to your specific device. Please relog and click on the retry button below.'
+        );
+        const tag =
+            "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     } else if (value === 'ineligible') {
         /* we can (should?) rephrase this when we get a chance. Also this just leaves them stuck which is weird UX. */
-        alert('It looks like you don\'t have enough recordings. Sorry but you are ineligible for this survery');
+        alert(
+            "It looks like you don't have enough recordings. Sorry but you are ineligible for this survery"
+        );
     } else {
         placeholder.style.display = 'block';
-        alert('There may have been an error in fetching your device recordings. Please try again');
-        const tag = "<button onClick=\"window.postMessage('retry', '*')\">Retry</button>";
+        alert(
+            'There may have been an error in fetching your device recordings. Please try again'
+        );
+        const tag =
+            "<button onClick=\"window.postMessage('retry', '*')\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     }
 }
@@ -59,7 +75,7 @@ function checkVerification(value: VCode): void {
  *
  * @param targetElement the id of the DOM element of the question under which the recording should be inserted
  */
-function processRecordingRequest(targetElement: string): void {
+async function processRecordingRequest(targetElement: string): Promise<void> {
     // Select recording to show
     let index: number;
     const questionNumber = parseInt(targetElement, 10);
@@ -69,13 +85,25 @@ function processRecordingRequest(targetElement: string): void {
     } else {
         // Select new recording
         index = Math.floor(Math.random() * urls.length);
+        // FIXME: this will go into an infinite loop if the number of available recordings is less than the number of questions
+        // Debug mode, in particular, will trigger this.
         while (seen.includes(index)) {
             index = Math.floor(Math.random() * urls.length);
         }
         seen.push(index);
     }
-    const url = urls[index];
-    const transcript = transcripts[index];
+    let url = urls[index];
+    let transcript = transcripts[index];
+
+    // Substitute dummy recording if we're in debug mode
+    if (
+        url === undefined &&
+        transcript === undefined &&
+        (await getDebugStatus())
+    ) {
+        url = 'https://people.eecs.berkeley.edu/~nmalkin/sample.mp3';
+        transcript = 'This is a test transcript.';
+    }
 
     // Display recording on page
     const tag =
@@ -134,7 +162,7 @@ async function validateGoogle(): Promise<void> {
         verified = VCode.error;
         return;
     }
-    ({urls, transcripts} = extractData(data[0]));
+    ({ urls, transcripts } = extractData(data[0]));
     if (urls.length > 0) {
         verified = VCode.loggedIn;
         return;
@@ -155,11 +183,20 @@ async function fetchDeviceData(): Promise<void> {
 }
 
 async function messageListener(event: MessageEvent): Promise<void> {
+    console.log(event);
     if (event.source !== window) {
         // pass
     } else if (event.data === 'verify') {
         await fetchDeviceData();
-        window.postMessage({ type: 'verification', value: verified }, '*');
+
+        // If debug is on, always report status as logged in
+        const debug = await getDebugStatus();
+        const verificationStatus = debug ? VCode.loggedIn : verified;
+
+        window.postMessage(
+            { type: 'verification', value: verificationStatus },
+            '*'
+        );
     } else if (event.data.hasOwnProperty('type')) {
         switch (event.data.type) {
             case 'device':
