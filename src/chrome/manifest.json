@@ -15,6 +15,7 @@
             "matches": [
                 "https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05"
             ],
+            "all_frames": true,
             "js": ["content.js"]
         }
     ],
