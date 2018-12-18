@@ -64,9 +64,9 @@ async function processRecordingRequest(
 }
 
 /**
- * Query the device's manufacturer to check login status and download interactions
+ * Process 'verify' message
  */
-async function fetchDeviceData(state: State): Promise<VerificationState> {
+async function processVerify(state: State) {
     let result: ValidationResult;
     if (state.device === Device.alexa) {
         result = await validateAmazon();
@@ -88,18 +88,11 @@ async function fetchDeviceData(state: State): Promise<VerificationState> {
         });
     }
 
-    return result.status;
-}
-
-/**
- * Process 'verify' message
- */
-async function processVerify(state: State) {
-    const verified = await fetchDeviceData(state);
-
     // If debug is on, always report status as logged in
     const debug = await getDebugStatus();
-    const verificationStatus = debug ? VerificationState.loggedIn : verified;
+    const verificationStatus = debug
+        ? VerificationState.loggedIn
+        : result.status;
 
     displayVerificationResults(verificationStatus);
 }
