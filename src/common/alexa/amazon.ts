@@ -1,3 +1,5 @@
+import { ValidationResult, VerificationState } from '../../common/types';
+
 const csrfReg = /csrfToken = "(.*)"/g;
 const expReg = /<audio id="audio-(.*)"> <source[\w\W]*?<div class="summaryCss">\s*(.*?)\s*<\/div/g;
 
@@ -64,4 +66,31 @@ function getAudio(tok: string) {
         });
 }
 
-export { matchCSRF, matchAudio, getCSRF, getAudio };
+/**
+ * Validate Echo user status and eligibility
+ *
+ * Determines whether a user can proceed with the survey
+ */
+async function validateAmazon(): Promise<ValidationResult> {
+    const csrfTok = await getCSRF();
+    if (csrfTok === null) {
+        return { status: VerificationState.loggedOut };
+    }
+    const dict = await getAudio(csrfTok);
+    if (dict === null) {
+        return { status: VerificationState.error };
+    }
+    const urls = Object.keys(dict);
+    const transcripts = Object.values(dict) as string[];
+    if (urls.length > 10) {
+        return {
+            status: VerificationState.loggedIn,
+            urls,
+            transcripts
+        };
+    } else {
+        return { status: VerificationState.ineligible };
+    }
+}
+
+export { validateAmazon };

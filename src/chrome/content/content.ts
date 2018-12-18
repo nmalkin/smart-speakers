@@ -1,26 +1,11 @@
 import {
-    fetchCsrfToken,
-    fetchJsonData,
-    tryParseJson,
-    extractData
-} from '../../common/google/google';
-import { getCSRF, getAudio } from '../../common/alexa/amazon';
+    Device,
+    ValidationResult,
+    VerificationState
+} from '../../common/types';
+import { validateGoogle } from '../../common/google/google';
+import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
-
-/**
- * The user's login state for the targeted assistant service
- */
-enum VerificationState {
-    loggedIn = 'loggedIn',
-    loggedOut = 'loggedOut',
-    ineligible = 'ineligible',
-    error = 'error'
-}
-
-enum Device {
-    alexa = 'alexa',
-    google = 'google'
-}
 
 let device: Device;
 let verified: VerificationState;
@@ -114,65 +99,6 @@ async function processRecordingRequest(targetElement: string): Promise<void> {
     document
         .getElementById(targetElement + '_QID9')!
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
-}
-
-/**
- * The result of performing validation.
- */
-interface ValidationResult {
-    status: VerificationState;
-    urls?: string[];
-    transcripts?: string[];
-}
-
-/**
- * Validate Echo user status and eligibility
- *
- * Determines whether a user can proceed with the survey
- */
-async function validateAmazon(): Promise<ValidationResult> {
-    const csrfTok = await getCSRF();
-    if (csrfTok === null) {
-        return { status: VerificationState.loggedOut };
-    }
-    const dict = await getAudio(csrfTok);
-    if (dict === null) {
-        return { status: VerificationState.error };
-    }
-    const urls = Object.keys(dict);
-    const transcripts = Object.values(dict);
-    if (urls.length > 10) {
-        return {
-            status: VerificationState.loggedIn,
-            urls,
-            transcripts
-        };
-    } else {
-        return { status: VerificationState.ineligible };
-    }
-}
-
-/**
- * Validate Home user status and eligibility
- *
- * Determines whether a user can proceed with the survey
- */
-async function validateGoogle(): Promise<ValidationResult> {
-    const csrfTok = await fetchCsrfToken();
-    if (!csrfTok || csrfTok === '') {
-        return { status: VerificationState.loggedOut };
-    }
-    const response = await fetchJsonData(csrfTok);
-    const data = tryParseJson(response);
-    if (data === null || data.length === 0) {
-        return { status: VerificationState.error };
-    }
-    const { urls, transcripts } = extractData(data[0]);
-    if (urls.length > 0) {
-        return { status: VerificationState.loggedIn, urls, transcripts };
-    } else {
-        return { status: VerificationState.ineligible };
-    }
 }
 
 async function fetchDeviceData(): Promise<void> {

@@ -1,3 +1,5 @@
+import { ValidationResult, VerificationState } from '../../common/types';
+
 const URL_INDEX = 24;
 const TRANSCRIPT_INDEX = 9;
 
@@ -76,13 +78,36 @@ async function fetchAudioGoogle() {
     return extractData(data);
 }
 
-export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
+/**
+ * Validate Home user status and eligibility
+ *
+ * Determines whether a user can proceed with the survey
+ */
+async function validateGoogle(): Promise<ValidationResult> {
+    const csrfTok = await fetchCsrfToken();
+    if (!csrfTok || csrfTok === '') {
+        return { status: VerificationState.loggedOut };
+    }
+    const response = await fetchJsonData(csrfTok);
+    const data = tryParseJson(response);
+    if (data === null || data.length === 0) {
+        return { status: VerificationState.error };
+    }
+    const { urls, transcripts } = extractData(data[0]);
+    if (urls.length > 0) {
+        return { status: VerificationState.loggedIn, urls, transcripts };
+    } else {
+        return { status: VerificationState.ineligible };
+    }
+}
 
+export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
 export {
     URL_INDEX,
     TRANSCRIPT_INDEX,
     fetchCsrfToken,
     fetchJsonData,
     tryParseJson,
-    extractData
+    extractData,
+    validateGoogle
 };
