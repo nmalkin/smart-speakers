@@ -195,10 +195,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
             ? VerificationState.loggedIn
             : verified;
 
-        window.postMessage(
-            { type: 'verification', value: verificationStatus },
-            '*'
-        );
+        checkVerification(verificationStatus);
     } else if (event.data.hasOwnProperty('type')) {
         switch (event.data.type) {
             case 'device':
@@ -213,16 +210,6 @@ async function messageListener(event: MessageEvent): Promise<void> {
                     device = Device.google;
                 }
 
-                break;
-
-            case 'verification':
-                if (!('value' in event.data)) {
-                    console.error(
-                        'Message from webpage missing verification value'
-                    );
-                    return;
-                }
-                checkVerification(event.data.value);
                 break;
 
             case 'recordingRequest': {
