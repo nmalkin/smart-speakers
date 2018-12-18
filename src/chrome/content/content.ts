@@ -94,7 +94,7 @@ async function processVerify() {
     const debug = await getDebugStatus();
     const verificationStatus = debug ? VerificationState.loggedIn : verified;
 
-    // displayVerificationResults(verificationStatus);
+    displayVerificationResults(verificationStatus);
 }
 
 /**
