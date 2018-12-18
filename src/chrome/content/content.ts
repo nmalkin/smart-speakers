@@ -214,31 +214,35 @@ async function messageListener(event: MessageEvent): Promise<void> {
         return;
     }
 
+    // TODO: update this call to use event.data.type like the others
     if (event.data === 'verify') {
         processVerify();
-    } else if (event.data.hasOwnProperty('type')) {
-        switch (event.data.type) {
-            case 'device':
-                if (!('device' in event.data)) {
-                    console.error('Message from webpage missing device');
-                    return;
-                }
+        return;
+    }
 
-                processDevice(event.data.device);
+    if (!event.data.hasOwnProperty('type')) {
+        return;
+    }
 
-                break;
-
-            case 'recordingRequest': {
-                // A recording request is expected to contain the id of the element where the result should be inserted.
-                if (!('element' in event.data)) {
-                    console.error(
-                        'Message from webpage missing target element ID'
-                    );
-                    return;
-                }
-                processRecordingRequest(event.data.element);
-                break;
+    switch (event.data.type) {
+        case 'device':
+            if (!('device' in event.data)) {
+                console.error('Message from webpage missing device');
+                return;
             }
+
+            processDevice(event.data.device);
+            break;
+
+        case 'recordingRequest': {
+            // A recording request is expected to contain the id of the element where the result should be inserted.
+            if (!('element' in event.data)) {
+                console.error('Message from webpage missing target element ID');
+                return;
+            }
+
+            processRecordingRequest(event.data.element);
+            break;
         }
     }
 }
