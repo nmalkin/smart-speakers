@@ -10,7 +10,6 @@ import { getDebugStatus } from '../common/debug';
 import { displayVerificationResults, displayInteraction } from './views';
 
 let device: Device;
-let verified: VerificationState;
 let interactions: Interaction[] = [];
 const seen: number[] = [];
 
@@ -60,18 +59,15 @@ async function processRecordingRequest(iteration: string): Promise<void> {
 /**
  * Query the device's manufacturer to check login status and download interactions
  */
-async function fetchDeviceData(): Promise<void> {
+async function fetchDeviceData(): Promise<VerificationState> {
     let result: ValidationResult;
     if (device === Device.alexa) {
         result = await validateAmazon();
     } else if (device === Device.google) {
         result = await validateGoogle();
     } else {
-        console.error(`Unrecognized device: ${device}`);
-        return;
+        throw new Error(`Unrecognized device: ${device}`);
     }
-
-    verified = result.status;
 
     if (result.urls && result.transcripts) {
         if (result.urls.length !== result.transcripts.length) {
@@ -84,13 +80,15 @@ async function fetchDeviceData(): Promise<void> {
             return { url, transcript };
         });
     }
+
+    return result.status;
 }
 
 /**
  * Process 'verify' message
  */
 async function processVerify() {
-    await fetchDeviceData();
+    const verified = await fetchDeviceData();
 
     // If debug is on, always report status as logged in
     const debug = await getDebugStatus();
