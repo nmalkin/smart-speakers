@@ -182,20 +182,40 @@ async function fetchDeviceData(): Promise<void> {
     }
 }
 
+/**
+ * Process 'verify' message
+ */
+async function processVerify() {
+    await fetchDeviceData();
+
+    // If debug is on, always report status as logged in
+    const debug = await getDebugStatus();
+    const verificationStatus = debug ? VerificationState.loggedIn : verified;
+
+    checkVerification(verificationStatus);
+}
+
+/**
+ * Process 'device' message
+ */
+function processDevice(newDevice: string) {
+    if (newDevice === 'alexa') {
+        device = Device.alexa;
+    } else if (newDevice === 'google') {
+        device = Device.google;
+    }
+}
+
+/**
+ * Process messages received from the survey page
+ */
 async function messageListener(event: MessageEvent): Promise<void> {
-    console.log(event);
     if (event.source !== window) {
-        // pass
-    } else if (event.data === 'verify') {
-        await fetchDeviceData();
+        return;
+    }
 
-        // If debug is on, always report status as logged in
-        const debug = await getDebugStatus();
-        const verificationStatus = debug
-            ? VerificationState.loggedIn
-            : verified;
-
-        checkVerification(verificationStatus);
+    if (event.data === 'verify') {
+        processVerify();
     } else if (event.data.hasOwnProperty('type')) {
         switch (event.data.type) {
             case 'device':
@@ -204,11 +224,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
                     return;
                 }
 
-                if (event.data.device === 'alexa') {
-                    device = Device.alexa;
-                } else if (event.data.device === 'google') {
-                    device = Device.google;
-                }
+                processDevice(event.data.device);
 
                 break;
 
