@@ -45,19 +45,20 @@ export function displayVerificationResults(value: VerificationState): void {
  *
  * @param url
  * @param transcript
- * @param targetElement
+ * @param iteration
  */
 export function displayInteraction(
     url: string,
     transcript: string,
-    targetElement: string
+    iteration: string
 ) {
     const tag =
         '<audio controls><source src="' +
         url +
         '" type="audio/mp3"></audio> <br> Transcript: ' +
         transcript;
+    const targetElement = iteration + '_QID9';
     document
-        .getElementById(targetElement + '_QID9')!
+        .getElementById(targetElement)!
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
 }

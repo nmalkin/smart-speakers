@@ -19,12 +19,12 @@ const seen: number[] = [];
  *
  * Selects a recording and adds it to the survey page
  *
- * @param targetElement the id of the DOM element of the question under which the recording should be inserted
+ * @param iteration the current iteration of the recording loop (i.e., how many recordings the user has seen so far)
  */
-async function processRecordingRequest(targetElement: string): Promise<void> {
+async function processRecordingRequest(iteration: string): Promise<void> {
     // Select recording to show
     let index: number;
-    const questionNumber = parseInt(targetElement, 10);
+    const questionNumber = parseInt(iteration, 10);
     if (questionNumber <= seen.length) {
         // User is on an old question
         index = seen[questionNumber - 1];
@@ -52,7 +52,7 @@ async function processRecordingRequest(targetElement: string): Promise<void> {
     }
 
     // Display recording on page
-    displayInteraction(url, transcript, targetElement);
+    displayInteraction(url, transcript, iteration);
 }
 
 /**
