@@ -1,228 +1,162 @@
 import {
-    fetchCsrfToken,
-    fetchJsonData,
-    tryParseJson,
-    extractData
-} from '../../common/google/google';
-import { getCSRF, getAudio } from '../../common/alexa/amazon';
+    Device,
+    Interaction,
+    ValidationResult,
+    VerificationState
+} from '../../common/types';
+import { validateGoogle } from '../../common/google/google';
+import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
+import { displayVerificationResults, displayInteraction } from './views';
+import { selectUnseen } from '../../common/util';
 
-/**
- * The user's login state for the targeted assistant service
- */
-enum VerificationState {
-    loggedIn = 'loggedIn',
-    loggedOut = 'loggedOut',
-    ineligible = 'ineligible',
-    error = 'error'
+class SurveyState {
+    public device: Device;
+    public interactions: Interaction[] = [];
+    public seen: number[] = [];
 }
 
-enum Device {
-    alexa = 'alexa',
-    google = 'google'
-}
+// tslint:disable-next-line:variable-name
+const _state = new SurveyState();
 
-let device: Device;
-let verified: VerificationState;
-let urls: string[] = [];
-let transcripts: string[] = [];
-const seen: number[] = [];
+const DUMMY_INTERACTION: Interaction = {
+    url: 'https://people.eecs.berkeley.edu/~nmalkin/sample.mp3',
+    transcript: 'This is a test transcript.'
+};
 
-/**
- * Check user's verification status
- *
- * Checks whether the user has been verified, and prompts a retry if not
- *
- * @param value the user's verification status
- */
-function checkVerification(value: VerificationState): void {
-    const placeholder = document.getElementById('QID17')!;
-    const nextButton = document.getElementById(
-        'NextButton'
-    )! as HTMLInputElement;
-    placeholder.style.display = 'none';
-    if (value === 'loggedIn') {
-        nextButton.disabled = false;
-        nextButton.click();
-    } else if (value === 'loggedOut') {
-        placeholder.style.display = 'block';
-        alert(
-            'Please ensure that you are logged in to your Amazon/Google account. This is required for our study, so we can customize our questions to your specific device. Please relog and click on the retry button below.'
-        );
-        const tag =
-            "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
-        placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
-    } else if (value === 'ineligible') {
-        /* we can (should?) rephrase this when we get a chance. Also this just leaves them stuck which is weird UX. */
-        alert(
-            "It looks like you don't have enough recordings. Sorry but you are ineligible for this survery"
-        );
-    } else {
-        placeholder.style.display = 'block';
-        alert(
-            'There may have been an error in fetching your device recordings. Please try again'
-        );
-        const tag =
-            "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
-        placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
-    }
-}
+const ERROR_INTERACTION: Interaction = {
+    url: '',
+    transcript:
+        "Something went wrong. Please enter STUDY ERROR as the transcript and select any answer to remaining questions. We're sorry for the inconvenience!"
+};
 
 /**
  * Process request for a recording
  *
  * Selects a recording and adds it to the survey page
  *
- * @param targetElement the id of the DOM element of the question under which the recording should be inserted
+ * @param questionNumber the current iteration of the recording loop (1-indexed)
  */
-async function processRecordingRequest(targetElement: string): Promise<void> {
+async function processRecordingRequest(
+    state: SurveyState,
+    questionNumber: number
+): Promise<void> {
     // Select recording to show
-    let index: number;
-    const questionNumber = parseInt(targetElement, 10);
-    if (questionNumber <= seen.length) {
-        // User is on an old question
-        index = seen[questionNumber - 1];
+    let interaction: Interaction;
+    if (questionNumber <= state.seen.length) {
+        // Page is requesting a question/interaction that's already been seen.
+        const index = state.seen[questionNumber - 1];
+        interaction = state.interactions[index];
     } else {
-        // Select new recording
-        index = Math.floor(Math.random() * urls.length);
-        // FIXME: this will go into an infinite loop if the number of available recordings is less than the number of questions
-        // Debug mode, in particular, will trigger this.
-        while (seen.includes(index)) {
-            index = Math.floor(Math.random() * urls.length);
+        // Choose a new interaction
+        try {
+            // Try to get an interaction that hasn't been seen before
+            const index = selectUnseen(state.interactions.length, state.seen);
+            state.seen.push(index);
+            interaction = state.interactions[index];
+        } catch {
+            // All available interactions have already been seen!
+            if (await getDebugStatus()) {
+                // Substitute dummy recording if we're in debug mode
+                interaction = DUMMY_INTERACTION;
+            } else {
+                // This shouldn't happen, but if we end up in this state, we should handle it as gracefully as possible.
+                console.error('No available recordings to show');
+                interaction = ERROR_INTERACTION;
+            }
         }
-        seen.push(index);
-    }
-    let url = urls[index];
-    let transcript = transcripts[index];
-
-    // Substitute dummy recording if we're in debug mode
-    if (
-        url === undefined &&
-        transcript === undefined &&
-        (await getDebugStatus())
-    ) {
-        url = 'https://people.eecs.berkeley.edu/~nmalkin/sample.mp3';
-        transcript = 'This is a test transcript.';
     }
 
     // Display recording on page
-    const tag =
-        '<audio controls><source src="' +
-        url +
-        '" type="audio/mp3"></audio> <br> Transcript: ' +
-        transcript;
-    document
-        .getElementById(targetElement + '_QID9')!
-        .getElementsByClassName('QuestionText')[0].innerHTML = tag;
+    displayInteraction(interaction, questionNumber);
 }
 
 /**
- * Validate Echo user status and eligibility
- *
- * Determines whether a user can proceed with the survey
+ * Process 'verify' message
  */
-async function validateAmazon(): Promise<void> {
-    device = Device.alexa;
-    const csrfTok = await getCSRF();
-    if (csrfTok === null) {
-        verified = VerificationState.loggedOut;
-        return;
-    }
-    const dict = await getAudio(csrfTok);
-    if (dict === null) {
-        verified = VerificationState.error;
-        return;
-    }
-    urls = Object.keys(dict);
-    transcripts = Object.values(dict);
-    if (urls.length > 10) {
-        verified = VerificationState.loggedIn;
-        return;
+async function processVerify(state: SurveyState) {
+    let result: ValidationResult;
+    if (state.device === Device.alexa) {
+        result = await validateAmazon();
+    } else if (state.device === Device.google) {
+        result = await validateGoogle();
     } else {
-        verified = VerificationState.ineligible;
-        return;
+        throw new Error(`Unrecognized device: ${state.device}`);
+    }
+
+    if (result.urls && result.transcripts) {
+        if (result.urls.length !== result.transcripts.length) {
+            throw new Error("number of URLs and transcripts doesn't match");
+        }
+
+        const transcripts = result.transcripts;
+        state.interactions = result.urls.map((url, i) => {
+            const transcript = transcripts[i];
+            return { url, transcript };
+        });
+    }
+
+    // If debug is on, always report status as logged in
+    const debug = await getDebugStatus();
+    const verificationStatus = debug
+        ? VerificationState.loggedIn
+        : result.status;
+
+    displayVerificationResults(verificationStatus);
+}
+
+/**
+ * Process 'device' message
+ */
+function processDevice(state: SurveyState, newDevice: string) {
+    if (newDevice === 'alexa') {
+        state.device = Device.alexa;
+    } else if (newDevice === 'google') {
+        state.device = Device.google;
     }
 }
 
 /**
- * Validate Home user status and eligibility
- *
- * Determines whether a user can proceed with the survey
+ * Process messages received from the survey page
  */
-async function validateGoogle(): Promise<void> {
-    device = Device.google;
-    const csrfTok = await fetchCsrfToken();
-    if (!csrfTok || csrfTok === '') {
-        verified = VerificationState.loggedOut;
-        return;
-    }
-    const response = await fetchJsonData(csrfTok);
-    const data = tryParseJson(response);
-    if (data === null || data.length === 0) {
-        verified = VerificationState.error;
-        return;
-    }
-    ({ urls, transcripts } = extractData(data[0]));
-    if (urls.length > 0) {
-        verified = VerificationState.loggedIn;
-        return;
-    } else {
-        verified = VerificationState.ineligible;
-        return;
-    }
-}
-
-async function fetchDeviceData(): Promise<void> {
-    if (device === Device.alexa) {
-        await validateAmazon();
-    } else if (device === Device.google) {
-        await validateGoogle();
-    } else {
-        console.error(`Unrecognized device: ${device}`);
-    }
-}
-
 async function messageListener(event: MessageEvent): Promise<void> {
-    console.log(event);
     if (event.source !== window) {
-        // pass
-    } else if (event.data === 'verify') {
-        await fetchDeviceData();
+        return;
+    }
 
-        // If debug is on, always report status as logged in
-        const debug = await getDebugStatus();
-        const verificationStatus = debug
-            ? VerificationState.loggedIn
-            : verified;
+    // TODO: update this call to use event.data.type like the others
+    if (event.data === 'verify') {
+        processVerify(_state);
+        return;
+    }
 
-        checkVerification(verificationStatus);
-    } else if (event.data.hasOwnProperty('type')) {
-        switch (event.data.type) {
-            case 'device':
-                if (!('device' in event.data)) {
-                    console.error('Message from webpage missing device');
-                    return;
-                }
+    if (!event.data.hasOwnProperty('type')) {
+        return;
+    }
 
-                if (event.data.device === 'alexa') {
-                    device = Device.alexa;
-                } else if (event.data.device === 'google') {
-                    device = Device.google;
-                }
-
-                break;
-
-            case 'recordingRequest': {
-                // A recording request is expected to contain the id of the element where the result should be inserted.
-                if (!('element' in event.data)) {
-                    console.error(
-                        'Message from webpage missing target element ID'
-                    );
-                    return;
-                }
-                processRecordingRequest(event.data.element);
-                break;
+    switch (event.data.type) {
+        case 'device':
+            if (!('device' in event.data)) {
+                console.error('Message from webpage missing device');
+                return;
             }
+
+            processDevice(_state, event.data.device);
+            break;
+
+        case 'recordingRequest': {
+            // A recording request is expected to contain the id of the element where the result should be inserted.
+            if (!('element' in event.data)) {
+                console.error('Message from webpage missing target element ID');
+                return;
+            }
+
+            // FIXME: pass number directly from the page
+            const element = event.data.element;
+            const questionNumber = parseInt(element, 10); // This relies on parseInt('4_QID9') to return 4, which is hacky.
+
+            processRecordingRequest(_state, questionNumber);
+            break;
         }
     }
 }
