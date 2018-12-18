@@ -8,9 +8,9 @@ import { getCSRF, getAudio } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
 
 /**
- * User Verification Code
+ * The user's login state for the targeted assistant service
  */
-enum VCode {
+enum VerificationState {
     loggedIn = 'loggedIn',
     loggedOut = 'loggedOut',
     ineligible = 'ineligible',
@@ -23,7 +23,7 @@ enum Device {
 }
 
 let device: Device;
-let verified: VCode;
+let verified: VerificationState;
 let urls: string[] = [];
 let transcripts: string[] = [];
 const seen: number[] = [];
@@ -35,7 +35,7 @@ const seen: number[] = [];
  *
  * @param value the user's verification status
  */
-function checkVerification(value: VCode): void {
+function checkVerification(value: VerificationState): void {
     const placeholder = document.getElementById('QID17')!;
     const nextButton = document.getElementById(
         'NextButton'
@@ -125,21 +125,21 @@ async function validateAmazon(): Promise<void> {
     device = Device.alexa;
     const csrfTok = await getCSRF();
     if (csrfTok === null) {
-        verified = VCode.loggedOut;
+        verified = VerificationState.loggedOut;
         return;
     }
     const dict = await getAudio(csrfTok);
     if (dict === null) {
-        verified = VCode.error;
+        verified = VerificationState.error;
         return;
     }
     urls = Object.keys(dict);
     transcripts = Object.values(dict);
     if (urls.length > 10) {
-        verified = VCode.loggedIn;
+        verified = VerificationState.loggedIn;
         return;
     } else {
-        verified = VCode.ineligible;
+        verified = VerificationState.ineligible;
         return;
     }
 }
@@ -153,21 +153,21 @@ async function validateGoogle(): Promise<void> {
     device = Device.google;
     const csrfTok = await fetchCsrfToken();
     if (!csrfTok || csrfTok === '') {
-        verified = VCode.loggedOut;
+        verified = VerificationState.loggedOut;
         return;
     }
     const response = await fetchJsonData(csrfTok);
     const data = tryParseJson(response);
     if (data === null || data.length === 0) {
-        verified = VCode.error;
+        verified = VerificationState.error;
         return;
     }
     ({ urls, transcripts } = extractData(data[0]));
     if (urls.length > 0) {
-        verified = VCode.loggedIn;
+        verified = VerificationState.loggedIn;
         return;
     } else {
-        verified = VCode.ineligible;
+        verified = VerificationState.ineligible;
         return;
     }
 }
@@ -191,7 +191,9 @@ async function messageListener(event: MessageEvent): Promise<void> {
 
         // If debug is on, always report status as logged in
         const debug = await getDebugStatus();
-        const verificationStatus = debug ? VCode.loggedIn : verified;
+        const verificationStatus = debug
+            ? VerificationState.loggedIn
+            : verified;
 
         window.postMessage(
             { type: 'verification', value: verificationStatus },
