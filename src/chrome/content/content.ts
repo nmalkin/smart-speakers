@@ -122,7 +122,6 @@ async function processRecordingRequest(targetElement: string): Promise<void> {
  * Determines whether a user can proceed with the survey
  */
 async function validateAmazon(): Promise<void> {
-    device = Device.alexa;
     const csrfTok = await getCSRF();
     if (csrfTok === null) {
         verified = VerificationState.loggedOut;
@@ -150,7 +149,6 @@ async function validateAmazon(): Promise<void> {
  * Determines whether a user can proceed with the survey
  */
 async function validateGoogle(): Promise<void> {
-    device = Device.google;
     const csrfTok = await fetchCsrfToken();
     if (!csrfTok || csrfTok === '') {
         verified = VerificationState.loggedOut;
