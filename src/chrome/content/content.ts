@@ -8,6 +8,7 @@ import { validateGoogle } from '../../common/google/google';
 import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
 import { displayVerificationResults, displayInteraction } from './views';
+import { selectUnseen } from '../../common/util';
 
 class SurveyState {
     public device: Device;
@@ -28,25 +29,6 @@ const ERROR_INTERACTION: Interaction = {
     transcript:
         "Something went wrong. Please enter STUDY ERROR as the transcript and select any answer to remaining questions. We're sorry for the inconvenience!"
 };
-
-/**
- * Selects an integer at random between 0 and max, if it doesn't appear in `seen`
- *
- * @param max the chosen number will be less than (but not equal to) max.
- * @param seen the integers that have already been seen
- */
-function selectUnseen(max: number, seen: number[]): number {
-    if (seen.length >= max) {
-        throw new Error('all numbers seen');
-    }
-
-    const randomInt = () => Math.floor(Math.random() * max);
-    let index = randomInt();
-    while (seen.includes(index)) {
-        index = randomInt();
-    }
-    return index;
-}
 
 /**
  * Process request for a recording
