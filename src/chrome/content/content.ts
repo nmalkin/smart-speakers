@@ -9,9 +9,13 @@ import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
 import { displayVerificationResults, displayInteraction } from './views';
 
-let device: Device;
-let interactions: Interaction[] = [];
-const seen: number[] = [];
+class State {
+    public device: Device;
+    public interactions: Interaction[] = [];
+    public seen: number[] = [];
+}
+
+const STATE = new State();
 
 /**
  * Process request for a recording
@@ -20,27 +24,30 @@ const seen: number[] = [];
  *
  * @param iteration the current iteration of the recording loop (i.e., how many recordings the user has seen so far)
  */
-async function processRecordingRequest(iteration: string): Promise<void> {
+async function processRecordingRequest(
+    state: State,
+    iteration: string
+): Promise<void> {
     // Select recording to show
     let index: number;
     const questionNumber = parseInt(iteration, 10);
-    if (questionNumber <= seen.length) {
+    if (questionNumber <= state.seen.length) {
         // User is on an old question
-        index = seen[questionNumber - 1];
+        index = state.seen[questionNumber - 1];
     } else {
         // Select new recording
-        index = Math.floor(Math.random() * interactions.length);
+        index = Math.floor(Math.random() * state.interactions.length);
         // FIXME: this will go into an infinite loop if the number of available recordings is less than the number of questions
         // Debug mode, in particular, will trigger this.
-        while (seen.includes(index)) {
-            index = Math.floor(Math.random() * interactions.length);
+        while (state.seen.includes(index)) {
+            index = Math.floor(Math.random() * state.interactions.length);
         }
-        seen.push(index);
+        state.seen.push(index);
     }
 
     // FIXME: debug mode is broken because, at this point, interactions are empty, yet we try to index them
-    let url = interactions[index].url;
-    let transcript = interactions[index].transcript;
+    let url = state.interactions[index].url;
+    let transcript = state.interactions[index].transcript;
 
     // Substitute dummy recording if we're in debug mode
     if (
@@ -59,14 +66,14 @@ async function processRecordingRequest(iteration: string): Promise<void> {
 /**
  * Query the device's manufacturer to check login status and download interactions
  */
-async function fetchDeviceData(): Promise<VerificationState> {
+async function fetchDeviceData(state: State): Promise<VerificationState> {
     let result: ValidationResult;
-    if (device === Device.alexa) {
+    if (state.device === Device.alexa) {
         result = await validateAmazon();
-    } else if (device === Device.google) {
+    } else if (state.device === Device.google) {
         result = await validateGoogle();
     } else {
-        throw new Error(`Unrecognized device: ${device}`);
+        throw new Error(`Unrecognized device: ${state.device}`);
     }
 
     if (result.urls && result.transcripts) {
@@ -75,7 +82,7 @@ async function fetchDeviceData(): Promise<VerificationState> {
         }
 
         const transcripts = result.transcripts;
-        interactions = result.urls.map((url, i) => {
+        state.interactions = result.urls.map((url, i) => {
             const transcript = transcripts[i];
             return { url, transcript };
         });
@@ -87,8 +94,8 @@ async function fetchDeviceData(): Promise<VerificationState> {
 /**
  * Process 'verify' message
  */
-async function processVerify() {
-    const verified = await fetchDeviceData();
+async function processVerify(state: State) {
+    const verified = await fetchDeviceData(state);
 
     // If debug is on, always report status as logged in
     const debug = await getDebugStatus();
@@ -100,11 +107,11 @@ async function processVerify() {
 /**
  * Process 'device' message
  */
-function processDevice(newDevice: string) {
+function processDevice(state: State, newDevice: string) {
     if (newDevice === 'alexa') {
-        device = Device.alexa;
+        state.device = Device.alexa;
     } else if (newDevice === 'google') {
-        device = Device.google;
+        state.device = Device.google;
     }
 }
 
@@ -118,7 +125,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
 
     // TODO: update this call to use event.data.type like the others
     if (event.data === 'verify') {
-        processVerify();
+        processVerify(STATE);
         return;
     }
 
@@ -133,7 +140,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
                 return;
             }
 
-            processDevice(event.data.device);
+            processDevice(STATE, event.data.device);
             break;
 
         case 'recordingRequest': {
@@ -143,7 +150,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
                 return;
             }
 
-            processRecordingRequest(event.data.element);
+            processRecordingRequest(STATE, event.data.element);
             break;
         }
     }
