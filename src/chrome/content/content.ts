@@ -63,7 +63,7 @@ function checkVerification(value: VerificationState): void {
             'There may have been an error in fetching your device recordings. Please try again'
         );
         const tag =
-            "<button onClick=\"window.postMessage('retry', '*')\">Retry</button>";
+            "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     }
 }
