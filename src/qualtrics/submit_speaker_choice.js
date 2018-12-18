@@ -16,7 +16,7 @@ Qualtrics.SurveyEngine.addOnUnload(() => {
     /* Place your JavaScript here to run when the page is unloaded */
 });
 
-Qualtrics.SurveyEngine.addOnPageSubmit(type => {
+Qualtrics.SurveyEngine.addOnPageSubmit(function submitSpeakerChoice(type) {
     if (type === 'next') {
         const alexa = this.getChoiceValue('1');
         const google = this.getChoiceValue('2');

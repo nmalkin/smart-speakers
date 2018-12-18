@@ -4,7 +4,7 @@
  * This code triggers the extension's validation of the user's login status and recordings.
  */
 
-Qualtrics.SurveyEngine.addOnload(() => {
+Qualtrics.SurveyEngine.addOnload(function disableProcees() {
     /* Place your JavaScript here to run when the page loads */
     this.disableNextButton();
     this.hideNextButton();
