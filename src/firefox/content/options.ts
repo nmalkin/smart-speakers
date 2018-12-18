@@ -1,3 +1,3 @@
-import { testInBrowser } from '../../chrome/content/options';
+import { testInBrowser } from '../../chrome/pages/options';
 
 document.getElementById('google')!.onclick = testInBrowser;
