@@ -2,6 +2,7 @@
     "compilerOptions": {
         "lib": ["esnext", "dom"],
         "strictNullChecks": true,
+        "module": "commonjs", // required by Sentry
         "target": "ES2017"
     }
 }
