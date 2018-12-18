@@ -121,25 +121,21 @@ async function processRecordingRequest(targetElement: string): Promise<void> {
  *
  * Determines whether a user can proceed with the survey
  */
-async function validateAmazon(): Promise<void> {
+async function validateAmazon(): Promise<VerificationState> {
     const csrfTok = await getCSRF();
     if (csrfTok === null) {
-        verified = VerificationState.loggedOut;
-        return;
+        return VerificationState.loggedOut;
     }
     const dict = await getAudio(csrfTok);
     if (dict === null) {
-        verified = VerificationState.error;
-        return;
+        return VerificationState.error;
     }
     urls = Object.keys(dict);
     transcripts = Object.values(dict);
     if (urls.length > 10) {
-        verified = VerificationState.loggedIn;
-        return;
+        return VerificationState.loggedIn;
     } else {
-        verified = VerificationState.ineligible;
-        return;
+        return VerificationState.ineligible;
     }
 }
 
@@ -148,33 +144,29 @@ async function validateAmazon(): Promise<void> {
  *
  * Determines whether a user can proceed with the survey
  */
-async function validateGoogle(): Promise<void> {
+async function validateGoogle(): Promise<VerificationState> {
     const csrfTok = await fetchCsrfToken();
     if (!csrfTok || csrfTok === '') {
-        verified = VerificationState.loggedOut;
-        return;
+        return VerificationState.loggedOut;
     }
     const response = await fetchJsonData(csrfTok);
     const data = tryParseJson(response);
     if (data === null || data.length === 0) {
-        verified = VerificationState.error;
-        return;
+        return VerificationState.error;
     }
     ({ urls, transcripts } = extractData(data[0]));
     if (urls.length > 0) {
-        verified = VerificationState.loggedIn;
-        return;
+        return VerificationState.loggedIn;
     } else {
-        verified = VerificationState.ineligible;
-        return;
+        return VerificationState.ineligible;
     }
 }
 
 async function fetchDeviceData(): Promise<void> {
     if (device === Device.alexa) {
-        await validateAmazon();
+        verified = await validateAmazon();
     } else if (device === Device.google) {
-        await validateGoogle();
+        verified = await validateGoogle();
     } else {
         console.error(`Unrecognized device: ${device}`);
     }
