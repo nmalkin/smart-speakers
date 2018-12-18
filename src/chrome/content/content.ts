@@ -17,50 +17,75 @@ class State {
 
 const STATE = new State();
 
+const DUMMY_INTERACTION: Interaction = {
+    url: 'https://people.eecs.berkeley.edu/~nmalkin/sample.mp3',
+    transcript: 'This is a test transcript.'
+};
+
+const ERROR_INTERACTION: Interaction = {
+    url: '',
+    transcript:
+        "Something went wrong. Please enter STUDY ERROR as the transcript and select any answer to remaining questions. We're sorry for the inconvenience!"
+};
+
+/**
+ * Selects an integer at random between 0 and max, if it doesn't appear in `seen`
+ *
+ * @param max the chosen number will be less than (but not equal to) max.
+ * @param seen the integers that have already been seen
+ */
+function selectUnseen(max: number, seen: number[]): number {
+    if (seen.length >= max) {
+        throw new Error('all numbers seen');
+    }
+
+    const randomInt = () => Math.floor(Math.random() * max);
+    let index = randomInt();
+    while (seen.includes(index)) {
+        index = randomInt();
+    }
+    return index;
+}
+
 /**
  * Process request for a recording
  *
  * Selects a recording and adds it to the survey page
  *
- * @param iteration the current iteration of the recording loop (i.e., how many recordings the user has seen so far)
+ * @param questionNumber the current iteration of the recording loop (1-indexed)
  */
 async function processRecordingRequest(
     state: State,
-    iteration: string
+    questionNumber: number
 ): Promise<void> {
     // Select recording to show
-    let index: number;
-    const questionNumber = parseInt(iteration, 10);
+    let interaction: Interaction;
     if (questionNumber <= state.seen.length) {
-        // User is on an old question
-        index = state.seen[questionNumber - 1];
+        // Page is requesting a question/interaction that's already been seen.
+        const index = state.seen[questionNumber - 1];
+        interaction = state.interactions[index];
     } else {
-        // Select new recording
-        index = Math.floor(Math.random() * state.interactions.length);
-        // FIXME: this will go into an infinite loop if the number of available recordings is less than the number of questions
-        // Debug mode, in particular, will trigger this.
-        while (state.seen.includes(index)) {
-            index = Math.floor(Math.random() * state.interactions.length);
+        // Choose a new interaction
+        try {
+            // Try to get an interaction that hasn't been seen before
+            const index = selectUnseen(state.interactions.length, state.seen);
+            state.seen.push(index);
+            interaction = state.interactions[index];
+        } catch {
+            // All available interactions have already been seen!
+            if (await getDebugStatus()) {
+                // Substitute dummy recording if we're in debug mode
+                interaction = DUMMY_INTERACTION;
+            } else {
+                // This shouldn't happen, but if we end up in this state, we should handle it as gracefully as possible.
+                console.error('No available recordings to show');
+                interaction = ERROR_INTERACTION;
+            }
         }
-        state.seen.push(index);
-    }
-
-    // FIXME: debug mode is broken because, at this point, interactions are empty, yet we try to index them
-    let url = state.interactions[index].url;
-    let transcript = state.interactions[index].transcript;
-
-    // Substitute dummy recording if we're in debug mode
-    if (
-        url === undefined &&
-        transcript === undefined &&
-        (await getDebugStatus())
-    ) {
-        url = 'https://people.eecs.berkeley.edu/~nmalkin/sample.mp3';
-        transcript = 'This is a test transcript.';
     }
 
     // Display recording on page
-    displayInteraction(url, transcript, iteration);
+    displayInteraction(interaction, questionNumber);
 }
 
 /**
@@ -143,7 +168,11 @@ async function messageListener(event: MessageEvent): Promise<void> {
                 return;
             }
 
-            processRecordingRequest(STATE, event.data.element);
+            // FIXME: pass number directly from the page
+            const element = event.data.element;
+            const questionNumber = parseInt(element, 10); // This relies on parseInt('4_QID9') to return 4, which is hacky.
+
+            processRecordingRequest(STATE, questionNumber);
             break;
         }
     }

@@ -1,4 +1,4 @@
-import { VerificationState } from '../../common/types';
+import { VerificationState, Interaction } from '../../common/types';
 
 /**
  * Update the survey webpage based on the user's VerificationState
@@ -41,23 +41,18 @@ export function displayVerificationResults(value: VerificationState): void {
 }
 
 /**
- * Show audio control and transcript at the location in the page identified by the given ID
- *
- * @param url
- * @param transcript
- * @param iteration
+ * Show audio control and transcript at a location in the page associated with the given question number
  */
 export function displayInteraction(
-    url: string,
-    transcript: string,
-    iteration: string
+    interaction: Interaction,
+    questionNumber: number
 ) {
     const tag =
         '<audio controls><source src="' +
-        url +
+        interaction.url +
         '" type="audio/mp3"></audio> <br> Transcript: ' +
-        transcript;
-    const targetElement = iteration + '_QID9';
+        interaction.transcript;
+    const targetElement = questionNumber + '_QID9';
     document
         .getElementById(targetElement)!
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
