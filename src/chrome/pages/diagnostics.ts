@@ -12,6 +12,7 @@ import {
     extractAudio
 } from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
+import { initErrorHandling } from '../common/errors';
 
 enum Tests {
     all = 'all',
@@ -260,6 +261,8 @@ function setupDiagnostics() {
         mocha.run();
     };
 }
+
+initErrorHandling();
 
 setupDiagnostics();
 

@@ -2,6 +2,7 @@
     "name": "smart-speakers",
     "version": "0.0.0",
     "dependencies": {
+        "@sentry/browser": "^4.4.2",
         "@types/chrome": "0.0.75",
         "@types/firefox-webext-browser": "^64.0.0",
         "@types/mocha": "^5.2.5"

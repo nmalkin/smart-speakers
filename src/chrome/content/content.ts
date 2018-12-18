@@ -9,6 +9,7 @@ import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
 import { displayVerificationResults, displayInteraction } from './views';
 import { selectUnseen, zip } from '../../common/util';
+import { reportError, initErrorHandling } from '../common/errors';
 
 class SurveyState {
     public device: Device;
@@ -132,7 +133,7 @@ function processDevice(state: SurveyState) {
 /**
  * Process messages received from the survey page
  */
-async function messageListener(event: MessageEvent): Promise<void> {
+async function processMessages(event: MessageEvent): Promise<void> {
     if (event.source !== window) {
         return;
     } else if (!event.data.hasOwnProperty('type')) {
@@ -161,4 +162,16 @@ async function messageListener(event: MessageEvent): Promise<void> {
     }
 }
 
+/**
+ * Process messages and catch errors
+ */
+async function messageListener(event: MessageEvent): Promise<void> {
+    try {
+        await processMessages(event);
+    } catch (error) {
+        reportError(error);
+    }
+}
+
+initErrorHandling();
 window.addEventListener('message', messageListener, false);
