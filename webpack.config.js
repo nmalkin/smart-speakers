@@ -9,8 +9,8 @@ module.exports = [
         entry: {
             background: './src/chrome/background/background.ts',
             content: './src/chrome/content/content.ts',
-            index: './src/chrome/content/index.ts',
-            options: './src/chrome/content/options.ts'
+            index: './src/chrome/pages/index.ts',
+            options: './src/chrome/pages/options.ts'
         },
         module: {
             rules: [
