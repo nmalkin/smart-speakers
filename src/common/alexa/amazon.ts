@@ -66,6 +66,8 @@ function getAudio(tok: string) {
         });
 }
 
+export { matchCSRF, matchAudio };
+
 /**
  * Validate Echo user status and eligibility
  *
