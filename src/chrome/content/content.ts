@@ -117,25 +117,38 @@ async function processRecordingRequest(targetElement: string): Promise<void> {
 }
 
 /**
+ * The result of performing validation.
+ */
+interface ValidationResult {
+    status: VerificationState;
+    urls?: string[];
+    transcripts?: string[];
+}
+
+/**
  * Validate Echo user status and eligibility
  *
  * Determines whether a user can proceed with the survey
  */
-async function validateAmazon(): Promise<VerificationState> {
+async function validateAmazon(): Promise<ValidationResult> {
     const csrfTok = await getCSRF();
     if (csrfTok === null) {
-        return VerificationState.loggedOut;
+        return { status: VerificationState.loggedOut };
     }
     const dict = await getAudio(csrfTok);
     if (dict === null) {
-        return VerificationState.error;
+        return { status: VerificationState.error };
     }
-    urls = Object.keys(dict);
-    transcripts = Object.values(dict);
+    const urls = Object.keys(dict);
+    const transcripts = Object.values(dict);
     if (urls.length > 10) {
-        return VerificationState.loggedIn;
+        return {
+            status: VerificationState.loggedIn,
+            urls,
+            transcripts
+        };
     } else {
-        return VerificationState.ineligible;
+        return { status: VerificationState.ineligible };
     }
 }
 
@@ -144,31 +157,42 @@ async function validateAmazon(): Promise<VerificationState> {
  *
  * Determines whether a user can proceed with the survey
  */
-async function validateGoogle(): Promise<VerificationState> {
+async function validateGoogle(): Promise<ValidationResult> {
     const csrfTok = await fetchCsrfToken();
     if (!csrfTok || csrfTok === '') {
-        return VerificationState.loggedOut;
+        return { status: VerificationState.loggedOut };
     }
     const response = await fetchJsonData(csrfTok);
     const data = tryParseJson(response);
     if (data === null || data.length === 0) {
-        return VerificationState.error;
+        return { status: VerificationState.error };
     }
-    ({ urls, transcripts } = extractData(data[0]));
+    const { urls, transcripts } = extractData(data[0]);
     if (urls.length > 0) {
-        return VerificationState.loggedIn;
+        return { status: VerificationState.loggedIn, urls, transcripts };
     } else {
-        return VerificationState.ineligible;
+        return { status: VerificationState.ineligible };
     }
 }
 
 async function fetchDeviceData(): Promise<void> {
+    let result: ValidationResult;
     if (device === Device.alexa) {
-        verified = await validateAmazon();
+        result = await validateAmazon();
     } else if (device === Device.google) {
-        verified = await validateGoogle();
+        result = await validateGoogle();
     } else {
         console.error(`Unrecognized device: ${device}`);
+        return;
+    }
+
+    verified = result.status;
+
+    if (result.urls) {
+        urls = result.urls;
+    }
+    if (result.transcripts) {
+        transcripts = result.transcripts;
     }
 }
 
