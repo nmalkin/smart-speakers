@@ -14,13 +14,13 @@ let transcripts: string[] = [];
 const seen: number[] = [];
 
 /**
- * Check user's verification status
+ * Update the survey webpage based on the user's VerificationState
  *
  * Checks whether the user has been verified, and prompts a retry if not
  *
  * @param value the user's verification status
  */
-function checkVerification(value: VerificationState): void {
+function displayVerificationResults(value: VerificationState): void {
     const placeholder = document.getElementById('QID17')!;
     const nextButton = document.getElementById(
         'NextButton'
@@ -101,6 +101,9 @@ async function processRecordingRequest(targetElement: string): Promise<void> {
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
 }
 
+/**
+ * Query the device's manufacturer to check login status and download interactions
+ */
 async function fetchDeviceData(): Promise<void> {
     let result: ValidationResult;
     if (device === Device.alexa) {
@@ -132,7 +135,7 @@ async function processVerify() {
     const debug = await getDebugStatus();
     const verificationStatus = debug ? VerificationState.loggedIn : verified;
 
-    checkVerification(verificationStatus);
+    displayVerificationResults(verificationStatus);
 }
 
 /**
