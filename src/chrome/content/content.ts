@@ -1,5 +1,6 @@
 import {
     Device,
+    Interaction,
     ValidationResult,
     VerificationState
 } from '../../common/types';
@@ -10,8 +11,7 @@ import { displayVerificationResults, displayInteraction } from './views';
 
 let device: Device;
 let verified: VerificationState;
-let urls: string[] = [];
-let transcripts: string[] = [];
+let interactions: Interaction[] = [];
 const seen: number[] = [];
 
 /**
@@ -30,16 +30,18 @@ async function processRecordingRequest(iteration: string): Promise<void> {
         index = seen[questionNumber - 1];
     } else {
         // Select new recording
-        index = Math.floor(Math.random() * urls.length);
+        index = Math.floor(Math.random() * interactions.length);
         // FIXME: this will go into an infinite loop if the number of available recordings is less than the number of questions
         // Debug mode, in particular, will trigger this.
         while (seen.includes(index)) {
-            index = Math.floor(Math.random() * urls.length);
+            index = Math.floor(Math.random() * interactions.length);
         }
         seen.push(index);
     }
-    let url = urls[index];
-    let transcript = transcripts[index];
+
+    // FIXME: debug mode is broken because, at this point, interactions are empty, yet we try to index them
+    let url = interactions[index].url;
+    let transcript = interactions[index].transcript;
 
     // Substitute dummy recording if we're in debug mode
     if (
@@ -71,11 +73,16 @@ async function fetchDeviceData(): Promise<void> {
 
     verified = result.status;
 
-    if (result.urls) {
-        urls = result.urls;
-    }
-    if (result.transcripts) {
-        transcripts = result.transcripts;
+    if (result.urls && result.transcripts) {
+        if (result.urls.length !== result.transcripts.length) {
+            throw new Error("number of URLs and transcripts doesn't match");
+        }
+
+        const transcripts = result.transcripts;
+        interactions = result.urls.map((url, i) => {
+            const transcript = transcripts[i];
+            return { url, transcript };
+        });
     }
 }
 
@@ -89,7 +96,7 @@ async function processVerify() {
     const debug = await getDebugStatus();
     const verificationStatus = debug ? VerificationState.loggedIn : verified;
 
-    displayVerificationResults(verificationStatus);
+    // displayVerificationResults(verificationStatus);
 }
 
 /**

@@ -21,3 +21,11 @@ export interface ValidationResult {
     urls?: string[];
     transcripts?: string[];
 }
+
+/**
+ * A pair of an audio recording's URL and its transcript
+ */
+export interface Interaction {
+    url: string;
+    transcript: string;
+}
