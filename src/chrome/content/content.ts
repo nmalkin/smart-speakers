@@ -9,13 +9,14 @@ import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
 import { displayVerificationResults, displayInteraction } from './views';
 
-class State {
+class SurveyState {
     public device: Device;
     public interactions: Interaction[] = [];
     public seen: number[] = [];
 }
 
-const STATE = new State();
+// tslint:disable-next-line:variable-name
+const _state = new SurveyState();
 
 const DUMMY_INTERACTION: Interaction = {
     url: 'https://people.eecs.berkeley.edu/~nmalkin/sample.mp3',
@@ -55,7 +56,7 @@ function selectUnseen(max: number, seen: number[]): number {
  * @param questionNumber the current iteration of the recording loop (1-indexed)
  */
 async function processRecordingRequest(
-    state: State,
+    state: SurveyState,
     questionNumber: number
 ): Promise<void> {
     // Select recording to show
@@ -91,7 +92,7 @@ async function processRecordingRequest(
 /**
  * Process 'verify' message
  */
-async function processVerify(state: State) {
+async function processVerify(state: SurveyState) {
     let result: ValidationResult;
     if (state.device === Device.alexa) {
         result = await validateAmazon();
@@ -125,7 +126,7 @@ async function processVerify(state: State) {
 /**
  * Process 'device' message
  */
-function processDevice(state: State, newDevice: string) {
+function processDevice(state: SurveyState, newDevice: string) {
     if (newDevice === 'alexa') {
         state.device = Device.alexa;
     } else if (newDevice === 'google') {
@@ -143,7 +144,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
 
     // TODO: update this call to use event.data.type like the others
     if (event.data === 'verify') {
-        processVerify(STATE);
+        processVerify(_state);
         return;
     }
 
@@ -158,7 +159,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
                 return;
             }
 
-            processDevice(STATE, event.data.device);
+            processDevice(_state, event.data.device);
             break;
 
         case 'recordingRequest': {
@@ -172,7 +173,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
             const element = event.data.element;
             const questionNumber = parseInt(element, 10); // This relies on parseInt('4_QID9') to return 4, which is hacky.
 
-            processRecordingRequest(STATE, questionNumber);
+            processRecordingRequest(_state, questionNumber);
             break;
         }
     }
