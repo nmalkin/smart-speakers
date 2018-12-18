@@ -142,16 +142,12 @@ async function messageListener(event: MessageEvent): Promise<void> {
 
         case 'recordingRequest': {
             // A recording request is expected to contain the id of the element where the result should be inserted.
-            if (!('element' in event.data)) {
-                console.error('Message from webpage missing target element ID');
+            if (!('question' in event.data)) {
+                console.error('Message from webpage missing question id');
                 return;
             }
 
-            // FIXME: pass number directly from the page
-            const element = event.data.element;
-            const questionNumber = parseInt(element, 10); // This relies on parseInt('4_QID9') to return 4, which is hacky.
-
-            processRecordingRequest(_state, questionNumber);
+            processRecordingRequest(_state, event.data.question);
             break;
         }
     }
