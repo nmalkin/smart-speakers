@@ -1,4 +1,5 @@
 import { VerificationState } from '../../common/types';
+
 /**
  * Update the survey webpage based on the user's VerificationState
  *
@@ -37,4 +38,26 @@ export function displayVerificationResults(value: VerificationState): void {
             "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     }
+}
+
+/**
+ * Show audio control and transcript at the location in the page identified by the given ID
+ *
+ * @param url
+ * @param transcript
+ * @param targetElement
+ */
+export function displayInteraction(
+    url: string,
+    transcript: string,
+    targetElement: string
+) {
+    const tag =
+        '<audio controls><source src="' +
+        url +
+        '" type="audio/mp3"></audio> <br> Transcript: ' +
+        transcript;
+    document
+        .getElementById(targetElement + '_QID9')!
+        .getElementsByClassName('QuestionText')[0].innerHTML = tag;
 }

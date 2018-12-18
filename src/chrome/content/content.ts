@@ -6,7 +6,7 @@ import {
 import { validateGoogle } from '../../common/google/google';
 import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
-import { displayVerificationResults } from './views';
+import { displayVerificationResults, displayInteraction } from './views';
 
 let device: Device;
 let verified: VerificationState;
@@ -52,14 +52,7 @@ async function processRecordingRequest(targetElement: string): Promise<void> {
     }
 
     // Display recording on page
-    const tag =
-        '<audio controls><source src="' +
-        url +
-        '" type="audio/mp3"></audio> <br> Transcript: ' +
-        transcript;
-    document
-        .getElementById(targetElement + '_QID9')!
-        .getElementsByClassName('QuestionText')[0].innerHTML = tag;
+    displayInteraction(url, transcript, targetElement);
 }
 
 /**
