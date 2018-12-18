@@ -13,7 +13,7 @@ Qualtrics.SurveyEngine.addOnload(function disableProcees() {
 
 Qualtrics.SurveyEngine.addOnReady(() => {
     /* Place your JavaScript here to run when the page is fully displayed */
-    window.postMessage('verify', '*');
+    window.postMessage({ type: 'verify' }, '*');
 });
 
 Qualtrics.SurveyEngine.addOnUnload(() => {

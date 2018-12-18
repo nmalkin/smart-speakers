@@ -122,15 +122,7 @@ function processDevice(state: SurveyState, newDevice: string) {
 async function messageListener(event: MessageEvent): Promise<void> {
     if (event.source !== window) {
         return;
-    }
-
-    // TODO: update this call to use event.data.type like the others
-    if (event.data === 'verify') {
-        processVerify(_state);
-        return;
-    }
-
-    if (!event.data.hasOwnProperty('type')) {
+    } else if (!event.data.hasOwnProperty('type')) {
         return;
     }
 
@@ -142,6 +134,10 @@ async function messageListener(event: MessageEvent): Promise<void> {
             }
 
             processDevice(_state, event.data.device);
+            break;
+
+        case 'verify':
+            processVerify(_state);
             break;
 
         case 'recordingRequest': {

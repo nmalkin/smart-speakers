@@ -22,7 +22,7 @@ export function displayVerificationResults(value: VerificationState): void {
             'Please ensure that you are logged in to your Amazon/Google account. This is required for our study, so we can customize our questions to your specific device. Please relog and click on the retry button below.'
         );
         const tag =
-            "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
+            "<button onClick=\"window.postMessage({ type: 'verify' }, '*');\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     } else if (value === 'ineligible') {
         /* we can (should?) rephrase this when we get a chance. Also this just leaves them stuck which is weird UX. */
@@ -35,7 +35,7 @@ export function displayVerificationResults(value: VerificationState): void {
             'There may have been an error in fetching your device recordings. Please try again'
         );
         const tag =
-            "<button onClick=\"window.postMessage('verify', '*')\">Retry</button>";
+            "<button onClick=\"window.postMessage({ type: 'verify' }, '*');\">Retry</button>";
         placeholder.getElementsByClassName('QuestionText')[0].innerHTML = tag;
     }
 }
