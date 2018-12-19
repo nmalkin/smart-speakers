@@ -8,7 +8,7 @@ import { validateGoogle } from '../../common/google/google';
 import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
 import { displayVerificationResults, displayInteraction } from './views';
-import { selectUnseen } from '../../common/util';
+import { selectUnseen, zip } from '../../common/util';
 
 class SurveyState {
     public device: Device;
@@ -85,15 +85,13 @@ async function processVerify(state: SurveyState) {
     }
 
     if (result.urls && result.transcripts) {
-        if (result.urls.length !== result.transcripts.length) {
-            throw new Error("number of URLs and transcripts doesn't match");
-        }
-
-        const transcripts = result.transcripts;
-        state.interactions = result.urls.map((url, i) => {
-            const transcript = transcripts[i];
-            return { url, transcript };
-        });
+        state.interactions = zip(
+            result.urls,
+            result.transcripts,
+            (url, transcript) => {
+                return { url, transcript };
+            }
+        );
     }
 
     // If debug is on, always report status as logged in

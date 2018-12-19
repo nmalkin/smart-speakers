@@ -1,4 +1,4 @@
-import { selectUnseen } from '../src/common/util';
+import { selectUnseen, zip } from '../src/common/util';
 
 describe('utility functions', () => {
     describe('selectUnseen', () => {
@@ -25,6 +25,27 @@ describe('utility functions', () => {
             expect(() => {
                 const chosen = selectUnseen(3, [2, 0, 1]);
             }).toThrow('all numbers seen');
+        });
+    });
+
+    describe('zip', () => {
+        test('it combines two equal-length arrays', () => {
+            const combined = zip(['a', 'b', 'c'], [1, 2, 3], (a, b) => {
+                return { a, b };
+            });
+            expect(combined).toEqual([
+                { a: 'a', b: 1 },
+                { a: 'b', b: 2 },
+                { a: 'c', b: 3 }
+            ]);
+        });
+
+        test('it throws on unequal arrays', () => {
+            expect(() => {
+                zip([1, 2, 3], [4, 5, 6, 7], () => {
+                    return 0;
+                });
+            }).toThrow('length');
         });
     });
 });

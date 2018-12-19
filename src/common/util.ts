@@ -15,3 +15,18 @@ export function selectUnseen(max: number, seen: number[]): number {
     }
     return index;
 }
+
+/**
+ * Aggregate the given equal-length arrays
+ *
+ * Apply f sequentially to each pair of values in the given arrays
+ */
+export function zip<T, U, V>(arr1: T[], arr2: U[], f: (T, U) => V): V[] {
+    if (arr1.length !== arr2.length) {
+        throw new Error(`length of ${arr1} and ${arr2} doesn't match`);
+    }
+
+    return arr1.map((value, index) => {
+        return f(value, arr2[index]);
+    });
+}
