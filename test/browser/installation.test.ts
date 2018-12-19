@@ -1,4 +1,4 @@
-import { getBrowser, describeOutsideCI } from './browser';
+import { getBrowser } from './browser';
 import { exec } from 'child_process';
 
 /**
@@ -20,7 +20,7 @@ async function execAsync(command: string): Promise<void> {
     });
 }
 
-describeOutsideCI('test installation', () => {
+describe('test installation', () => {
     beforeAll(async () => {
         await execAsync('npm run build');
     });

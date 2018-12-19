@@ -1,6 +1,6 @@
 import * as puppeteer from 'puppeteer';
 
-import { getBrowser, describeOutsideCI } from './browser';
+import { getBrowser } from './browser';
 import { readFileSync } from 'fs';
 
 const SURVEY_URL = 'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05';
@@ -24,7 +24,7 @@ const consentChoiceSelector = '#QID12-1-label';
 const speakerChoiceAmazon = '#QID5-1-label';
 const speakerChoiceGoogle = '#QID5-2-label';
 
-describeOutsideCI('test in browser', () => {
+describe('test in browser', () => {
     let browser: puppeteer.Browser;
     let backgroundPage: puppeteer.Page; // currently unused
     let page: puppeteer.Page;
@@ -200,7 +200,7 @@ function getCredentials(device: Device): Credentials {
     }
 }
 
-describeOutsideCI('test using Amazon credentials', () => {
+describe('test using Amazon credentials', () => {
     let browser: puppeteer.Browser;
     let page: puppeteer.Page;
 
@@ -289,7 +289,7 @@ describeOutsideCI('test using Amazon credentials', () => {
     });
 });
 
-describeOutsideCI('test using Google credentials', () => {
+describe('test using Google credentials', () => {
     let browser: puppeteer.Browser;
     let page: puppeteer.Page;
 
