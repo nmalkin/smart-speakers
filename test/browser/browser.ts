@@ -1,7 +1,7 @@
 import { join } from 'path';
 import * as puppeteer from 'puppeteer';
 
-const pathToExtension = join(__dirname, '../chrome_extension');
+const pathToExtension = join(__dirname, '../../chrome_extension');
 
 async function getBrowser(): Promise<puppeteer.Browser> {
     return await puppeteer.launch({
