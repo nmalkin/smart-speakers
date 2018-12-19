@@ -1,9 +1,16 @@
-function buttonClicked() {
+function openStartPage() {
     chrome.tabs.create({
-        url: 'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05'
+        url: 'assets/index.html'
     });
 }
 
-chrome.browserAction.onClicked.addListener(buttonClicked);
+function onInstall(details: { reason: string }) {
+    if (details.reason === 'install') {
+        openStartPage();
+    }
+}
 
-export { buttonClicked };
+chrome.browserAction.onClicked.addListener(openStartPage);
+chrome.runtime.onInstalled.addListener(onInstall);
+
+export { openStartPage as buttonClicked };

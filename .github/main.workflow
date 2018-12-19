@@ -17,7 +17,7 @@ action "Build" {
 action "Test" {
   needs = "Setup"
   uses = "actions/npm@master"
-  args = "test"
+  args = "test -- --testPathIgnorePatterns browser"
 }
 
 action "Lint" {

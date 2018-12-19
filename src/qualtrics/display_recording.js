@@ -3,7 +3,7 @@
 Qualtrics.SurveyEngine.addOnload(() => {
     window.postMessage(
         // eslint-disable-next-line no-template-curly-in-string
-        { type: 'recordingRequest', element: '${lm://Field/1}_QID9' },
+        { type: 'recordingRequest', question: parseInt('${lm://Field/1}', 10) },
         '*'
     );
 });

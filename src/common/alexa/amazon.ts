@@ -1,7 +1,9 @@
+import { ValidationResult, VerificationState } from '../../common/types';
+
 const csrfReg = /csrfToken = "(.*)"/g;
 const expReg = /<audio id="audio-(.*)"> <source[\w\W]*?<div class="summaryCss">\s*(.*?)\s*<\/div/g;
 
-function matchCSRF(pageText) {
+function matchCSRF(pageText: string): string | null {
     const match = pageText.match(csrfReg);
     if (match == null) {
         return null;
@@ -10,7 +12,7 @@ function matchCSRF(pageText) {
     return encodeURIComponent(match[0].slice(13, -1));
 }
 
-function matchAudio(pageText) {
+function matchAudio(pageText: string): object {
     const dict = {};
     let match = expReg.exec(pageText);
     while (match) {
@@ -41,7 +43,7 @@ function getCSRF() {
         });
 }
 
-function getAudio(tok) {
+function getAudio(tok: string) {
     /* make the AJAX request for the activity transcripts */
     return fetch('https://www.amazon.com/hz/mycd/alexa/activityTranscripts', {
         method: 'POST',
@@ -64,4 +66,33 @@ function getAudio(tok) {
         });
 }
 
-export { matchCSRF, matchAudio, getCSRF, getAudio };
+export { matchCSRF, matchAudio };
+
+/**
+ * Validate Echo user status and eligibility
+ *
+ * Determines whether a user can proceed with the survey
+ */
+async function validateAmazon(): Promise<ValidationResult> {
+    const csrfTok = await getCSRF();
+    if (csrfTok === null) {
+        return { status: VerificationState.loggedOut };
+    }
+    const dict = await getAudio(csrfTok);
+    if (dict === null) {
+        return { status: VerificationState.error };
+    }
+    const urls = Object.keys(dict);
+    const transcripts = Object.values(dict) as string[];
+    if (urls.length > 10) {
+        return {
+            status: VerificationState.loggedIn,
+            urls,
+            transcripts
+        };
+    } else {
+        return { status: VerificationState.ineligible };
+    }
+}
+
+export { validateAmazon };
