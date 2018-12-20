@@ -570,7 +570,7 @@ header#site-header.subbrand .navbar-brand {
     header#site-header #primary-nav .open .dropdown-menu {
     }
     header#site-header {
-        border-top: 42px solid #003262;
+        border-top: 4px solid #003262;
     }
     header#site-header.dark {
         border-top-color: #00274e;
