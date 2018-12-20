@@ -1,7 +1,7 @@
 /* global Qualtrics */
 
 /**
- * This code submits the user's selected speaker to the extension.
+ * This code notifies the extension to set the user's selected speaker.
  */
 
 Qualtrics.SurveyEngine.addOnload(() => {
@@ -18,12 +18,6 @@ Qualtrics.SurveyEngine.addOnUnload(() => {
 
 Qualtrics.SurveyEngine.addOnPageSubmit(function submitSpeakerChoice(type) {
     if (type === 'next') {
-        const alexa = this.getChoiceValue('1');
-        const google = this.getChoiceValue('2');
-        if (alexa) {
-            window.postMessage({ type: 'device', device: 'alexa' }, '*');
-        } else if (google) {
-            window.postMessage({ type: 'device', device: 'google' }, '*');
-        }
+		window.postMessage({ type: 'device' }, '*');
     }
 });
