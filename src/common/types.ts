@@ -1,6 +1,7 @@
 export enum Device {
     alexa = 'alexa',
-    google = 'google'
+    google = 'google',
+    error = 'error'
 }
 
 /**
