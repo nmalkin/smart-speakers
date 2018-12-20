@@ -39,10 +39,6 @@ module.exports = [
                 {
                     from: 'assets/**/*',
                     to: ''
-                },
-                {
-                    from: 'src/chrome/options.html',
-                    to: ''
                 }
             ])
         ]
@@ -78,10 +74,6 @@ module.exports = [
                 },
                 {
                     from: 'assets/**/*',
-                    to: ''
-                },
-                {
-                    from: 'src/chrome/options.html',
                     to: ''
                 }
             ])

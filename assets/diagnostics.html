@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Diagnostics</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="./calbrand/bootstrap.min.css" />
+
+        <!-- Prototype styles -->
+        <link rel="stylesheet" href="./calbrand/nav.css" />
+        <link rel="stylesheet" href="./calbrand/layout.css" />
+        <link rel="stylesheet" href="./calbrand/typography.css" />
+        <link rel="stylesheet" href="./calbrand/components.css" />
+
+        <!-- Site Specific CSS -->
+        <link rel="stylesheet" href="./calbrand/site.css" />
+
+        <link rel="stylesheet" href="./calbrand/custom.css" />
+
+        <link rel="stylesheet" href="mocha.css" />
+    </head>
+    <body class="home">
+        <header id="site-header" class="subbrand light">
+            <div class="navbar navbar-default navbar-static-top yamm">
+                <div class="container">
+                    <div class="navbar-header one-line">
+                        <h1>
+                            <span class="b-wordmark" aria-hidden="true"></span
+                            ><span class="dept-title one"
+                                >Smart Speaker Study</span
+                            >
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="content" role="main">
+            <div class="container" style="height: 100%; overflow:hidden">
+                <h1>Diagnostics</h1>
+                <p>Start a diagnostics test by clicking the appropriate button for your device.</p>
+                <p>Reminder: you'll need to be logged in to your Amazon/Google account.</p>
+                <p>
+        <button id="test" class="btn btn-primary">Run all diagnostics</button>
+
+        <button id="google" class="btn btn-default">Run diagnostics for Google Home (old tests)</button>
+        <p id="result"></p>
+
+</p>
+
+        <div id="mocha"></div>
+            </div>
+            <!-- .container -->
+        </div>
+        <!-- #content -->
+
+        <footer id="universal-footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-6 col-sm-4 col-md-3">
+                        <div class="block logo">
+                            <a href="https://www.berkeley.edu/"
+                                ><img
+                                    src="./calbrand/logo-ucberkeley-white.png"
+                                    alt="University of California Berkeley"
+                            /></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <script src="mocha.js"></script>
+        <script src="../options.js" type="module"></script>
+    </body>
+</html>

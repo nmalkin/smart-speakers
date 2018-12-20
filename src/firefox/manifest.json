@@ -25,7 +25,7 @@
     },
     "incognito": "split",
     "options_ui": {
-        "page": "options.html"
+        "page": "assets/index.html"
     },
     "permissions": ["https://myactivity.google.com/", "https://www.amazon.com/"]
 }
