@@ -8,7 +8,6 @@ function matchCSRF(pageText: string): string | null {
     if (match == null) {
         return null;
     }
-    console.log(match);
     return encodeURIComponent(match[0].slice(13, -1));
 }
 
@@ -66,7 +65,7 @@ function getAudio(tok: string) {
         });
 }
 
-export { matchCSRF, matchAudio };
+export { getCSRF, getAudio };
 
 /**
  * Validate Echo user status and eligibility

@@ -5,6 +5,7 @@ import {
     fetchJsonData,
     tryParseJson
 } from '../../common/google/google';
+import { getCSRF, getAudio } from '../../common/alexa/amazon';
 
 function checkArray(data: any, name: string) {
     if (data === null) {
@@ -64,6 +65,33 @@ async function testInBrowser() {
         checkString(transcript, 'transcript');
         if (transcript !== 'do you want to read my proposal') {
             throw new Error('Transcript did not match');
+        }
+    } catch (e) {
+        result = e;
+    }
+    document.getElementById('result')!.innerHTML = result;
+}
+
+/*
+    Diagnostic for Amazon recording fetch flow.
+*/
+async function amazonDiagnostic() {
+    let result = 'Test passed';
+    try {
+        const token = await getCSRF();
+        if (token === null) {
+            /* TODO: makes these two different cases */
+            throw new Error("User is signed out or CSRF didn't match.");
+        }
+        const dict = await getAudio(token);
+        if (dict === null) {
+            throw new Error(
+                'Unexpected response from recordings page. CSRF validation may have failed.'
+            );
+        } else if (Object.keys(dict).length === 0) {
+            throw new Error(
+                'No recordings were retrieved from recordings page.'
+            );
         }
     } catch (e) {
         result = e;

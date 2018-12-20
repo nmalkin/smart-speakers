@@ -76,6 +76,10 @@ async function processRecordingRequest(
  */
 async function processVerify(state: SurveyState) {
     let result: ValidationResult;
+    const placeholder = document.getElementById('QID14')!;
+    placeholder.getElementsByClassName(
+        'QuestionText BorderColor'
+    )[0].innerHTML = '<b>Status:</b><br><br>Checking for Recordings...';
     if (state.device === Device.alexa) {
         result = await validateAmazon();
     } else if (state.device === Device.google) {
