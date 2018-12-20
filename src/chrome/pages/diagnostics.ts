@@ -72,35 +72,6 @@ async function testInBrowser() {
     document.getElementById('result')!.innerHTML = result;
 }
 
-/*
-    Diagnostic for Amazon recording fetch flow.
-*/
-async function amazonDiagnostic() {
-    let result = 'Test passed';
-    try {
-        const token = await getCSRF();
-        if (token === null) {
-            /* TODO: makes these two different cases */
-            throw new Error("User is signed out or CSRF didn't match.");
-        }
-        const dict = await getAudio(token);
-        if (dict === null) {
-            throw new Error(
-                'Unexpected response from recordings page. CSRF validation may have failed.'
-            );
-        } else if (Object.keys(dict).length === 0) {
-            throw new Error(
-                'No recordings were retrieved from recordings page.'
-            );
-        }
-    } catch (e) {
-        result = e;
-    }
-    document.getElementById('result')!.innerHTML = result;
-}
-
-document.getElementById('google')!.onclick = testInBrowser;
-
 export { testInBrowser };
 
 // Test using Mocha
@@ -143,6 +114,44 @@ describe('Google', () => {
             if (json === '[]') {
                 throw new Error('CSRF token failed');
             }
+        });
+    });
+});
+
+/*
+    Diagnostic test for Amazon recording fetch flow.
+*/
+
+describe('Amazon', () => {
+    let token;
+
+    context('fetching the CSRF token', async () => {
+        before(async () => {
+            token = await getCSRF();
+        });
+
+        it('user is signed in', () => {
+            if (token === null) {
+                /* TODO: Make these different checks. */
+                throw new Error('Detected user signed out or token missing');
+            }
+        });
+    });
+
+    context('fetching Audio Recordings', async () => {
+        let interactions;
+        before(async () => {
+            interactions = await getAudio(token);
+        });
+
+        it('the CSRF token should work', () => {
+            if (interactions === null) {
+                throw new Error('CSRF token failed');
+            }
+            /* Not sure if this should be a diagnostic error or not */
+            // if (Object.keys(interactions).length === 0) {
+            //     throw new Error('Failed to retrieve recordings');
+            // }
         });
     });
 });
