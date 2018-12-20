@@ -106,11 +106,22 @@ async function processVerify(state: SurveyState) {
 /**
  * Process 'device' message
  */
-function processDevice(state: SurveyState, newDevice: string) {
-    if (newDevice === 'alexa') {
+function processDevice(state: SurveyState) {
+    const choices = document.querySelector(
+        '#QID5 > div.Inner.BorderColor.SAVR > div > fieldset > div > ul'
+    )!;
+    const alexa = choices.querySelector(
+        'li.Selection.reg > label.q-radio.q-checked'
+    );
+    const google = choices.querySelector(
+        'li.Selection.alt > label.q-radio.q-checked'
+    );
+    if (alexa) {
         state.device = Device.alexa;
-    } else if (newDevice === 'google') {
+    } else if (google) {
         state.device = Device.google;
+    } else {
+        state.device = Device.error;
     }
 }
 
@@ -126,12 +137,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
 
     switch (event.data.type) {
         case 'device':
-            if (!('device' in event.data)) {
-                console.error('Message from webpage missing device');
-                return;
-            }
-
-            processDevice(_state, event.data.device);
+            processDevice(_state);
             break;
 
         case 'verify':

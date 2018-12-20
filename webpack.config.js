@@ -10,7 +10,7 @@ module.exports = [
             background: './src/chrome/background/background.ts',
             content: './src/chrome/content/content.ts',
             index: './src/chrome/pages/index.ts',
-            options: './src/chrome/pages/options.ts'
+            diagnostics: './src/chrome/pages/diagnostics.ts'
         },
         module: {
             rules: [
@@ -39,10 +39,6 @@ module.exports = [
                 {
                     from: 'assets/**/*',
                     to: ''
-                },
-                {
-                    from: 'src/chrome/options.html',
-                    to: ''
                 }
             ])
         ]
@@ -50,7 +46,7 @@ module.exports = [
     {
         entry: {
             background: './src/firefox/background/background.ts',
-            options: './src/firefox/content/options.ts'
+            diagnostics: './src/firefox/content/diagnostics.ts'
         },
         module: {
             rules: [
@@ -78,10 +74,6 @@ module.exports = [
                 },
                 {
                     from: 'assets/**/*',
-                    to: ''
-                },
-                {
-                    from: 'src/chrome/options.html',
                     to: ''
                 }
             ])

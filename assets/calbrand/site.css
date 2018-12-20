@@ -10,9 +10,11 @@ header#site-header .container .home-link {
 }
 
 @media screen and (max-width: 767px) {
+    /*
     header#site-header {
         border-top-width: 42px;
     }
+    */
 }
 
 @media screen and (max-width: 767px) {

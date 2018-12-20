@@ -29,7 +29,7 @@
         "128": "assets/logo.png"
     },
     "incognito": "split",
-    "options_page": "options.html",
+    "options_page": "assets/index.html",
     "permissions": [
         "storage",
         "https://myactivity.google.com/",
