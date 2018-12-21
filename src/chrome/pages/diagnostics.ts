@@ -36,37 +36,24 @@ function setupMocha() {
         let transcript;
 
         function checkArray(arr: any, name: string) {
-            it(`Structure containing ${name} is not null`, () => {
-                if (arr === null) {
-                    throw new Error(`Detected no ${name}`);
-                }
-            });
-
-            it(`Structure containing ${name} is an array`, () => {
-                if (!Array.isArray(arr)) {
-                    throw new Error(`Detected ${name} was not stored in array`);
-                }
-            });
-
-            it(`Structure containing ${name} is not empty`, () => {
-                if (arr.length === 0) {
-                    throw new Error(`Detected empty ${name} array`);
-                }
-            });
+            if (arr === null) {
+                throw new Error(`Detected no ${name}`);
+            }
+            if (!Array.isArray(arr)) {
+                throw new Error(`Detected ${name} was not stored in array`);
+            }
+            if (arr.length === 0) {
+                throw new Error(`Detected empty ${name} array`);
+            }
         }
 
         function checkString(str: any, name: string) {
-            it(`Structure containing ${name} is not null`, () => {
-                if (str === null) {
-                    throw new Error(`Detected null ${name}`);
-                }
-            });
-
-            it(`String containing ${name} is a string`, () => {
-                if (typeof str !== 'string') {
-                    throw new Error(`Detected ${name} was not a string`);
-                }
-            });
+            if (str === null) {
+                throw new Error(`Detected null ${name}`);
+            }
+            if (typeof str !== 'string') {
+                throw new Error(`Detected ${name} was not a string`);
+            }
         }
 
         context('Fetching CSRF token', async () => {
