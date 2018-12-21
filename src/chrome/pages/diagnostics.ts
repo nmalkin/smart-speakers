@@ -13,8 +13,6 @@ import {
 } from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
 
-const ASYNC_TIMEOUT = 5000;
-
 enum Tests {
     all = 'all',
     google = 'google',
@@ -66,8 +64,7 @@ function setupMocha() {
         }
 
         context('Fetching CSRF token', async () => {
-            before('Fetch CSRF token', async function() {
-                this.timeout(ASYNC_TIMEOUT);
+            before('Fetch CSRF token', async () => {
                 token = await fetchCsrfToken();
             });
 
@@ -87,8 +84,7 @@ function setupMocha() {
         });
 
         context('Fetching JSON data', async () => {
-            before('Fetch JSON data', async function() {
-                this.timeout(ASYNC_TIMEOUT);
+            before('Fetch JSON data', async () => {
                 json = await fetchJsonData(token);
             });
 
