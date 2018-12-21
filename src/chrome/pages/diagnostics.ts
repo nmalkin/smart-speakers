@@ -12,6 +12,7 @@ import {
     extractAudio
 } from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
+import * as assert from 'assert';
 
 enum Tests {
     all = 'all',
@@ -35,6 +36,7 @@ function setupMocha() {
      * Diagnostic tests for Google
      */
     (tests === Tests.google ? describe.only : describe)('Google', () => {
+        let failed = false;
         let token;
         let json;
         let data;
@@ -42,26 +44,32 @@ function setupMocha() {
         let urls;
         let transcripts;
 
+        function check(value: any, message: string) {
+            if (!value) {
+                failed = true;
+            }
+            assert(value, message);
+        }
+
         function checkArray(arr: any, name: string) {
-            if (arr === null) {
-                throw new Error(`Detected no ${name}`);
-            }
-            if (!Array.isArray(arr)) {
-                throw new Error(`Detected ${name} was not stored in array`);
-            }
-            if (arr.length === 0) {
-                throw new Error(`Detected empty ${name} array`);
-            }
+            check(arr !== null, `Detected no ${name}`);
+            check(
+                Array.isArray(arr),
+                `Detected ${name} was not stored in array`
+            );
+            check(arr.length > 0, `Detected empty ${name} array`);
         }
 
         function checkString(str: any, name: string) {
-            if (str === null) {
-                throw new Error(`Detected null ${name}`);
-            }
-            if (typeof str !== 'string') {
-                throw new Error(`Detected ${name} was not a string`);
-            }
+            check(str !== null, `Detected null ${name}`);
+            check(typeof str === 'string', `Detected ${name} was not a string`);
         }
+
+        beforeEach(function() {
+            if (failed) {
+                this.skip();
+            }
+        });
 
         context('Fetching CSRF token', async () => {
             before('Fetch CSRF token', async () => {
@@ -69,17 +77,14 @@ function setupMocha() {
             });
 
             it('Response matches regex', () => {
-                if (token === null) {
-                    throw new Error(
-                        "Response didn't match either signed out or CSRF token regex"
-                    );
-                }
+                check(
+                    token !== null,
+                    "Response didn't match either signed out or CSRF token regex"
+                );
             });
 
             it('User is signed in', () => {
-                if (token === '') {
-                    throw new Error('Detected user signed out');
-                }
+                check(token !== '', 'Detected user signed out');
             });
         });
 
@@ -89,9 +94,7 @@ function setupMocha() {
             });
 
             it('CSRF token is valid', () => {
-                if (json === '[]') {
-                    throw new Error('CSRF token failed');
-                }
+                check(json !== '[]', 'CSRF token failed');
             });
         });
 
@@ -101,17 +104,14 @@ function setupMocha() {
             });
 
             it('Data is valid JSON array', () => {
-                if (data === null) {
-                    throw new Error(
-                        'Sliced response text was not valid JSON array'
-                    );
-                }
+                check(
+                    data !== null,
+                    'Sliced response text was not valid JSON array'
+                );
             });
 
             it('Data is not empty', () => {
-                if (data.length === 0) {
-                    throw new Error('Detected empty response array');
-                }
+                check(data.length > 0, 'Detected empty response array');
             });
         });
 

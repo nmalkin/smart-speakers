@@ -4,7 +4,8 @@
     "dependencies": {
         "@types/chrome": "0.0.75",
         "@types/firefox-webext-browser": "^64.0.0",
-        "@types/mocha": "^5.2.5"
+        "@types/mocha": "^5.2.5",
+        "@types/node": "^10.12.18"
     },
     "devDependencies": {
         "@babel/core": "^7.2.0",
