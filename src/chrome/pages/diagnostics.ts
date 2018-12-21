@@ -5,7 +5,13 @@ import {
     fetchJsonData,
     tryParseJson
 } from '../../common/google/google';
-import { getCSRF, getAudio } from '../../common/alexa/amazon';
+import {
+    getCSRF,
+    getCSRFPage,
+    fetchTranscriptPage,
+    extractAudio
+} from '../../common/alexa/amazon';
+import { Interaction } from '../../common/types';
 
 const ASYNC_TIMEOUT = 5000;
 
@@ -15,14 +21,15 @@ enum Tests {
     amazon = 'amazon'
 }
 
-let tests;
+let tests: Tests;
 
 function setupMocha() {
     document.getElementById('mocha')!.innerHTML = '';
     mocha.suite = mocha.suite.clone();
     mocha.setup({
         ui: 'bdd',
-        bail: true
+        bail: true,
+        timeout: 5000
     });
     mocha.checkLeaks();
 
@@ -179,14 +186,18 @@ function setupMocha() {
      * Diagnostic tests for Amazon recording fetch flow.
      */
     (tests === Tests.amazon ? describe.only : describe)('Amazon', () => {
-        let token;
+        let token: string | null;
 
         context('fetching the CSRF token', async () => {
-            before(async () => {
+            it('should get the CSRF page without errors', async () => {
+                await getCSRFPage();
+            });
+
+            it('should parse the token without throwing errors', async () => {
                 token = await getCSRF();
             });
 
-            it('user is signed in', () => {
+            it('the user is expected to be signed in', () => {
                 if (token === null) {
                     /* TODO: Make these different checks. */
                     throw new Error(
@@ -197,19 +208,40 @@ function setupMocha() {
         });
 
         context('fetching Audio Recordings', async () => {
-            let interactions;
-            before(async () => {
-                interactions = await getAudio(token);
+            let page: string | null;
+
+            it('fetches the activity page without errors', async () => {
+                if (token) {
+                    page = await fetchTranscriptPage(token);
+                }
             });
 
-            it('the CSRF token should work', () => {
-                if (interactions === null) {
-                    throw new Error('CSRF token failed');
+            it('should not report that CSRF validation failed', () => {
+                if (
+                    page ===
+                    '{"ERROR":"{\\"success\\":false,\\"error\\":\\"CSRF_VALIDATION_FAILED\\"}"}'
+                ) {
+                    throw new Error('Amazon says CSRF validation failed');
                 }
-                /* Not sure if this should be a diagnostic error or not */
-                // if (Object.keys(interactions).length === 0) {
-                //     throw new Error('Failed to retrieve recordings');
-                // }
+            });
+
+            it('should extract audio without throwing errors', () => {
+                if (page !== null) {
+                    extractAudio(page);
+                }
+            });
+
+            it('expects to extract at least one interaction ', () => {
+                let interactions: Interaction[] = [];
+                if (page !== null) {
+                    interactions = extractAudio(page);
+                }
+
+                if (interactions.length === 0) {
+                    throw new Error(
+                        "didn't extract a single interaction from the activity page"
+                    );
+                }
             });
         });
     });
