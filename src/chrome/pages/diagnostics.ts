@@ -7,6 +7,8 @@ import {
 } from '../../common/google/google';
 import { getCSRF, getAudio } from '../../common/alexa/amazon';
 
+const ASYNC_TIMEOUT = 5000;
+
 enum Tests {
     all = 'all',
     google = 'google',
@@ -57,7 +59,8 @@ function setupMocha() {
         }
 
         context('Fetching CSRF token', async () => {
-            before('Fetch CSRF token', async () => {
+            before('Fetch CSRF token', async function() {
+                this.timeout(ASYNC_TIMEOUT);
                 token = await fetchCsrfToken();
             });
 
@@ -77,7 +80,8 @@ function setupMocha() {
         });
 
         context('Fetching JSON data', async () => {
-            before('Fetch JSON data', async () => {
+            before('Fetch JSON data', async function() {
+                this.timeout(ASYNC_TIMEOUT);
                 json = await fetchJsonData(token);
             });
 
