@@ -33,9 +33,9 @@ function setupMocha() {
         let token;
         let json;
         let data;
-        let entry;
-        let url;
-        let transcript;
+        let entries;
+        let urls;
+        let transcripts;
 
         function checkArray(arr: any, name: string) {
             if (arr === null) {
@@ -115,41 +115,56 @@ function setupMocha() {
         context('Checking data array', () => {
             it('Check data array', () => {
                 checkArray(data[0], 'activity');
-                entry = data[0][data[0].length - 1];
+                entries = data[0];
             });
         });
 
-        context('Checking URL', () => {
-            it('Check URL array', () => {
-                checkArray(entry[URL_INDEX], 'URL');
-                url = entry[URL_INDEX][0];
+        context('Checking URLs', () => {
+            it('Check URL arrays', () => {
+                entries.forEach(entry => {
+                    checkArray(entry[URL_INDEX], 'URL');
+                });
+                urls = entries.map(entry => entry[URL_INDEX][0]);
             });
 
-            it('Check URL string', () => {
-                checkString(url, 'URL');
+            it('Check URL strings', () => {
+                urls.forEach(url => {
+                    checkString(url, 'URL');
+                });
             });
 
-            it('Verify URL', () => {
-                if (url.slice(-16) !== '1534466983744010') {
-                    throw new Error('Audio ID did not match');
-                }
+            it('Verify URLs', () => {
+                urls.forEach(url => {
+                    if (
+                        url.slice(0, 49) !==
+                        'https://myactivity.google.com/history/audio/play/'
+                    ) {
+                        throw new Error('Detected invalid URL');
+                    }
+                });
             });
         });
 
-        context('Checking transcript', () => {
-            it('Check transcript array', () => {
-                checkArray(entry[TRANSCRIPT_INDEX], 'transcript');
-                transcript = entry[TRANSCRIPT_INDEX][0];
+        context('Checking transcripts', () => {
+            it('Check transcript arrays', () => {
+                entries.forEach(entry => {
+                    checkArray(entry[TRANSCRIPT_INDEX], 'transcript');
+                });
+                transcripts = entries.map(entry => entry[TRANSCRIPT_INDEX][0]);
             });
 
-            it('Check transcript string', () => {
-                checkString(transcript, 'transcript');
+            it('Check transcript strings', () => {
+                transcripts.forEach(transcript => {
+                    checkString(transcript, 'transcript');
+                });
             });
 
-            it('Verify transcript', () => {
-                if (transcript !== 'do you want to read my proposal') {
-                    throw new Error('Transcript did not match');
-                }
+            it('Verify transcripts', () => {
+                transcripts.forEach(transcript => {
+                    if (transcript.length === 0) {
+                        throw new Error('Detected invalid transcript');
+                    }
+                });
             });
         });
 
