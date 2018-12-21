@@ -3,6 +3,11 @@ import { ValidationResult, VerificationState } from '../../common/types';
 const csrfReg = /csrfToken = "(.*)"/g;
 const expReg = /<audio id="audio-(.*)"> <source[\w\W]*?<div class="summaryCss">\s*(.*?)\s*<\/div/g;
 
+/**
+ * Extract CSRF token from page contents
+ *
+ * @param pageText the raw HTML of a page with the CSRF token
+ */
 function matchCSRF(pageText: string): string | null {
     const match = pageText.match(csrfReg);
     if (match == null) {
@@ -11,6 +16,12 @@ function matchCSRF(pageText: string): string | null {
     return encodeURIComponent(match[0].slice(13, -1));
 }
 
+/**
+ * Extract interaction data from page HTML
+ *
+ * @param pageText the raw HTML of the page
+ * @returns an object with keys as the URL and transcripts as value, or an empty object if those could not be found
+ */
 function matchAudio(pageText: string): object {
     const dict = {};
     let match = expReg.exec(pageText);
@@ -29,8 +40,10 @@ function matchAudio(pageText: string): object {
     return dict;
 }
 
+/**
+ * Fetch the overview page
+ */
 function getCSRF() {
-    /* fetch the overview page */
     return fetch(
         'https://www.amazon.com/hz/mycd/myx#/home/content/booksAll/dateDsc/'
     )
@@ -42,6 +55,10 @@ function getCSRF() {
         });
 }
 
+/**
+ * Get the page with activity data and return the parsed interaction data
+ * @param tok the CSRF token to use in the request
+ */
 function getAudio(tok: string) {
     /* make the AJAX request for the activity transcripts */
     return fetch('https://www.amazon.com/hz/mycd/alexa/activityTranscripts', {
@@ -64,8 +81,6 @@ function getAudio(tok: string) {
             return null;
         });
 }
-
-export { getCSRF, matchCSRF, matchAudio, getAudio };
 
 /**
  * Validate Echo user status and eligibility
@@ -94,4 +109,4 @@ async function validateAmazon(): Promise<ValidationResult> {
     }
 }
 
-export { validateAmazon };
+export { getCSRF, matchCSRF, matchAudio, getAudio, validateAmazon };
