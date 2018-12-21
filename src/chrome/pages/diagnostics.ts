@@ -29,21 +29,25 @@ function checkString(data: any, name: string) {
 }
 
 async function testInBrowser() {
+    document.getElementById('result')!.innerHTML = '';
+
     let result = 'Test passed!';
     try {
         const token = await fetchCsrfToken();
-        if (token === '') {
-            throw new Error('Detected user signed out');
-        }
         if (token === null) {
             throw new Error(
                 "Response didn't match either signed out or CSRF token regex"
             );
         }
+        if (token === '') {
+            throw new Error('Detected user signed out');
+        }
+
         const json = await fetchJsonData(token);
         if (json === '[]') {
             throw new Error('CSRF token failed');
         }
+
         const data = tryParseJson(json);
         console.log(data);
         if (data === null) {
@@ -52,14 +56,17 @@ async function testInBrowser() {
         if (data.length === 0) {
             throw new Error('Detected empty response array');
         }
+
         checkArray(data[0], 'activity');
         const entry = data[0][data[0].length - 1];
+
         checkArray(entry[URL_INDEX], 'URL');
         const url = entry[URL_INDEX][0];
         checkString(url, 'URL');
         if (url.slice(-16) !== '1534466983744010') {
             throw new Error('Audio ID did not match');
         }
+
         checkArray(entry[TRANSCRIPT_INDEX], 'transcript');
         const transcript = entry[TRANSCRIPT_INDEX][0];
         checkString(transcript, 'transcript');
@@ -69,8 +76,11 @@ async function testInBrowser() {
     } catch (e) {
         result = e;
     }
+
     document.getElementById('result')!.innerHTML = result;
 }
+
+document.getElementById('google')!.onclick = testInBrowser;
 
 export { testInBrowser };
 
@@ -83,34 +93,34 @@ mocha.setup({
 
 describe('Google', () => {
     let token;
+    let json;
 
-    context('fetching the CSRF token', async () => {
-        before(async () => {
+    context('Fetching CSRF token', async () => {
+        before('Fetch CSRF token', async () => {
             token = await fetchCsrfToken();
         });
 
-        it('user is signed in', () => {
-            if (token === '') {
-                throw new Error('Detected user signed out');
-            }
-        });
-
-        it('Response should match either signed out or CSRF token regex', () => {
+        it('Response matches regex', () => {
             if (token === null) {
                 throw new Error(
                     "Response didn't match either signed out or CSRF token regex"
                 );
             }
         });
+
+        it('User is signed in', () => {
+            if (token === '') {
+                throw new Error('Detected user signed out');
+            }
+        });
     });
 
-    context('fetching JSON data', async () => {
-        let json;
-        before(async () => {
+    context('Fetching JSON data', async () => {
+        before('Fetch JSON data', async () => {
             json = await fetchJsonData(token);
         });
 
-        it('the CSRF token should work', () => {
+        it('CSRF token is valid', () => {
             if (json === '[]') {
                 throw new Error('CSRF token failed');
             }
