@@ -18,6 +18,6 @@ Qualtrics.SurveyEngine.addOnUnload(() => {
 
 Qualtrics.SurveyEngine.addOnPageSubmit(function submitSpeakerChoice(type) {
     if (type === 'next') {
-		window.postMessage({ type: 'device' }, '*');
+        window.postMessage({ type: 'device' }, '*');
     }
 });
