@@ -244,21 +244,55 @@ function setupMocha() {
     });
 }
 
+/**
+ * Confirm with the user that they're signed in to the appropriate account
+ * @param testSuite the tests the user is about to run
+ * @returns the user's response
+ */
+function confirmLoginStatus(testSuite: Tests): boolean {
+    let accounts = '';
+    switch (testSuite) {
+        case Tests.amazon:
+            accounts = 'Amazon account';
+            break;
+        case Tests.google:
+            accounts = 'Google account';
+            break;
+        case Tests.all:
+            accounts = 'Amazon and Google accounts';
+            break;
+    }
+    const message = `For diagnostics to work correctly, you need to be logged in to your ${accounts}.
+
+If you aren't, our tests will fail, generating an alert.
+
+If you're certain that you're logged in to your ${accounts}, please click "OK" to start the tests.`;
+
+    return window.confirm(message);
+}
+
+/**
+ * Confirm login status before running the given tests
+ */
+function runTests(testSuite: Tests) {
+    if (!confirmLoginStatus(testSuite)) {
+        return;
+    }
+
+    tests = testSuite;
+    setupMocha();
+    mocha.run();
+}
+
 function setupDiagnostics() {
     document.getElementById('test')!.onclick = () => {
-        tests = Tests.all;
-        setupMocha();
-        mocha.run();
+        runTests(Tests.all);
     };
     document.getElementById('google')!.onclick = () => {
-        tests = Tests.google;
-        setupMocha();
-        mocha.run();
+        runTests(Tests.google);
     };
     document.getElementById('amazon')!.onclick = () => {
-        tests = Tests.amazon;
-        setupMocha();
-        mocha.run();
+        runTests(Tests.amazon);
     };
 }
 
