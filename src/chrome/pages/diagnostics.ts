@@ -21,6 +21,7 @@ enum Tests {
 }
 
 let tests: Tests;
+let runner: Mocha.Runner;
 
 function setupMocha() {
     document.getElementById('mocha')!.innerHTML = '';
@@ -79,7 +80,9 @@ function setupMocha() {
 
             it('User is signed in', () => {
                 if (token === '') {
-                    throw new Error('Detected user signed out');
+                    runner.abort();
+                    document.getElementById('mocha')!.innerHTML =
+                        'Please sign in to your Google account and try again.';
                 }
             });
         });
@@ -281,7 +284,7 @@ function runTests(testSuite: Tests) {
 
     tests = testSuite;
     setupMocha();
-    mocha.run();
+    runner = mocha.run();
 }
 
 function setupDiagnostics() {
