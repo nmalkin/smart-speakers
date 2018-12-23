@@ -15,7 +15,6 @@ import { Interaction } from '../../common/types';
 import { initErrorHandling } from '../common/errors';
 
 enum Tests {
-    all = 'all',
     google = 'google',
     amazon = 'amazon'
 }
@@ -258,9 +257,6 @@ function runTests(testSuite: Tests) {
 }
 
 function setupDiagnostics() {
-    document.getElementById('test')!.onclick = () => {
-        runTests(Tests.all);
-    };
     document.getElementById('google')!.onclick = () => {
         runTests(Tests.google);
     };
