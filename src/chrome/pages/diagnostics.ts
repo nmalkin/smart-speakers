@@ -200,9 +200,10 @@ function setupMocha() {
             it('the user is expected to be signed in', () => {
                 if (token === null) {
                     /* TODO: Make these different checks. */
-                    throw new Error(
-                        'Detected user signed out or token missing'
-                    );
+                    runner.abort();
+                    document.getElementById('mocha')!.innerHTML =
+                        'Detected user signed out or token missing. ' +
+                        'Please sign in to your Amazon account and try again.';
                 }
             });
         });
