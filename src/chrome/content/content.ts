@@ -62,7 +62,7 @@ async function processRecordingRequest(
                 interaction = DUMMY_INTERACTION;
             } else {
                 // This shouldn't happen, but if we end up in this state, we should handle it as gracefully as possible.
-                console.error('No available recordings to show');
+                reportError('No available recordings to show');
                 interaction = ERROR_INTERACTION;
             }
         }
@@ -152,7 +152,7 @@ async function processMessages(event: MessageEvent): Promise<void> {
         case 'recordingRequest': {
             // A recording request is expected to contain the id of the element where the result should be inserted.
             if (!('question' in event.data)) {
-                console.error('Message from webpage missing question id');
+                reportError('Message from webpage missing question id');
                 return;
             }
 
