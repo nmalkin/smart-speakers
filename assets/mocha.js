@@ -2631,6 +2631,8 @@ function HTML(runner) {
   });
 
   runner.on('fail', function(test) {
+    window.reportTestFailure(test);
+
     var el = fragment(
       '<li class="test fail"><h2>%e <a href="%e" class="replay">' +
         playIcon +
