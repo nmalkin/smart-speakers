@@ -188,10 +188,21 @@ async function getAudio(tok: string): Promise<object | null> {
  * Determines whether a user can proceed with the survey
  */
 async function validateAmazon(): Promise<ValidationResult> {
-    const csrfTok = await getCSRF();
-    if (csrfTok === null) {
+    const loggedIn: boolean = await isLoggedIn();
+    if (!loggedIn) {
         return { status: VerificationState.loggedOut };
     }
+
+    const upgradeRequired: boolean = await requiresPasswordUpgrade();
+    if (upgradeRequired) {
+        return { status: VerificationState.upgradeRequired };
+    }
+
+    const csrfTok = await getCSRF();
+    if (csrfTok === null) {
+        return { status: VerificationState.error };
+    }
+
     const dict = await getAudio(csrfTok);
     if (dict === null) {
         return { status: VerificationState.error };
