@@ -11,6 +11,7 @@ import {
     fetchTranscriptPage,
     extractAudio
 } from '../../common/alexa/amazon';
+import * as amazon from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
 import { initErrorHandling } from '../common/errors';
 
@@ -187,6 +188,30 @@ function setupMocha() {
     (tests === Tests.amazon ? describe.only : describe)('Amazon', () => {
         let token: string | null;
 
+        context('checking login status', async () => {
+            it('checking for being logged out', async () => {
+                const loggedIn: boolean = await amazon.isLoggedIn();
+                if (!loggedIn) {
+                    runner.abort();
+                    document.getElementById('mocha')!.innerHTML =
+                        'According to our test, you are signed out of your Amazon account. ' +
+                        'Please sign in and try again.';
+                }
+            });
+
+            it('checking for password re-entry', async () => {
+                const upgradeRequired: boolean = await amazon.requiresPasswordUpgrade();
+                if (upgradeRequired) {
+                    runner.abort();
+                    document.getElementById('mocha')!.innerHTML =
+                        'Amazon requires you to re-enter your password. ' +
+                        `Please <a href="${
+                            amazon.upgradeUrl
+                        }" target="_blank">visit this page</a> ` +
+                        'then re-run these tests.';
+                }
+            });
+        });
         context('fetching the CSRF token', async () => {
             it('should get the CSRF page without errors', async () => {
                 await getCSRFPage();
@@ -196,13 +221,12 @@ function setupMocha() {
                 token = await getCSRF();
             });
 
-            it('the user is expected to be signed in', () => {
+            it('should be able to find the CSRF token in the page', () => {
                 if (token === null) {
-                    /* TODO: Make these different checks. */
-                    runner.abort();
-                    document.getElementById('mocha')!.innerHTML =
-                        'Detected user signed out or token missing. ' +
-                        'Please sign in to your Amazon account and try again.';
+                    throw new Error('CSRF token missing from activity page');
+                    // This also happens when the user is signed out
+                    // or needs to reenter their password,
+                    // but we have a separate test for that which executes earlier.
                 }
             });
         });
