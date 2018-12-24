@@ -10,6 +10,7 @@ export enum Device {
 export enum VerificationState {
     loggedIn = 'loggedIn',
     loggedOut = 'loggedOut',
+    upgradeRequired = 'upgradeRequired',
     ineligible = 'ineligible',
     error = 'error'
 }

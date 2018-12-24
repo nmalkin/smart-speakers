@@ -77,6 +77,11 @@ export function displayVerificationResults(
              Being logged in is required for our study, so we can customize our questions to your specific device. \
              Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>`;
         displayVerificationMessage(msg + retry);
+    } else if (value === VerificationState.upgradeRequired) {
+        const msg = `<b>Status:</b><br><br> \
+             It looks like you need to re-enter the password for your ${account} account. \
+             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>`;
+        displayVerificationMessage(msg + retry);
     } else if (value === VerificationState.ineligible) {
         const msg =
             "<b>Status:</b><br><br> \
