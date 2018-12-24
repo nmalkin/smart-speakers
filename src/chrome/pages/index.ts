@@ -6,9 +6,12 @@ function displayDebugStatus(status: boolean) {
     document.getElementById('debug-status')!.innerText = text;
 }
 
-initErrorHandling();
-
-window.onload = async () => {
+/**
+ * Set up the on-screen debug mode toggle
+ *
+ * Sets its initial status and updates local storage with new settings.
+ */
+async function setupDebugToggle() {
     const debugControl = document.getElementById('debug') as HTMLInputElement;
 
     const initialStatus = await getDebugStatus();
@@ -21,4 +24,10 @@ window.onload = async () => {
         displayDebugStatus(newStatus);
         setDebugStatus(newStatus);
     };
+}
+
+initErrorHandling();
+
+window.onload = () => {
+    setupDebugToggle();
 };
