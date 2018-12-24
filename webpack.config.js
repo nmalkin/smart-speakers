@@ -2,7 +2,7 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const BUILD_PATH = path.resolve(__dirname, 'chrome_extension');
-const FIREFOX_BUILD_PATH = path.resolve(__dirname, 'firefox_extension');
+// const FIREFOX_BUILD_PATH = path.resolve(__dirname, 'firefox_extension');
 
 module.exports = [
     {
@@ -42,41 +42,41 @@ module.exports = [
                 }
             ])
         ]
-    },
-    {
-        entry: {
-            background: './src/firefox/background/background.ts',
-            diagnostics: './src/firefox/content/diagnostics.ts'
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.ts$/,
-                    loader: 'ts-loader',
-                    options: { onlyCompileBundledFiles: true },
-                    exclude: /node_modules/
-                }
-            ]
-        },
-        resolve: {
-            extensions: ['.ts', '.js']
-        },
-        output: {
-            filename: '[name].js',
-            path: FIREFOX_BUILD_PATH
-        },
-        mode: 'none',
-        plugins: [
-            new CopyWebpackPlugin([
-                {
-                    from: 'src/firefox/manifest.json',
-                    to: ''
-                },
-                {
-                    from: 'assets/**/*',
-                    to: ''
-                }
-            ])
-        ]
+        // },
+        // {
+        //     entry: {
+        //         background: './src/firefox/background/background.ts',
+        //         diagnostics: './src/firefox/content/diagnostics.ts'
+        //     },
+        //     module: {
+        //         rules: [
+        //             {
+        //                 test: /\.ts$/,
+        //                 loader: 'ts-loader',
+        //                 options: { onlyCompileBundledFiles: true },
+        //                 exclude: /node_modules/
+        //             }
+        //         ]
+        //     },
+        //     resolve: {
+        //         extensions: ['.ts', '.js']
+        //     },
+        //     output: {
+        //         filename: '[name].js',
+        //         path: FIREFOX_BUILD_PATH
+        //     },
+        //     mode: 'none',
+        //     plugins: [
+        //         new CopyWebpackPlugin([
+        //             {
+        //                 from: 'src/firefox/manifest.json',
+        //                 to: ''
+        //             },
+        //             {
+        //                 from: 'assets/**/*',
+        //                 to: ''
+        //             }
+        //         ])
+        //     ]
     }
 ];
