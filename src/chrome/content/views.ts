@@ -15,7 +15,7 @@ function displayVerificationMessage(message: string): void {
  */
 export function displayVerificationPlaceholder(): void {
     displayVerificationMessage(
-        '<b>Status:</b><br><br>Checking for Recordings...'
+        '<b>Status:</b><br><br>Verifying study eligibility'
     );
 }
 
@@ -46,24 +46,27 @@ export function displayVerificationResults(
         nextButton.click();
     } else if (value === VerificationState.loggedOut) {
         const msg = `<b>Status:</b><br><br> \
-             It looks like you are logged out of your ${account} account. \
-             Being logged in is required for our study, so we can customize our questions to your specific device. \
+             It looks like you are logged out of your ${account} account.
+             You need to be logged in so that we can customize our questions to your specific device.
              Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>`;
         displayVerificationMessage(msg + retry);
     } else if (value === VerificationState.upgradeRequired) {
-        const msg = `<b>Status:</b><br><br> \
-             It looks like you need to re-enter the password for your ${account} account. \
+        const msg = `<b>Status:</b><br><br>
+             It looks like you need to re-enter the password for your ${account} account.
              Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>`;
         displayVerificationMessage(msg + retry);
     } else if (value === VerificationState.ineligible) {
-        const msg =
-            "<b>Status:</b><br><br> \
-            It looks like you don't have enough recordings. Sorry but you are ineligible for this survey";
+        const msg = `<b>Status:</b><br><br>
+            Unfortunately, our tests show you don't meet our study's eligibility criteria
+            because you haven't used your smart speaker enough.
+            Mistakes do happen, so please reach out to us
+            if you believe this is an error.`;
         displayVerificationMessage(msg);
     } else {
-        const msg =
-            '<b>Status:</b><br><br> \
-             There may have been an error in fetching your device recordings. Please try again. <br><br>';
+        const msg = `<b>Status:</b><br><br>
+             There may have been an error in fetching your device recordings. Please try again.
+             If the error persists, please contact us.
+             <br><br>`;
         displayVerificationMessage(msg + retry);
     }
 }
