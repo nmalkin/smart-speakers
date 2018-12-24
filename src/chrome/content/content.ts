@@ -7,7 +7,11 @@ import {
 import { validateGoogle } from '../../common/google/google';
 import { validateAmazon } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
-import { displayVerificationResults, displayInteraction } from './views';
+import {
+    displayVerificationResults,
+    displayInteraction,
+    displayVerificationPlaceholder
+} from './views';
 import { selectUnseen, zip } from '../../common/util';
 import { reportError, initErrorHandling } from '../common/errors';
 
@@ -76,11 +80,9 @@ async function processRecordingRequest(
  * Process 'verify' message
  */
 async function processVerify(state: SurveyState) {
+    displayVerificationPlaceholder();
+
     let result: ValidationResult;
-    const placeholder = document.getElementById('QID14')!;
-    placeholder.getElementsByClassName(
-        'QuestionText BorderColor'
-    )[0].innerHTML = '<b>Status:</b><br><br>Checking for Recordings...';
     if (state.device === Device.alexa) {
         result = await validateAmazon();
     } else if (state.device === Device.google) {
