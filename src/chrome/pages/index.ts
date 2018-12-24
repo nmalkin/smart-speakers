@@ -42,7 +42,20 @@ function testPermissions() {
 1) You are offline. Please connect to the Internet.
 2) You denied the extension "Site access" to this URL. Please allow it for our study. For more information, see https://support.google.com/chrome_webstore/answer/2664769
 3) You are running the extension in Incognito Mode. Unfortunately, our extension won't work because incognito mode blocks network requests like this one.`;
-            alert(message);
+
+            // Show an error message, but only after an invisible timeout.
+            // tl;dr: This is a workaround for using an alert instead of rendering an error message.
+            // One more case where this error handler is triggered is if the user
+            // clicks a link to navigate away from this page so quickly that the
+            // requests above don't complete. Then we don't really need to show
+            // this message, and it wouldn't even be a problem if this message
+            // were rendered as HTML. But this is an alert, and it ends up blocking
+            // the JavaScript event loop, preventing navigation to the next page.
+            // The timeout allows the navigation to preempt the alert, and the
+            // message doesn't get shown.
+            setTimeout(() => {
+                alert(message);
+            }, 1);
         });
 }
 
