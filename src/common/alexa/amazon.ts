@@ -5,7 +5,7 @@ import {
 } from '../../common/types';
 
 const csrfReg = /csrfToken = "(.*)"/g;
-const expReg = /<audio id="audio-(.*)"> <source[\w\W]*?<div class="summaryCss">\s*(.*?)\s*<\/div/g;
+const expReg = /<audio id="audio-(.*)"> <source[\w\W]*?(?:<div class="summaryCss">|<div class="summaryNotAvailableCss">)\s*(.*?)\s*<\/div/g;
 
 /**
  * Extract CSRF token from page contents
@@ -27,6 +27,7 @@ function matchCSRF(pageText: string): string | null {
  * TODO: why? Is there anything more stable we can check for?
  */
 function validAudioID(id: string): boolean {
+    console.log(id);
     return id.length >= 104 && id[104] === '/';
 }
 
