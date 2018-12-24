@@ -35,8 +35,7 @@ export enum VerificationState {
  */
 export interface ValidationResult {
     status: VerificationState;
-    urls?: string[];
-    transcripts?: string[];
+    interactions?: Interaction[];
 }
 
 /**

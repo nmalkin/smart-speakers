@@ -83,15 +83,8 @@ async function processVerify(state: SurveyState) {
     displayVerificationPlaceholder();
 
     const result: ValidationResult = await state.device.validate();
-
-    if (result.urls && result.transcripts) {
-        state.interactions = zip(
-            result.urls,
-            result.transcripts,
-            (url, transcript) => {
-                return { url, transcript };
-            }
-        );
+    if (result.interactions) {
+        state.interactions = result.interactions;
     }
 
     // If debug is on, always report status as logged in

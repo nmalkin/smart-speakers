@@ -72,23 +72,6 @@ export function extractAudio(pageText: string): Interaction[] {
 }
 
 /**
- * Extract interaction data from page HTML
- *
- * @deprecated TODO: use extractAudio instead
- *
- * @param pageText the raw HTML of the page
- * @returns an object with keys as the URL and transcripts as value, or an empty object if those could not be found
- */
-function matchAudio(pageText: string): object {
-    const dict = {};
-    const interactions = extractAudio(pageText);
-    interactions.forEach(interaction => {
-        dict[interaction.url] = interaction.transcript;
-    });
-    return dict;
-}
-
-/**
  * Get the contents of the overview page
  *
  * We use it only to extract the CSRF token.
@@ -172,13 +155,13 @@ async function fetchTranscriptPage(token: string): Promise<string> {
  * Get the page with activity data and return the parsed interaction data
  * @param tok the CSRF token to use in the request
  */
-async function getAudio(tok: string): Promise<object | null> {
+async function getAudio(tok: string): Promise<Interaction[] | null> {
     const text = await fetchTranscriptPage(tok);
     if (
         text !==
         '{"ERROR":"{\\"success\\":false,\\"error\\":\\"CSRF_VALIDATION_FAILED\\"}"}'
     ) {
-        return matchAudio(text);
+        return extractAudio(text);
     }
     return null;
 }
@@ -204,17 +187,16 @@ async function validateAmazon(): Promise<ValidationResult> {
         return { status: VerificationState.error };
     }
 
-    const dict = await getAudio(csrfTok);
-    if (dict === null) {
+    const interactions = await getAudio(csrfTok);
+    if (interactions === null) {
         return { status: VerificationState.error };
     }
-    const urls = Object.keys(dict);
-    const transcripts = Object.values(dict) as string[];
-    if (urls.length > 10) {
+
+    // Validate quantity of interactions
+    if (interactions.length > 10) {
         return {
             status: VerificationState.loggedIn,
-            urls,
-            transcripts
+            interactions
         };
     } else {
         return { status: VerificationState.ineligible };
@@ -234,6 +216,5 @@ export {
     getCSRFPage,
     matchCSRF,
     fetchTranscriptPage,
-    matchAudio,
     validateAmazon
 };

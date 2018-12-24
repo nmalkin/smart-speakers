@@ -1,7 +1,8 @@
 import {
     ValidationResult,
     VerificationState,
-    Device
+    Device,
+    Interaction
 } from '../../common/types';
 
 const URL_INDEX = 24;
@@ -67,14 +68,16 @@ async function fetchDataGoogle() {
     return null;
 }
 
-function extractData(data) {
-    let urls = [];
-    let transcripts = [];
+function extractData(data): Interaction[] {
     if (data !== null) {
-        urls = data.map(entry => entry[URL_INDEX][0]);
-        transcripts = data.map(entry => entry[TRANSCRIPT_INDEX][0]);
+        return data.map(entry => {
+            const url = entry[URL_INDEX][0];
+            const transcript = entry[TRANSCRIPT_INDEX][0];
+            return { url, transcript };
+        });
+    } else {
+        return [];
     }
-    return { urls, transcripts };
 }
 
 async function fetchAudioGoogle() {
@@ -97,9 +100,9 @@ async function validateGoogle(): Promise<ValidationResult> {
     if (data === null || data.length === 0) {
         return { status: VerificationState.error };
     }
-    const { urls, transcripts } = extractData(data[0]);
-    if (urls.length > 0) {
-        return { status: VerificationState.loggedIn, urls, transcripts };
+    const interactions = extractData(data[0]);
+    if (interactions.length > 0) {
+        return { status: VerificationState.loggedIn, interactions };
     } else {
         return { status: VerificationState.ineligible };
     }
@@ -118,6 +121,5 @@ export {
     fetchCsrfToken,
     fetchJsonData,
     tryParseJson,
-    extractData,
     validateGoogle
 };
