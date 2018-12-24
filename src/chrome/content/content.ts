@@ -107,7 +107,7 @@ async function processVerify(state: SurveyState) {
         ? VerificationState.loggedIn
         : result.status;
 
-    displayVerificationResults(verificationStatus);
+    displayVerificationResults(verificationStatus, state.device);
 }
 
 /**
