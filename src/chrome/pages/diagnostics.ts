@@ -206,7 +206,7 @@ function setupMocha() {
                     document.getElementById('mocha')!.innerHTML =
                         'Amazon requires you to re-enter your password. ' +
                         `Please <a href="${
-                            amazon.upgradeUrl
+                            amazon.Alexa.loginURL
                         }" target="_blank">visit this page</a> ` +
                         'then re-run these tests.';
                 }

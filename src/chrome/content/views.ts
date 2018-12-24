@@ -1,5 +1,4 @@
 import { VerificationState, Interaction, Device } from '../../common/types';
-import { upgradeUrl } from '../../common/alexa/amazon';
 
 /**
  * Display given message on the verification page
@@ -21,32 +20,6 @@ export function displayVerificationPlaceholder(): void {
 }
 
 /**
- * Returns the name of the account associated with the given device
- */
-export function accountFromDevice(device: Device): string {
-    if (device === Device.alexa) {
-        return 'Amazon';
-    } else if (device === Device.google) {
-        return 'Google';
-    } else {
-        throw new Error(`unrecognized device ${device}`);
-    }
-}
-
-/**
- * Returns the name of the URL associated with the given device
- */
-export function loginUrl(device: Device): string {
-    if (device === Device.alexa) {
-        return upgradeUrl;
-    } else if (device === Device.google) {
-        return 'https://accounts.google.com/ServiceLogin';
-    } else {
-        throw new Error(`unrecognized device ${device}`);
-    }
-}
-
-/**
  * Update the survey webpage based on the user's VerificationState
  *
  * Checks whether the user has been verified, and prompts a retry if not
@@ -57,8 +30,8 @@ export function displayVerificationResults(
     value: VerificationState,
     device: Device
 ): void {
-    const account = accountFromDevice(device);
-    const url = loginUrl(device);
+    const account = device.accountName;
+    const url = device.loginURL;
 
     const nextButton = document.getElementById(
         'NextButton'

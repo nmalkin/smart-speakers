@@ -1,7 +1,8 @@
 import {
     ValidationResult,
     VerificationState,
-    Interaction
+    Interaction,
+    Device
 } from '../../common/types';
 
 const csrfReg = /csrfToken = "(.*)"/g;
@@ -118,7 +119,7 @@ export async function isLoggedIn(): Promise<boolean> {
  * if you try accessing this after having been logged in for a while,
  * it re-prompts you for a password.
  */
-export const upgradeUrl =
+const upgradeUrl =
     'https://www.amazon.com/gp/mas/your-account/myapps/yourdevices/';
 
 /**
@@ -219,6 +220,12 @@ async function validateAmazon(): Promise<ValidationResult> {
         return { status: VerificationState.ineligible };
     }
 }
+
+export const Alexa: Device = {
+    accountName: 'Amazon',
+    loginURL: upgradeUrl,
+    validate: validateAmazon
+};
 
 export {
     validAudioID,

@@ -1,4 +1,8 @@
-import { ValidationResult, VerificationState } from '../../common/types';
+import {
+    ValidationResult,
+    VerificationState,
+    Device
+} from '../../common/types';
 
 const URL_INDEX = 24;
 const TRANSCRIPT_INDEX = 9;
@@ -100,6 +104,12 @@ async function validateGoogle(): Promise<ValidationResult> {
         return { status: VerificationState.ineligible };
     }
 }
+
+export const Google: Device = {
+    accountName: 'Google',
+    loginURL: 'https://accounts.google.com/ServiceLogin',
+    validate: validateGoogle
+};
 
 export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
 export {

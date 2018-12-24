@@ -4,8 +4,8 @@ import {
     ValidationResult,
     VerificationState
 } from '../../common/types';
-import { validateGoogle } from '../../common/google/google';
-import { validateAmazon } from '../../common/alexa/amazon';
+import { Google } from '../../common/google/google';
+import { Alexa } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
 import {
     displayVerificationResults,
@@ -82,14 +82,7 @@ async function processRecordingRequest(
 async function processVerify(state: SurveyState) {
     displayVerificationPlaceholder();
 
-    let result: ValidationResult;
-    if (state.device === Device.alexa) {
-        result = await validateAmazon();
-    } else if (state.device === Device.google) {
-        result = await validateGoogle();
-    } else {
-        throw new Error(`Unrecognized device: ${state.device}`);
-    }
+    const result: ValidationResult = await state.device.validate();
 
     if (result.urls && result.transcripts) {
         state.interactions = zip(
@@ -123,12 +116,11 @@ function processDevice(state: SurveyState) {
     const google = choices.querySelector(
         'li.Selection.alt > label.q-radio.q-checked'
     );
+
     if (alexa) {
-        state.device = Device.alexa;
+        state.device = Alexa;
     } else if (google) {
-        state.device = Device.google;
-    } else {
-        state.device = Device.error;
+        state.device = Google;
     }
 }
 
