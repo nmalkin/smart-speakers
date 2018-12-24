@@ -1,5 +1,12 @@
 import { VerificationState, Interaction } from '../../common/types';
 
+export function displayVerificationPlaceholder(): void {
+    const placeholder = document.getElementById('QID14')!;
+    placeholder.getElementsByClassName(
+        'QuestionText BorderColor'
+    )[0].innerHTML = '<b>Status:</b><br><br>Checking for Recordings...';
+}
+
 /**
  * Update the survey webpage based on the user's VerificationState
  *
