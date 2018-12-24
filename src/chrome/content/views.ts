@@ -1,10 +1,22 @@
 import { VerificationState, Interaction } from '../../common/types';
 
-export function displayVerificationPlaceholder(): void {
+/**
+ * Display given message on the verification page
+ */
+function displayVerificationMessage(message: string): void {
     const placeholder = document.getElementById('QID14')!;
     placeholder.getElementsByClassName(
         'QuestionText BorderColor'
-    )[0].innerHTML = '<b>Status:</b><br><br>Checking for Recordings...';
+    )[0].innerHTML = message;
+}
+
+/**
+ * Show initial message during verification process
+ */
+export function displayVerificationPlaceholder(): void {
+    displayVerificationMessage(
+        '<b>Status:</b><br><br>Checking for Recordings...'
+    );
 }
 
 /**
@@ -15,11 +27,9 @@ export function displayVerificationPlaceholder(): void {
  * @param value the user's verification status
  */
 export function displayVerificationResults(value: VerificationState): void {
-    const placeholder = document.getElementById('QID14')!;
     const nextButton = document.getElementById(
         'NextButton'
     )! as HTMLInputElement;
-    placeholder.style.display = 'none';
     const retry =
         '<button style = "border-radius: 18px; border-style: solid; border-width: 2px; font-size: 18px; padding: 13px; \
                     background-color: #FAFAFA;" onClick="window.postMessage({ type: \'verify\' }, \'*\');">Retry</button>';
@@ -27,29 +37,22 @@ export function displayVerificationResults(value: VerificationState): void {
         nextButton.disabled = false;
         nextButton.click();
     } else if (value === 'loggedOut') {
-        placeholder.style.display = 'block';
         const msg =
             '<b>Status:</b><br><br> \
                     Please ensure that you are logged in to your Amazon/Google account. \
                     This is required for our study, so we can customize our questions to your specific device. \
                     Please relog and click on the retry button below.<br><br>';
-        placeholder.getElementsByClassName(
-            'QuestionText BorderColor'
-        )[0].innerHTML = msg + retry;
+        displayVerificationMessage(msg + retry);
     } else if (value === 'ineligible') {
         const msg =
             "<b>Status:</b><br><br> \
                     It looks like you don't have enough recordings. Sorry but you are ineligible for this survery";
-        placeholder.getElementsByClassName(
-            'QuestionText BorderColor'
-        )[0].innerHTML = msg;
+        displayVerificationMessage(msg);
     } else {
-        placeholder.style.display = 'block';
         const msg =
             '<b>Status:</b><br><br> \
                     There may have been an error in fetching your device recordings. Please try again';
-        placeholder.getElementsByClassName('QuestionText')[0].innerHTML =
-            msg + retry;
+        displayVerificationMessage(msg + retry);
     }
 }
 
