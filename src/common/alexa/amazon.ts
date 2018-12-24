@@ -101,6 +101,39 @@ async function getCSRFPage(): Promise<string> {
 }
 
 /**
+ * Return true if the current user is logged in to Amazon
+ *
+ * This is done by trying to access a page that's only visible if the user is logged in.
+ * If the request ends up redirected (presumably to the login page),
+ * we assume that they're not.
+ */
+export async function isLoggedIn(): Promise<boolean> {
+    const response = await fetch('https://www.amazon.com/gp/yourstore/home');
+    const loggedIn = !response.redirected;
+    return loggedIn;
+}
+
+/**
+ * A URL that Amazon considers "sensitive":
+ * if you try accessing this after having been logged in for a while,
+ * it re-prompts you for a password.
+ */
+export const upgradeUrl =
+    'https://www.amazon.com/gp/mas/your-account/myapps/yourdevices/';
+
+/**
+ * Return true if the current user needs to re-enter their password before accessing content
+ *
+ * We know this is the case if they're redirected away from a "sensitive" page.
+ * @see upgradeUrl
+ */
+export async function requiresPasswordUpgrade(): Promise<boolean> {
+    const response = await fetch(upgradeUrl);
+    const upgradeRequired = response.redirected;
+    return upgradeRequired;
+}
+
+/**
  * Fetch the overview page
  */
 async function getCSRF(): Promise<string | null> {
