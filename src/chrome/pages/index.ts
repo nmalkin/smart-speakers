@@ -26,8 +26,29 @@ async function setupDebugToggle() {
     };
 }
 
+/**
+ * Try accessing the study URLs and show an error if that fails
+ */
+function testPermissions() {
+    let url = 'https://www.amazon.com';
+    fetch(url)
+        .then(() => {
+            url = 'https://myactivity.google.com';
+            return fetch(url);
+        })
+        .catch(() => {
+            const message = `In a connectivity test, our extension was unable to reach ${url}. There may be a few reasons for that:
+
+1) You are offline. Please connect to the Internet.
+2) You denied the extension "Site access" to this URL. Please allow it for our study. For more information, see https://support.google.com/chrome_webstore/answer/2664769
+3) You are running the extension in Incognito Mode. Unfortunately, our extension won't work because incognito mode blocks network requests like this one.`;
+            alert(message);
+        });
+}
+
 initErrorHandling();
 
 window.onload = () => {
     setupDebugToggle();
+    testPermissions();
 };
