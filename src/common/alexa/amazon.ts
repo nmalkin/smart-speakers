@@ -28,7 +28,6 @@ function matchCSRF(pageText: string): string | null {
  * TODO: why? Is there anything more stable we can check for?
  */
 function validAudioID(id: string): boolean {
-    console.log(id);
     return id.length >= 104 && id[104] === '/';
 }
 
