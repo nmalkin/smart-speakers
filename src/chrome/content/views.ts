@@ -28,7 +28,8 @@ export function displayVerificationPlaceholder(): void {
  */
 export function displayVerificationResults(
     value: VerificationState,
-    device: Device
+    device: Device,
+    interactions: Interaction[]
 ): void {
     const account = device.accountName;
     const url = device.loginURL;
@@ -42,6 +43,11 @@ export function displayVerificationResults(
          background-color: #FAFAFA;" onClick="window.postMessage({ type: \'verify\' }, \'*\');">Retry</button>';
 
     if (value === VerificationState.loggedIn) {
+        const countField = document.querySelector(
+            'input#QR~QID60'
+        ) as HTMLInputElement;
+        countField.value = String(interactions.length);
+
         nextButton.disabled = false;
         nextButton.click();
     } else if (value === VerificationState.loggedOut) {

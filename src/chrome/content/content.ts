@@ -93,7 +93,11 @@ async function processVerify(state: SurveyState) {
         ? VerificationState.loggedIn
         : result.status;
 
-    displayVerificationResults(verificationStatus, state.device);
+    displayVerificationResults(
+        verificationStatus,
+        state.device,
+        state.interactions
+    );
 }
 
 /**
