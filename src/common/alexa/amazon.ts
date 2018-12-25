@@ -31,6 +31,25 @@ function validAudioID(id: string): boolean {
     return id.length >= 104 && id[104] === '/';
 }
 
+/** Regular expression for extracting the timestamp from an audio ID */
+const timestampRegex = /^A\w+:1.0\/(20\d\d)\/(\d\d)\/(\d\d)\/(\d\d)\/\w+\/(\d\d):(\d\d):/;
+
+/**
+ * Given an Amazon audio ID, extracts the approximate timestamp for that interaction
+ * @see timestampRegex
+ */
+export function timestampFromAudioID(id: string): number {
+    const match = timestampRegex.exec(id);
+    if (match === null) {
+        throw new Error(`failed to find timestamp in audio ID: ${id}`);
+    }
+
+    const [year, month, day, hour, minute, second] = match
+        .slice(1)
+        .map(value => parseInt(value, 10));
+    return Date.UTC(year, month - 1, day, hour, minute, second);
+}
+
 /**
  * Given a match object returned by expReg, extracts the resulting interaction
  *
@@ -45,7 +64,8 @@ function getInteractionFromMatch(match: RegExpMatchArray): Interaction | null {
     if (validAudioID(audioID)) {
         const transcript = match[2];
         const url = `https://www.amazon.com/hz/mycd/playOption?id=${audioID}`;
-        return { url, transcript };
+        const timestamp = timestampFromAudioID(audioID);
+        return { url, transcript, timestamp };
     } else {
         return null;
     }

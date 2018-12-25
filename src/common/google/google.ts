@@ -7,6 +7,7 @@ import {
 
 const URL_INDEX = 24;
 const TRANSCRIPT_INDEX = 9;
+const TIMESTAMP_INDEX = 4;
 
 function checkSignedOut(text: string) {
     const regex = /FootprintsMyactivitySignedoutUi/;
@@ -68,12 +69,28 @@ async function fetchDataGoogle() {
     return null;
 }
 
+/**
+ * Parse a timestamp string in microseconds to a number in milliseconds
+ */
+export function parseTimestamp(timestampString: string): number {
+    const parsedTimestamp = parseInt(timestampString, 10);
+    if (Number.isNaN(parsedTimestamp)) {
+        throw new Error(`timestamp is not a number: ${timestampString}`);
+    }
+    const inMilliseconds = parsedTimestamp / 1000; // convert to milliseconds
+    const timestamp = Math.floor(inMilliseconds); // make sure result is integer
+    return timestamp;
+}
+
 function extractData(data): Interaction[] {
     if (data !== null) {
         return data.map(entry => {
             const url = entry[URL_INDEX][0];
             const transcript = entry[TRANSCRIPT_INDEX][0];
-            return { url, transcript };
+            const timestampString = entry[TIMESTAMP_INDEX];
+            const timestamp = parseTimestamp(timestampString);
+
+            return { url, transcript, timestamp };
         });
     } else {
         return [];
@@ -118,6 +135,7 @@ export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
 export {
     URL_INDEX,
     TRANSCRIPT_INDEX,
+    TIMESTAMP_INDEX,
     fetchCsrfToken,
     fetchJsonData,
     tryParseJson,

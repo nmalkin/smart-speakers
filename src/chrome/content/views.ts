@@ -43,8 +43,15 @@ export function displayVerificationResults(
          background-color: #FAFAFA;" onClick="window.postMessage({ type: \'verify\' }, \'*\');">Retry</button>';
 
     if (value === VerificationState.loggedIn) {
+        const timestampField = document.querySelector(
+            `input#${CSS.escape('QR~QID58')}`
+        ) as HTMLInputElement;
+        timestampField.value = String(
+            interactions.map(interaction => interaction.timestamp).sort()[0]
+        );
+
         const countField = document.querySelector(
-            'input#QR~QID60'
+            `input#${CSS.escape('QR~QID60')}`
         ) as HTMLInputElement;
         countField.value = String(interactions.length);
 

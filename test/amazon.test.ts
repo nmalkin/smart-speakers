@@ -2,7 +2,8 @@ import {
     matchCSRF,
     validAudioID,
     getInteractionFromMatch,
-    extractAudio
+    extractAudio,
+    timestampFromAudioID
 } from '../src/common/alexa/amazon';
 
 const sampleCSRF =
@@ -62,7 +63,7 @@ describe('getInteractionFromMatch', () => {
             'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
         expect(
             getInteractionFromMatch(['matched text', id, 'transcript'])
-        ).toEqual({
+        ).toMatchObject({
             url:
                 'https://www.amazon.com/hz/mycd/playOption?id=A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1',
             transcript: 'transcript'
@@ -89,9 +90,28 @@ describe('extractAudio', () => {
         const id =
             'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
         const result = extractAudio(sampleTranscript);
+        expect(result[0].transcript).toEqual(
+            '“when is kingdom hearts three coming out”'
+        );
+    });
+
+    test('returns the correct URL', () => {
+        const id =
+            'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
+        const result = extractAudio(sampleTranscript);
+        expect(result[0].url).toEqual(
+            `https://www.amazon.com/hz/mycd/playOption?id=${id}`
+        );
+    });
+
+    test('returns the correct interaction', () => {
+        const id =
+            'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
+        const result = extractAudio(sampleTranscript);
         expect(result[0]).toEqual({
             url: `https://www.amazon.com/hz/mycd/playOption?id=${id}`,
-            transcript: '“when is kingdom hearts three coming out”'
+            transcript: '“when is kingdom hearts three coming out”',
+            timestamp: Date.UTC(2018, 9, 13, 20, 57, 10)
         });
     });
 
@@ -111,5 +131,27 @@ describe('extractAudio', () => {
 
     test('returns empty array if nothing is found', () => {
         expect(extractAudio('a test string without audio')).toEqual([]);
+    });
+});
+
+describe('timestampFromAudioID', () => {
+    test('it produces the right timestamp', () => {
+        let id =
+            'A3S5BH2HU6VAYF:1.0/2018/11/01/23/G090LF0964950683/15:15::TNIH_2V.9053daa8-8164-1193-bf4e-293caba0d27cYXV/1';
+        expect(timestampFromAudioID(id)).toEqual(1541114115000);
+
+        id =
+            'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
+        expect(timestampFromAudioID(id)).toEqual(
+            Date.UTC(2018, 9, 13, 20, 57, 10)
+        );
+    });
+
+    test('it throws if timestamp is invalid', () => {
+        const id =
+            'A3S5BH2HU6VAYF:1.0/YYYY/11/DD/23/G090LF0964950683/15:15::TNIH_2V.9053daa8-8164-1193-bf4e-293caba0d27cYXV/1';
+        expect(() => {
+            timestampFromAudioID(id);
+        }).toThrow('failed to find timestamp');
     });
 });

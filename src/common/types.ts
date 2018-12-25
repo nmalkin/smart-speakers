@@ -44,4 +44,6 @@ export interface ValidationResult {
 export interface Interaction {
     url: string;
     transcript: string;
+    /** Timestamp, in milliseconds */
+    timestamp: number;
 }

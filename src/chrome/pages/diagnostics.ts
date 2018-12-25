@@ -5,6 +5,7 @@ import {
     fetchJsonData,
     tryParseJson
 } from '../../common/google/google';
+import * as google from '../../common/google/google';
 import {
     getCSRF,
     getCSRFPage,
@@ -175,6 +176,51 @@ function setupMocha() {
             });
         });
 
+        context('Checking timestamps', () => {
+            let timestamps: string[];
+            it('Check timestamp arrays', () => {
+                entries.forEach(entry => {
+                    if (entry.length <= google.TIMESTAMP_INDEX) {
+                        throw new Error('timestamp missing from data entry');
+                    }
+                });
+                timestamps = entries.map(
+                    entry => entry[google.TIMESTAMP_INDEX]
+                );
+            });
+
+            it('Check timestamp strings', () => {
+                timestamps.forEach(timestamp => {
+                    checkString(timestamp, 'timestamp');
+                });
+            });
+
+            it('Check that timestamps are numeric', () => {
+                timestamps.forEach(timestamp => {
+                    const parsedTimestamp = parseInt(timestamp, 10);
+                    if (Number.isNaN(parsedTimestamp)) {
+                        throw new Error(
+                            `timestamp is not a number: ${timestamp}`
+                        );
+                    }
+                });
+            });
+
+            it('Check that timestamps look like real dates', () => {
+                timestamps.forEach(timestamp => {
+                    const parsedTimestamp = parseInt(timestamp, 10);
+                    const inMilliseconds = parsedTimestamp / 1000;
+                    const asDate = new Date(inMilliseconds);
+                    const year = asDate.getFullYear();
+                    if (year < 2012 || year > 2019) {
+                        throw new Error(
+                            `timestamp ${timestamp} looks like an invalid date`
+                        );
+                    }
+                });
+            });
+        });
+
         context('Concluding Google tests', () => {
             it('All tests passed!', () => {
                 // pass
@@ -255,7 +301,7 @@ function setupMocha() {
                 }
             });
 
-            it('expects to extract at least one interaction ', () => {
+            it('expects to extract at least one interaction', () => {
                 let interactions: Interaction[] = [];
                 if (page !== null) {
                     interactions = extractAudio(page);
@@ -266,6 +312,31 @@ function setupMocha() {
                         "didn't extract a single interaction from the activity page"
                     );
                 }
+            });
+
+            it('finds reasonable timestamps for interactions', () => {
+                let interactions: Interaction[] = [];
+                if (page !== null) {
+                    interactions = extractAudio(page);
+                }
+
+                interactions.forEach(interaction => {
+                    const asDate = new Date(interaction.timestamp);
+                    const year = asDate.getFullYear();
+                    if (year < 2012 || year > 2019) {
+                        throw new Error(
+                            `timestamp ${
+                                interaction.timestamp
+                            } looks like an invalid date`
+                        );
+                    }
+                });
+            });
+        });
+
+        context('finished Amazon tests', () => {
+            it('All tests passed!', done => {
+                done();
             });
         });
     });
