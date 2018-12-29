@@ -30,7 +30,7 @@ function setupMocha() {
     mocha.setup({
         ui: 'bdd',
         bail: true,
-        timeout: 5000
+        timeout: 30000
     });
     mocha.checkLeaks();
 
