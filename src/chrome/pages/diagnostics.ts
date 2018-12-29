@@ -2,7 +2,6 @@ import {
     URL_INDEX,
     TRANSCRIPT_INDEX,
     fetchCsrfToken,
-    fetchJsonData,
     tryParseJson
 } from '../../common/google/google';
 import * as google from '../../common/google/google';
@@ -89,8 +88,27 @@ function setupMocha() {
         });
 
         context('Fetching JSON data', async () => {
-            before('Fetch JSON data', async () => {
-                json = await fetchJsonData(token);
+            let response: string | null = null;
+
+            it('fetches data without errors', async () => {
+                response = await google.fetchActivityData(token);
+            });
+
+            it('parses the returned page', () => {
+                if (response) {
+                    json = google.processActivityData(response);
+                    if (json === '') {
+                        throw new Error(
+                            `activity data follows unexpected format: ${response.slice(
+                                0,
+                                50
+                            )}`
+                        );
+                        // Not reporting full response to avoid potentially sensitive content
+                    }
+                } else {
+                    throw new Error('fetching failed');
+                }
             });
 
             it('CSRF token is valid', () => {

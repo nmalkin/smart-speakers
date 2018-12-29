@@ -32,7 +32,11 @@ async function fetchCsrfToken(): Promise<string | null> {
     return extractCsrfToken(restxt);
 }
 
-async function fetchJsonData(token: string): Promise<string> {
+/**
+ * Fetch activity data
+ * @param token CSRF token
+ */
+async function fetchActivityData(token: string): Promise<string> {
     const response = await fetch(
         'https://myactivity.google.com/item?product=29&jspb=1&jsv=myactivity_20181016-0717_1',
         {
@@ -41,7 +45,26 @@ async function fetchJsonData(token: string): Promise<string> {
         }
     );
     const restxt = await response.text();
-    return restxt.slice(6);
+    return restxt;
+}
+
+/**
+ * Pre-process activity data
+ * @param response returned by fetchActivityData
+ */
+function processActivityData(response: string): string {
+    // The response is valid JSON, except it starts with: )]}',
+    const cleaned = response.slice(6);
+    return cleaned;
+}
+
+/**
+ * Fetch and pre-process activity data
+ * @param token CSRF token
+ */
+async function fetchJsonData(token: string): Promise<string> {
+    const response = await fetchActivityData(token);
+    return processActivityData(response);
 }
 
 function tryParseJson(jsonString: string): string[] | null {
@@ -137,6 +160,8 @@ export {
     TRANSCRIPT_INDEX,
     TIMESTAMP_INDEX,
     fetchCsrfToken,
+    fetchActivityData,
+    processActivityData,
     fetchJsonData,
     tryParseJson,
     validateGoogle
