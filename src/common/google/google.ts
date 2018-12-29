@@ -38,7 +38,7 @@ async function fetchCsrfToken(): Promise<string | null> {
  */
 async function fetchActivityData(token: string): Promise<string> {
     const response = await fetch(
-        'https://myactivity.google.com/item?product=29&jspb=1&jsv=myactivity_20181016-0717_1',
+        'https://myactivity.google.com/item?product=29&jspb=1',
         {
             method: 'POST',
             body: `{"sig":"${token}"}`
