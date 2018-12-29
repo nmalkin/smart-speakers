@@ -21,6 +21,22 @@ export function reportIssue(message: string) {
     console.warn(message);
 }
 
+export async function reportExecutionTime(
+    name: string,
+    actions: () => Promise<any>
+) {
+    const startTime = performance.now();
+    await actions();
+    const endTime = performance.now();
+    const elapsed = endTime - startTime;
+    const message = `Timer: ${name} took ${elapsed} milliseconds`;
+
+    if (reportErrors) {
+        Sentry.captureMessage(message, Sentry.Severity.Info);
+    }
+    console.log(message);
+}
+
 interface MochaTest {
     title: string;
     err: Error;

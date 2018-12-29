@@ -14,7 +14,7 @@ import {
 } from '../../common/alexa/amazon';
 import * as amazon from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
-import { initErrorHandling } from '../common/errors';
+import { initErrorHandling, reportExecutionTime } from '../common/errors';
 
 enum Tests {
     google = 'google',
@@ -30,7 +30,7 @@ function setupMocha() {
     mocha.setup({
         ui: 'bdd',
         bail: true,
-        timeout: 30000
+        timeout: 100000
     });
     mocha.checkLeaks();
 
@@ -278,12 +278,17 @@ function setupMocha() {
         });
 
         context('fetching Audio Recordings', async () => {
-            let page: string | null;
+            let page: string | null = null;
 
             it('fetches the activity page without errors', async () => {
-                if (token) {
-                    page = await fetchTranscriptPage(token);
-                }
+                await reportExecutionTime(
+                    'fetching Amazon activity page',
+                    async () => {
+                        if (token) {
+                            page = await fetchTranscriptPage(token);
+                        }
+                    }
+                );
             });
 
             it('should not report that CSRF validation failed', () => {
