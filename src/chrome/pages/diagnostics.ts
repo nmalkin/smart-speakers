@@ -91,7 +91,12 @@ function setupMocha() {
             let response: string | null = null;
 
             it('fetches data without errors', async () => {
-                response = await google.fetchActivityData(token);
+                await reportExecutionTime(
+                    'fetching Google activity data',
+                    async () => {
+                        response = await google.fetchActivityData(token);
+                    }
+                );
             });
 
             it('parses the returned page', () => {
