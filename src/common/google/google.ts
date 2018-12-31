@@ -176,7 +176,18 @@ class GoogleInteraction implements Interaction {
 
 function extractData(data): Interaction[] {
     if (data !== null) {
-        return GoogleInteraction.fromArray(data);
+        const interactions = GoogleInteraction.fromArray(data);
+
+        interactions.forEach(({ transcript, url, timestamp }) => {
+            // The purpose of this loop is to access the fields of the Interaction.
+            // Because the implementation of GoogleInteraction uses getters,
+            // they are lazy-evaluated, so we wouldn't know until we tried
+            // accessing them whether they're valid or not.
+            // We want to know that *now* rather than later,
+            // so we try accessing them now.
+        });
+
+        return interactions;
     } else {
         return [];
     }
