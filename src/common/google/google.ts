@@ -5,10 +5,6 @@ import {
     Interaction
 } from '../../common/types';
 
-const URL_INDEX = 24;
-const TRANSCRIPT_INDEX = 9;
-const TIMESTAMP_INDEX = 4;
-
 function checkSignedOut(text: string) {
     const regex = /FootprintsMyactivitySignedoutUi/;
     return text.search(regex) > -1;
@@ -106,9 +102,9 @@ export function parseTimestamp(timestampString: string): number {
 }
 
 class GoogleInteraction implements Interaction {
-    public static TRANSCRIPT_INDEX = TRANSCRIPT_INDEX;
-    public static URL_INDEX = URL_INDEX;
-    public static TIMESTAMP_INDEX = TIMESTAMP_INDEX;
+    public static TRANSCRIPT_INDEX = 9;
+    public static URL_INDEX = 24;
+    public static TIMESTAMP_INDEX = 4;
 
     public static fromArray(rawJson: any[]): GoogleInteraction[] {
         if (!rawJson) {
@@ -222,11 +218,9 @@ export const Google: Device = {
 
 export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
 export {
-    URL_INDEX,
-    TRANSCRIPT_INDEX,
-    TIMESTAMP_INDEX,
     fetchCsrfToken,
     fetchActivityData,
+    GoogleInteraction,
     processActivityData,
     fetchJsonData,
     tryParseJson,

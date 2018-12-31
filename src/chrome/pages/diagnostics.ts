@@ -1,9 +1,4 @@
-import {
-    URL_INDEX,
-    TRANSCRIPT_INDEX,
-    fetchCsrfToken,
-    tryParseJson
-} from '../../common/google/google';
+import { fetchCsrfToken, tryParseJson } from '../../common/google/google';
 import * as google from '../../common/google/google';
 import {
     getCSRF,
@@ -153,9 +148,14 @@ function setupMocha() {
         context('Checking URLs', () => {
             it('Check URL arrays', () => {
                 entries.forEach(entry => {
-                    checkArray(entry[URL_INDEX], 'URL');
+                    checkArray(
+                        entry[google.GoogleInteraction.URL_INDEX],
+                        'URL'
+                    );
                 });
-                urls = entries.map(entry => entry[URL_INDEX][0]);
+                urls = entries.map(
+                    entry => entry[google.GoogleInteraction.URL_INDEX][0]
+                );
             });
 
             it('Check URL strings', () => {
@@ -179,9 +179,14 @@ function setupMocha() {
         context('Checking transcripts', () => {
             it('Check transcript arrays', () => {
                 entries.forEach(entry => {
-                    checkArray(entry[TRANSCRIPT_INDEX], 'transcript');
+                    checkArray(
+                        entry[google.GoogleInteraction.TRANSCRIPT_INDEX],
+                        'transcript'
+                    );
                 });
-                transcripts = entries.map(entry => entry[TRANSCRIPT_INDEX][0]);
+                transcripts = entries.map(
+                    entry => entry[google.GoogleInteraction.TRANSCRIPT_INDEX][0]
+                );
             });
 
             it('Check transcript strings', () => {
@@ -203,12 +208,14 @@ function setupMocha() {
             let timestamps: string[];
             it('Check timestamp arrays', () => {
                 entries.forEach(entry => {
-                    if (entry.length <= google.TIMESTAMP_INDEX) {
+                    if (
+                        entry.length <= google.GoogleInteraction.TIMESTAMP_INDEX
+                    ) {
                         throw new Error('timestamp missing from data entry');
                     }
                 });
                 timestamps = entries.map(
-                    entry => entry[google.TIMESTAMP_INDEX]
+                    entry => entry[google.GoogleInteraction.TIMESTAMP_INDEX]
                 );
             });
 
