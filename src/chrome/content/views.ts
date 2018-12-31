@@ -19,6 +19,28 @@ export function displayVerificationPlaceholder(): void {
     );
 }
 
+function summarize(interactions: Interaction[]): object {
+    const report = {};
+    interactions.forEach(interaction => {
+        const date = new Date(interaction.timestamp);
+        const day = date.getUTCDate();
+        const week = Math.floor(day / 7);
+        const tag = `${date.getUTCFullYear()}-${date.getUTCMonth()}.${week}`;
+
+        if (!(tag in report)) {
+            report[tag] = { interactions: 0, recordings: 0 };
+        }
+
+        report[tag].interactions += 1;
+
+        if (interaction.recordingAvailable) {
+            report[tag].recordings += 1;
+        }
+    });
+
+    return report;
+}
+
 /**
  * Update the survey webpage based on the user's VerificationState
  *
@@ -54,6 +76,11 @@ export function displayVerificationResults(
             `input#${CSS.escape('QR~QID60')}`
         ) as HTMLInputElement;
         countField.value = String(interactions.length);
+
+        const sumField = document.querySelector(
+            `input#${CSS.escape('QR~QID61')}`
+        ) as HTMLInputElement;
+        sumField.value = JSON.stringify(summarize(interactions));
 
         nextButton.disabled = false;
         nextButton.click();
