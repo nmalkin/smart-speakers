@@ -105,16 +105,82 @@ export function parseTimestamp(timestampString: string): number {
     return timestamp;
 }
 
+class GoogleInteraction implements Interaction {
+    public static TRANSCRIPT_INDEX = TRANSCRIPT_INDEX;
+    public static URL_INDEX = URL_INDEX;
+    public static TIMESTAMP_INDEX = TIMESTAMP_INDEX;
+
+    public static fromArray(rawJson: any[]): GoogleInteraction[] {
+        if (!rawJson) {
+            throw new Error('raw Google interaction data is empty');
+        } else if (!Array.isArray(rawJson)) {
+            throw new Error(
+                'expecting raw Google interaction data to be an array of interaction items'
+            );
+        }
+
+        return rawJson.map(item => {
+            const interaction = new GoogleInteraction(item);
+            return interaction;
+        });
+    }
+
+    private json: any[];
+
+    constructor(rawJson: any[]) {
+        if (!Array.isArray(rawJson)) {
+            const snippet = JSON.stringify(rawJson).slice(0, 5); // truncate for privacy
+            throw new Error(
+                `expected raw data for Google interaction to be an array, but it was ${snippet}...`
+            );
+        }
+        this.json = rawJson;
+    }
+
+    get transcript() {
+        if (this.json.length <= GoogleInteraction.TRANSCRIPT_INDEX) {
+            throw new Error(
+                `interaction missing transcript at ${
+                    GoogleInteraction.TRANSCRIPT_INDEX
+                }`
+            );
+        } else if (
+            !Array.isArray(this.json[GoogleInteraction.TRANSCRIPT_INDEX])
+        ) {
+            throw new Error('transcript is not an array');
+        }
+
+        return this.json[GoogleInteraction.TRANSCRIPT_INDEX][0];
+    }
+
+    get url() {
+        if (this.json.length <= GoogleInteraction.URL_INDEX) {
+            throw new Error(
+                `interaction missing url at ${GoogleInteraction.URL_INDEX}`
+            );
+        } else if (!Array.isArray(this.json[GoogleInteraction.URL_INDEX])) {
+            throw new Error('interaction missing url');
+        }
+
+        return this.json[GoogleInteraction.URL_INDEX][0];
+    }
+
+    get timestamp() {
+        if (this.json.length <= GoogleInteraction.TIMESTAMP_INDEX) {
+            throw new Error(
+                `interaction missing timestamp at ${
+                    GoogleInteraction.TIMESTAMP_INDEX
+                }`
+            );
+        }
+
+        return parseTimestamp(this.json[GoogleInteraction.TIMESTAMP_INDEX]);
+    }
+}
+
 function extractData(data): Interaction[] {
     if (data !== null) {
-        return data.map(entry => {
-            const url = entry[URL_INDEX][0];
-            const transcript = entry[TRANSCRIPT_INDEX][0];
-            const timestampString = entry[TIMESTAMP_INDEX];
-            const timestamp = parseTimestamp(timestampString);
-
-            return { url, transcript, timestamp };
-        });
+        return GoogleInteraction.fromArray(data);
     } else {
         return [];
     }
