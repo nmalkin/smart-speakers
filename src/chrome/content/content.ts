@@ -176,3 +176,18 @@ We apologize for the inconvenience!`;
 
 initErrorHandling();
 window.addEventListener('message', messageListener, false);
+
+/**
+ * Dynamically resize frame to have same height as survey page
+ */
+const target = document.documentElement;
+const config = { childList: true, subtree: true };
+let currentHeight = target.scrollHeight;
+const observer = new MutationObserver(() => {
+    console.log('observed');
+    if (target.scrollHeight !== currentHeight) {
+        window.parent.postMessage({ height: target.scrollHeight }, '*');
+        currentHeight = target.scrollHeight;
+    }
+});
+observer.observe(target, config);

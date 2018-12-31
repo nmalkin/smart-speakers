@@ -10,6 +10,7 @@ module.exports = [
             background: './src/chrome/background/background.ts',
             content: './src/chrome/content/content.ts',
             index: './src/chrome/pages/index.ts',
+            survey: './src/chrome/pages/survey.ts',
             diagnostics: './src/chrome/pages/diagnostics.ts'
         },
         module: {
