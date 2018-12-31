@@ -77,6 +77,7 @@ function setupMocha() {
                 if (token === '') {
                     runner.abort();
                     document.getElementById('mocha')!.innerHTML =
+                        'Detected user signed out. ' +
                         'Please sign in to your Google account and try again.';
                 }
             });
@@ -377,9 +378,6 @@ function setupMocha() {
     });
 }
 
-/**
- * Confirm login status before running the given tests
- */
 function runTests(testSuite: Tests) {
     tests = testSuite;
     setupMocha();
@@ -387,6 +385,8 @@ function runTests(testSuite: Tests) {
 }
 
 function setupDiagnostics() {
+    initErrorHandling();
+
     document.getElementById('google')!.onclick = () => {
         runTests(Tests.google);
     };
@@ -394,8 +394,6 @@ function setupDiagnostics() {
         runTests(Tests.amazon);
     };
 }
-
-initErrorHandling();
 
 setupDiagnostics();
 
