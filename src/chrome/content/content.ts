@@ -184,7 +184,6 @@ const target = document.documentElement;
 const config = { childList: true, subtree: true };
 let currentHeight = target.scrollHeight;
 const observer = new MutationObserver(() => {
-    console.log('observed');
     if (target.scrollHeight !== currentHeight) {
         window.parent.postMessage({ height: target.scrollHeight }, '*');
         currentHeight = target.scrollHeight;
