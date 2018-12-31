@@ -146,7 +146,8 @@ function setupMocha() {
             });
         });
 
-        context('Checking URLs', () => {
+        // This test is disabled because we're using a data source that includes interactions without URLs.
+        context.skip('Checking URLs', () => {
             it('Check URL arrays', () => {
                 entries.forEach(entry => {
                     checkArray(
@@ -249,6 +250,53 @@ function setupMocha() {
                         );
                     }
                 });
+            });
+        });
+
+        context('Checking interactions', () => {
+            let interactions: google.GoogleInteraction[];
+            it('creates interaction objects without errors', () => {
+                interactions = google.GoogleInteraction.fromArray(entries);
+            });
+
+            it('returns valid transcripts from the interactions', () => {
+                interactions.forEach(interaction => {
+                    checkString(interaction.transcript, 'transcript');
+                });
+            });
+
+            it('returns valid timestamps from the interactions', () => {
+                interactions.forEach(interaction => {
+                    const asDate = new Date(interaction.timestamp);
+                    const year = asDate.getFullYear();
+                    if (year < 2012 || year > 2019) {
+                        throw new Error(
+                            `timestamp ${
+                                interaction.timestamp
+                            } looks like an invalid date`
+                        );
+                    }
+                });
+            });
+
+            it('returns valid urls from the interactions, if available', () => {
+                interactions.forEach(interaction => {
+                    if (interaction.recordingAvailable) {
+                        checkString(interaction.url, 'url');
+                        if (
+                            interaction.url.slice(0, 49) !==
+                            'https://myactivity.google.com/history/audio/play/'
+                        ) {
+                            throw new Error('Detected invalid URL');
+                        }
+                    }
+                });
+            });
+        });
+
+        context('End-to-end test', async () => {
+            it('the full pipeline runs without errors', async () => {
+                const result = await google.validateGoogle();
             });
         });
 

@@ -25,12 +25,14 @@ class SurveyState {
 const _state = new SurveyState();
 
 const DUMMY_INTERACTION: Interaction = {
+    recordingAvailable: true,
     url: 'https://people.eecs.berkeley.edu/~nmalkin/sample.mp3',
     transcript: 'This is a test transcript.',
     timestamp: 0
 };
 
 const ERROR_INTERACTION: Interaction = {
+    recordingAvailable: false,
     url: '',
     transcript:
         "Something went wrong. Please enter STUDY ERROR as the transcript and select any answer to remaining questions. We're sorry for the inconvenience!",

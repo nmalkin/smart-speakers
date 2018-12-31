@@ -19,7 +19,7 @@ function extractCsrfToken(text: string): string | null {
 
 async function fetchCsrfToken(): Promise<string | null> {
     const response = await fetch(
-        'https://myactivity.google.com/item?product=29'
+        'https://myactivity.google.com/item?product=31'
     );
     const restxt = await response.text();
     if (checkSignedOut(restxt)) {
@@ -34,7 +34,7 @@ async function fetchCsrfToken(): Promise<string | null> {
  */
 async function fetchActivityData(token: string): Promise<string> {
     const response = await fetch(
-        'https://myactivity.google.com/item?product=29&jspb=1',
+        'https://myactivity.google.com/item?product=31&jspb=1',
         {
             method: 'POST',
             body: `{"sig":"${token}"}`
@@ -105,6 +105,7 @@ class GoogleInteraction implements Interaction {
     public static TRANSCRIPT_INDEX = 9;
     public static URL_INDEX = 24;
     public static TIMESTAMP_INDEX = 4;
+    public static SOURCE_INDEX = 19;
 
     public static fromArray(rawJson: any[]): GoogleInteraction[] {
         if (!rawJson) {
@@ -149,6 +150,19 @@ class GoogleInteraction implements Interaction {
         return this.json[GoogleInteraction.TRANSCRIPT_INDEX][0];
     }
 
+    /**
+     * Return true if the interaction contains a recording URL
+     */
+    get recordingAvailable(): boolean {
+        if (this.json.length <= GoogleInteraction.URL_INDEX) {
+            return false;
+        } else if (!Array.isArray(this.json[GoogleInteraction.URL_INDEX])) {
+            return false;
+        }
+
+        return true;
+    }
+
     get url() {
         if (this.json.length <= GoogleInteraction.URL_INDEX) {
             throw new Error(
@@ -172,25 +186,76 @@ class GoogleInteraction implements Interaction {
 
         return parseTimestamp(this.json[GoogleInteraction.TIMESTAMP_INDEX]);
     }
+
+    /**
+     * Check whether this interaction is attributed to Google Home
+     */
+    get isGoogleHome(): boolean {
+        if (this.json.length <= GoogleInteraction.SOURCE_INDEX) {
+            return false;
+        } else if (!Array.isArray(this.json[GoogleInteraction.SOURCE_INDEX])) {
+            return false;
+        } else if (
+            !Array.isArray(this.json[GoogleInteraction.SOURCE_INDEX][0])
+        ) {
+            return false;
+        }
+
+        const source = this.json[GoogleInteraction.SOURCE_INDEX][0][0];
+        return source === 'Google Home';
+    }
+
+    /**
+     * Throw an error if this interaction isn't attributed to Google Home
+     */
+    public assertGoogleHome(): void {
+        if (this.json.length <= GoogleInteraction.SOURCE_INDEX) {
+            throw new Error(
+                `interaction missing source at ${
+                    GoogleInteraction.SOURCE_INDEX
+                }`
+            );
+        } else if (!Array.isArray(this.json[GoogleInteraction.SOURCE_INDEX])) {
+            throw new Error(
+                'unexpected format for interaction source (layer 1)'
+            );
+        } else if (
+            !Array.isArray(this.json[GoogleInteraction.SOURCE_INDEX][0])
+        ) {
+            throw new Error(
+                'unexpected format for interaction source (layer 2)'
+            );
+        }
+
+        const source = this.json[GoogleInteraction.SOURCE_INDEX][0][0];
+        if (source !== 'Google Home') {
+            throw new Error('source is not Google Home');
+        }
+    }
 }
 
 function extractData(data): Interaction[] {
     if (data !== null) {
         const interactions = GoogleInteraction.fromArray(data);
 
-        interactions.forEach(({ transcript, url, timestamp }) => {
-            // The purpose of this loop is to access the fields of the Interaction.
-            // Because the implementation of GoogleInteraction uses getters,
-            // they are lazy-evaluated, so we wouldn't know until we tried
-            // accessing them whether they're valid or not.
-            // We want to know that *now* rather than later,
-            // so we try accessing them now.
+        return interactions.filter(interaction => {
+            return interaction.isGoogleHome;
         });
-
-        return interactions;
     } else {
         return [];
     }
+}
+
+function validateInteractions(interactions: Interaction[]): void {
+    interactions.forEach(interaction => {
+        // The purpose of this loop is to access the fields of the Interaction.
+        // Because the implementation of GoogleInteraction uses getters,
+        // they are lazy-evaluated, so we wouldn't know until we tried
+        // accessing them whether they're valid or not.
+        // We want to know that *now* rather than later,
+        // so we try accessing them now.
+        const { transcript, timestamp } = interaction;
+    });
 }
 
 async function fetchAudioGoogle() {
@@ -214,6 +279,7 @@ async function validateGoogle(): Promise<ValidationResult> {
         return { status: VerificationState.error };
     }
     const interactions = extractData(data[0]);
+    validateInteractions(interactions);
     if (interactions.length > 0) {
         return { status: VerificationState.loggedIn, interactions };
     } else {

@@ -91,11 +91,17 @@ export function displayInteraction(
     interaction: Interaction,
     questionNumber: number
 ) {
-    const tag =
-        '<audio controls><source src="' +
-        interaction.url +
-        '" type="audio/mp3"></audio> <br> Transcript: ' +
-        interaction.transcript;
+    let tag: string;
+    if (interaction.recordingAvailable) {
+        tag =
+            '<audio controls><source src="' +
+            interaction.url +
+            '" type="audio/mp3"></audio> <br> Transcript: ' +
+            interaction.transcript;
+    } else {
+        tag = `Transcript: ${interaction.transcript}<br>(Audio not available)`;
+    }
+
     const targetElement = questionNumber + '_QID9';
     document
         .getElementById(targetElement)!

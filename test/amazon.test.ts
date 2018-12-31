@@ -108,7 +108,7 @@ describe('extractAudio', () => {
         const id =
             'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
         const result = extractAudio(sampleTranscript);
-        expect(result[0]).toEqual({
+        expect(result[0]).toMatchObject({
             url: `https://www.amazon.com/hz/mycd/playOption?id=${id}`,
             transcript: '“when is kingdom hearts three coming out”',
             timestamp: Date.UTC(2018, 9, 13, 20, 57, 10)

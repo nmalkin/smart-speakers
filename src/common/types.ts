@@ -42,6 +42,8 @@ export interface ValidationResult {
  * A pair of an audio recording's URL and its transcript
  */
 export interface Interaction {
+    /** Is a recording URL available for this interaction? */
+    recordingAvailable: boolean;
     url: string;
     transcript: string;
     /** Timestamp, in milliseconds */

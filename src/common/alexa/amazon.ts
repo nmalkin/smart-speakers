@@ -65,7 +65,7 @@ function getInteractionFromMatch(match: RegExpMatchArray): Interaction | null {
         const transcript = match[2];
         const url = `https://www.amazon.com/hz/mycd/playOption?id=${audioID}`;
         const timestamp = timestampFromAudioID(audioID);
-        return { url, transcript, timestamp };
+        return { url, transcript, timestamp, recordingAvailable: true };
     } else {
         return null;
     }
