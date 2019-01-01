@@ -21,6 +21,15 @@ export function reportIssue(message: string) {
     console.warn(message);
 }
 
+export function addMetadata(description, data) {
+    if (reportErrors) {
+        Sentry.addBreadcrumb({
+            message: description,
+            data
+        });
+    }
+}
+
 export async function reportExecutionTime(
     name: string,
     actions: () => Promise<any>

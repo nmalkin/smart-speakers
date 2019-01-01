@@ -9,6 +9,8 @@ import {
 import * as amazon from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
 import { initErrorHandling, reportExecutionTime } from '../common/errors';
+import * as reporting from '../common/errors';
+import { summarize } from '../../common/util';
 
 enum Tests {
     google = 'google',
@@ -291,6 +293,14 @@ function setupMocha() {
                         }
                     }
                 });
+            });
+
+            it('report distribution of interactions for analysis', () => {
+                reporting.addMetadata(
+                    'interaction summary',
+                    summarize(interactions)
+                );
+                reporting.reportIssue('report interaction summary');
             });
         });
 

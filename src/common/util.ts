@@ -1,3 +1,5 @@
+import { Interaction } from './types';
+
 /**
  * Selects an integer at random between 0 and max, if it doesn't appear in `seen`
  *
@@ -29,4 +31,22 @@ export function zip<T, U, V>(arr1: T[], arr2: U[], f: (T, U) => V): V[] {
     return arr1.map((value, index) => {
         return f(value, arr2[index]);
     });
+}
+
+export function summarize(interactions: Interaction[]): object {
+    const report = {};
+    interactions.forEach(interaction => {
+        const date = new Date(interaction.timestamp);
+        const day = date.getUTCDate();
+        const week = Math.floor(day / 7);
+        const tag = `${date.getUTCFullYear()}-${date.getUTCMonth()}.${week}`;
+        if (!(tag in report)) {
+            report[tag] = { interactions: 0, recordings: 0 };
+        }
+        report[tag].interactions += 1;
+        if (interaction.recordingAvailable) {
+            report[tag].recordings += 1;
+        }
+    });
+    return report;
 }
