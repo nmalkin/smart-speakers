@@ -8,7 +8,6 @@ import {
 } from '../../common/alexa/amazon';
 import * as amazon from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
-import { initErrorHandling, reportExecutionTime } from '../common/errors';
 import * as reporting from '../common/errors';
 import { summarize } from '../../common/util';
 
@@ -89,7 +88,7 @@ function setupMocha() {
             let response: string | null = null;
 
             it('fetches data without errors', async () => {
-                await reportExecutionTime(
+                await reporting.reportExecutionTime(
                     'fetching Google activity data',
                     async () => {
                         response = await google.fetchActivityData(token);
@@ -370,7 +369,7 @@ function setupMocha() {
             let page: string | null = null;
 
             it('fetches the activity page without errors', async () => {
-                await reportExecutionTime(
+                await reporting.reportExecutionTime(
                     'fetching Amazon activity page',
                     async () => {
                         if (token) {
@@ -443,7 +442,7 @@ function runTests(testSuite: Tests) {
 }
 
 function setupDiagnostics() {
-    initErrorHandling();
+    reporting.initErrorHandling();
 
     document.getElementById('google')!.onclick = () => {
         runTests(Tests.google);

@@ -41,7 +41,10 @@ export async function reportExecutionTime(
     const message = `Timer: ${name} took ${elapsed} milliseconds`;
 
     if (reportErrors) {
-        Sentry.captureMessage(message, Sentry.Severity.Info);
+        Sentry.withScope(scope => {
+            scope.setFingerprint([`timer: ${name}`]);
+            Sentry.captureMessage(message, Sentry.Severity.Info);
+        });
     }
     console.log(message);
 }
