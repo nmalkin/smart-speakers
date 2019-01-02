@@ -13,10 +13,10 @@ const expReg = /<audio id="audio-(.*)"> <source[\w\W]*?(?:<div class="summaryCss
  *
  * @param pageText the raw HTML of a page with the CSRF token
  */
-function matchCSRF(pageText: string): string | null {
+function matchCSRF(pageText: string): string {
     const match = pageText.match(csrfReg);
-    if (match == null) {
-        return null;
+    if (match === null) {
+        throw new Error("couldn't find CSRF token in page");
     }
     return encodeURIComponent(match[0].slice(13, -1));
 }
@@ -55,20 +55,19 @@ export function timestampFromAudioID(id: string): number {
  *
  * @see expReg
  */
-function getInteractionFromMatch(match: RegExpMatchArray): Interaction | null {
+function getInteractionFromMatch(match: RegExpMatchArray): Interaction {
     if (match.length < 3) {
-        return null;
+        throw new Error('matched interaction but missing fields');
     }
 
     const audioID = match[1];
-    if (validAudioID(audioID)) {
-        const transcript = match[2];
-        const url = `https://www.amazon.com/hz/mycd/playOption?id=${audioID}`;
-        const timestamp = timestampFromAudioID(audioID);
-        return { url, transcript, timestamp, recordingAvailable: true };
-    } else {
-        return null;
+    if (!validAudioID(audioID)) {
+        throw new Error(`encountered invalid audio ID: ${audioID}`);
     }
+    const transcript = match[2];
+    const url = `https://www.amazon.com/hz/mycd/playOption?id=${audioID}`;
+    const timestamp = timestampFromAudioID(audioID);
+    return { url, transcript, timestamp, recordingAvailable: true };
 }
 
 /**
@@ -139,14 +138,9 @@ export async function requiresPasswordUpgrade(): Promise<boolean> {
 /**
  * Fetch the overview page
  */
-async function getCSRF(): Promise<string | null> {
-    try {
-        const text = await getCSRFPage();
-        return matchCSRF(text);
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
+async function getCSRF(): Promise<string> {
+    const text = await getCSRFPage();
+    return matchCSRF(text);
 }
 
 /**
@@ -174,15 +168,15 @@ async function fetchTranscriptPage(token: string): Promise<string> {
  * Get the page with activity data and return the parsed interaction data
  * @param tok the CSRF token to use in the request
  */
-async function getAudio(tok: string): Promise<Interaction[] | null> {
+async function getAudio(tok: string): Promise<Interaction[]> {
     const text = await fetchTranscriptPage(tok);
     if (
-        text !==
+        text ===
         '{"ERROR":"{\\"success\\":false,\\"error\\":\\"CSRF_VALIDATION_FAILED\\"}"}'
     ) {
-        return extractAudio(text);
+        throw new Error('CSRF validation failed');
     }
-    return null;
+    return extractAudio(text);
 }
 
 /**
@@ -202,14 +196,8 @@ async function validateAmazon(): Promise<ValidationResult> {
     }
 
     const csrfTok = await getCSRF();
-    if (csrfTok === null) {
-        return { status: VerificationState.error };
-    }
 
     const interactions = await getAudio(csrfTok);
-    if (interactions === null) {
-        return { status: VerificationState.error };
-    }
 
     // Validate quantity of interactions
     if (interactions.length > 10) {

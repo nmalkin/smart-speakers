@@ -29,13 +29,15 @@ describe('matchCSRF', () => {
         expect(matchCSRF(sampleCSRF)).toEqual(token);
     });
 
-    test("it returns null if it can't find the token", () => {
+    test("it throws an error if it can't find the token", () => {
         const page =
             'var isDesktop = "true"; ' +
             '				var someOtherToken = "gMEhI0aNH1xlXvtJF/wsG4uemtItdFMJBHDp9xYAAAAJAAAAAFvfRMJyYXcAAAAA"; ' +
             '		        var kindleAppsSupported = false; ' +
             '		        var myxWebsiteConfig = {};';
-        expect(matchCSRF(page)).toBeNull();
+        expect(() => {
+            matchCSRF(page);
+        }).toThrowError('CSRF token');
     });
 });
 
@@ -70,18 +72,18 @@ describe('getInteractionFromMatch', () => {
         });
     });
 
-    test('it returns null if audio id is invalid', () => {
+    test('it throws an error if audio id is invalid', () => {
         const id =
             '!A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
-        expect(
-            getInteractionFromMatch(['matched text', id, 'transcript'])
-        ).toBeNull();
+        expect(() => {
+            getInteractionFromMatch(['matched text', id, 'transcript']);
+        }).toThrowError('audio ID');
     });
 
     test('it returns null if not enough components matched', () => {
-        const id = expect(
-            getInteractionFromMatch(['missing', 'matches'])
-        ).toBeNull();
+        expect(() => {
+            getInteractionFromMatch(['missing', 'matches']);
+        }).toThrowError('missing fields');
     });
 });
 
@@ -115,7 +117,7 @@ describe('extractAudio', () => {
         });
     });
 
-    test('skips action if audio ID is malformed', () => {
+    test('throws error if audio ID is malformed', () => {
         const page =
             '<audio id="audio-A3S5BH2HU6VAYF::1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1"> <source id="audioSource-A3S5BH2HU6VAYF::1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1"></audio>\n' +
             '                     <span class="playButton" id="playIcon-50" attr="A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1" onclick="playOption(\'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1\', 50)">\n' +
@@ -125,8 +127,9 @@ describe('extractAudio', () => {
             '                          “when is kingdom hearts three coming out”</div>\n' +
             '                      </span>\n';
 
-        const result = extractAudio(page);
-        expect(result).toEqual([]);
+        expect(() => {
+            extractAudio(page);
+        }).toThrowError('audio ID');
     });
 
     test('returns empty array if nothing is found', () => {

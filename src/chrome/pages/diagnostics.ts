@@ -1,4 +1,3 @@
-import { fetchCsrfToken, tryParseJson } from '../../common/google/google';
 import * as google from '../../common/google/google';
 import {
     getCSRF,
@@ -63,7 +62,7 @@ function setupMocha() {
 
         context('Fetching CSRF token', async () => {
             before('Fetch CSRF token', async () => {
-                token = await fetchCsrfToken();
+                token = await google.fetchCsrfToken();
             });
 
             it('Response matches regex', () => {
@@ -122,7 +121,7 @@ function setupMocha() {
 
         context('Parsing JSON data', () => {
             before('Parse JSON data', () => {
-                data = tryParseJson(json);
+                data = google.parseActivityData(json);
             });
 
             it('Data is valid JSON array', () => {

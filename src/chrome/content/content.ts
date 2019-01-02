@@ -86,7 +86,14 @@ async function processRecordingRequest(
 async function processVerify(state: SurveyState) {
     displayVerificationPlaceholder();
 
-    const result: ValidationResult = await state.device.validate();
+    let result: ValidationResult;
+    try {
+        result = await state.device.validate();
+    } catch (error) {
+        reportError(error);
+        result = { status: VerificationState.error };
+    }
+
     if (result.interactions) {
         state.interactions = result.interactions;
     }

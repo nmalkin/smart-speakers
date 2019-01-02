@@ -81,39 +81,32 @@ async function fetchJsonData(token: string): Promise<string> {
 }
 
 /**
- * Try to parse Google activity into valid JSON
- * We expect it to be an array, because that's what it always looks like.
- * If it isn't, we return null.
+ * Try to parse Google activity into valid JSON, then further validate that it looks as expected
  *
  * @param jsonString
- * @return the parsed data as an array, or null if something unexpected is given
+ * @return the parsed data as an array
+ * @throws error if something doesn't match our expectations
  */
-function tryParseJson(jsonString: string): GoogleActivityData | null {
-    let obj;
-    try {
-        obj = JSON.parse(jsonString);
-    } catch (e) {
-        return null;
-    }
+function parseActivityData(jsonString: string): GoogleActivityData {
+    let obj = JSON.parse(jsonString);
 
     if (!Array.isArray(obj)) {
-        return null;
+        throw new Error('unexpected activity response: data is not an array');
     } else if (obj.length !== 2) {
-        console.warn('unexpected activity response: length of array is not 2');
-        return null;
+        throw new Error(
+            'unexpected activity response: length of array is not 2'
+        );
     }
 
     obj = obj as [any, any];
     if (!Array.isArray(obj[0])) {
-        console.warn(
+        throw new Error(
             'unexpected activity response: activity list is not an array'
         );
-        return null;
     } else if (obj[1] && typeof obj[1] !== 'string') {
-        console.warn(
+        throw new Error(
             'unexpected activity response: token field is not a string'
         );
-        return null;
     }
 
     return obj;
@@ -138,7 +131,7 @@ class GoogleInteraction implements Interaction {
     public static TIMESTAMP_INDEX = 4;
     public static SOURCE_INDEX = 19;
 
-    public static fromArray(rawJson: any[]): GoogleInteraction[] {
+    public static fromArray(rawJson: GoogleActivityList): GoogleInteraction[] {
         if (!rawJson) {
             throw new Error('raw Google interaction data is empty');
         } else if (!Array.isArray(rawJson)) {
@@ -265,16 +258,12 @@ class GoogleInteraction implements Interaction {
     }
 }
 
-function extractData(data): Interaction[] {
-    if (data !== null) {
-        const interactions = GoogleInteraction.fromArray(data);
+function extractData(data: GoogleActivityList): Interaction[] {
+    const interactions = GoogleInteraction.fromArray(data);
 
-        return interactions.filter(interaction => {
-            return interaction.isGoogleHome;
-        });
-    } else {
-        return [];
-    }
+    return interactions.filter(interaction => {
+        return interaction.isGoogleHome;
+    });
 }
 
 function validateInteractions(interactions: Interaction[]): void {
@@ -306,11 +295,7 @@ async function validateGoogle(): Promise<ValidationResult> {
     const response = await fetchJsonData(csrfTok);
 
     // Try to parse the interaction data
-    const data: GoogleActivityData | null = tryParseJson(response);
-    if (data === null) {
-        return { status: VerificationState.error };
-    }
-    const activities: GoogleActivityList = data[0];
+    const [activities] = parseActivityData(response);
     const interactions = extractData(activities);
     validateInteractions(interactions);
 
@@ -335,6 +320,6 @@ export {
     GoogleInteraction,
     processActivityData,
     fetchJsonData,
-    tryParseJson,
+    parseActivityData,
     validateGoogle
 };
