@@ -6,7 +6,7 @@ import {
 } from '../../common/types';
 
 const csrfReg = /csrfToken = "(.*)"/g;
-const expReg = /<audio id="audio-(.*)"> <source[\w\W]*?(?:<div class="summaryCss">|<div class="summaryNotAvailableCss">)\s*(.*?)\s*<\/div/g;
+const expReg = /<audio id="audio-(.+)"> <source[\w\W]*?(?:<div class="summaryCss">|<div class="summaryNotAvailableCss">)\s*(.*?)\s*<\/div/g;
 
 /**
  * Extract CSRF token from page contents
@@ -62,7 +62,8 @@ function getInteractionFromMatch(match: RegExpMatchArray): Interaction {
 
     const audioID = match[1];
     if (!validAudioID(audioID)) {
-        throw new Error(`encountered invalid audio ID: ${audioID}`);
+        console.warn(`encountered invalid audio ID: ${audioID}`);
+        // TODO: this used to be an error, but I'm currently not clear if this validation is necessary, so I'm disabling it for now.
     }
     const transcript = match[2];
     const url = `https://www.amazon.com/hz/mycd/playOption?id=${audioID}`;
