@@ -5,6 +5,9 @@ import {
     Interaction
 } from '../../common/types';
 
+type GoogleActivityList = any[];
+type GoogleActivityData = [GoogleActivityList];
+
 /**
  * Check page for whether user is signed out
  * @param text contents of the activity page
@@ -85,16 +88,35 @@ async function fetchJsonData(token: string): Promise<string> {
  * @param jsonString
  * @return the parsed data as an array, or null if something unexpected is given
  */
-function tryParseJson(jsonString: string): string[] | null {
+function tryParseJson(jsonString: string): GoogleActivityData | null {
+    let obj;
     try {
-        const obj = JSON.parse(jsonString);
-        if (Array.isArray(obj)) {
-            return obj;
-        }
+        obj = JSON.parse(jsonString);
     } catch (e) {
         return null;
     }
-    return null;
+
+    if (!Array.isArray(obj)) {
+        return null;
+    } else if (obj.length !== 2) {
+        console.warn('unexpected activity response: length of array is not 2');
+        return null;
+    }
+
+    obj = obj as [any, any];
+    if (!Array.isArray(obj[0])) {
+        console.warn(
+            'unexpected activity response: activity list is not an array'
+        );
+        return null;
+    } else if (obj[1] && typeof obj[1] !== 'string') {
+        console.warn(
+            'unexpected activity response: token field is not a string'
+        );
+        return null;
+    }
+
+    return obj;
 }
 
 /**
@@ -284,11 +306,12 @@ async function validateGoogle(): Promise<ValidationResult> {
     const response = await fetchJsonData(csrfTok);
 
     // Try to parse the interaction data
-    const data = tryParseJson(response);
-    if (data === null || data.length === 0) {
+    const data: GoogleActivityData | null = tryParseJson(response);
+    if (data === null) {
         return { status: VerificationState.error };
     }
-    const interactions = extractData(data[0]);
+    const activities: GoogleActivityList = data[0];
+    const interactions = extractData(activities);
     validateInteractions(interactions);
 
     // Check eligibility
