@@ -5,11 +5,21 @@ import {
     Interaction
 } from '../../common/types';
 
-function checkSignedOut(text: string) {
+/**
+ * Check page for whether user is signed out
+ * @param text contents of the activity page
+ * @returns true if signed out
+ */
+function checkSignedOut(text: string): boolean {
     const regex = /FootprintsMyactivitySignedoutUi/;
     return text.search(regex) > -1;
 }
 
+/**
+ * Extract CSRF token from page
+ * @param text
+ * @returns csrf token or null if it couldn't be found
+ */
 function extractCsrfToken(text: string): string | null {
     const regex = /window\.HISTORY_xsrf='(\S{44})'/;
     const match = text.match(regex);
@@ -17,6 +27,10 @@ function extractCsrfToken(text: string): string | null {
     return token;
 }
 
+/**
+ * Make a request and return CSRF token
+ * @returns CSRF token, empty string if signed out, null if not found
+ */
 async function fetchCsrfToken(): Promise<string | null> {
     const response = await fetch(
         'https://myactivity.google.com/item?product=31'
@@ -63,6 +77,14 @@ async function fetchJsonData(token: string): Promise<string> {
     return processActivityData(response);
 }
 
+/**
+ * Try to parse Google activity into valid JSON
+ * We expect it to be an array, because that's what it always looks like.
+ * If it isn't, we return null.
+ *
+ * @param jsonString
+ * @return the parsed data as an array, or null if something unexpected is given
+ */
 function tryParseJson(jsonString: string): string[] | null {
     try {
         const obj = JSON.parse(jsonString);
@@ -246,22 +268,30 @@ function validateInteractions(interactions: Interaction[]): void {
 }
 
 /**
- * Validate Home user status and eligibility
+ * Validate Home user status and eligibility and get interaction data
  *
- * Determines whether a user can proceed with the survey
+ * Determines whether a user can proceed with the survey,
+ * returning this along with the interaction data.
  */
 async function validateGoogle(): Promise<ValidationResult> {
+    // Get the CSRF token if the user isn't logged out
     const csrfTok = await fetchCsrfToken();
     if (!csrfTok || csrfTok === '') {
         return { status: VerificationState.loggedOut };
     }
+
+    // Get the interaction data
     const response = await fetchJsonData(csrfTok);
+
+    // Try to parse the interaction data
     const data = tryParseJson(response);
     if (data === null || data.length === 0) {
         return { status: VerificationState.error };
     }
     const interactions = extractData(data[0]);
     validateInteractions(interactions);
+
+    // Check eligibility
     if (interactions.length > 0) {
         return { status: VerificationState.loggedIn, interactions };
     } else {
