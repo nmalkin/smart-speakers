@@ -75,19 +75,6 @@ function tryParseJson(jsonString: string): string[] | null {
     return null;
 }
 
-async function fetchDataGoogle() {
-    const token = await fetchCsrfToken();
-    if (token === null || token === '') {
-        return null;
-    }
-    const response = await fetchJsonData(token);
-    const data = tryParseJson(response);
-    if (data && data.length > 0) {
-        return data[0];
-    }
-    return null;
-}
-
 /**
  * Parse a timestamp string in microseconds to a number in milliseconds
  */
@@ -258,11 +245,6 @@ function validateInteractions(interactions: Interaction[]): void {
     });
 }
 
-async function fetchAudioGoogle() {
-    const data = await fetchDataGoogle();
-    return extractData(data);
-}
-
 /**
  * Validate Home user status and eligibility
  *
@@ -293,7 +275,7 @@ export const Google: Device = {
     validate: validateGoogle
 };
 
-export { checkSignedOut, extractCsrfToken, fetchAudioGoogle };
+export { checkSignedOut, extractCsrfToken };
 export {
     fetchCsrfToken,
     fetchActivityData,
