@@ -8,7 +8,6 @@ Qualtrics.SurveyEngine.addOnload(function disableProcees() {
     /* Place your JavaScript here to run when the page loads */
     this.disableNextButton();
     this.hideNextButton();
-    $('QID17').hide();
 });
 
 Qualtrics.SurveyEngine.addOnReady(() => {
