@@ -4,9 +4,16 @@ import {
     Device,
     Interaction
 } from '../../common/types';
+import { wait } from '../util';
 
 type GoogleActivityList = any[];
-type GoogleActivityData = [GoogleActivityList];
+type GoogleActivityResponse = [GoogleActivityList | null, string | null];
+
+/**
+ * If we find ourselves making this many requests, something may have gone wrong, and we should probably stop.
+ * Alternately, the user may have *a lot* of data, but we don't need complete coverage.
+ */
+const TOO_MANY_REQUESTS = 100;
 
 /**
  * Check page for whether user is signed out
@@ -47,14 +54,23 @@ async function fetchCsrfToken(): Promise<string | null> {
 
 /**
  * Fetch activity data
+ * (We only fetch data for Assistant by specifying its product ID.)
+ *
  * @param token CSRF token
+ * @param cursor cursor for repeated requests
  */
-async function fetchActivityData(token: string): Promise<string> {
+async function fetchActivityData(
+    token: string,
+    cursor?: string
+): Promise<string> {
+    const cursorBody = `,"ct":"${cursor}"`;
+    const body = `{"sig":"${token}"${cursor ? cursorBody : ''}}`;
+
     const response = await fetch(
         'https://myactivity.google.com/item?product=31&jspb=1',
         {
             method: 'POST',
-            body: `{"sig":"${token}"}`
+            body
         }
     );
     const restxt = await response.text();
@@ -75,8 +91,8 @@ function processActivityData(response: string): string {
  * Fetch and pre-process activity data
  * @param token CSRF token
  */
-async function fetchJsonData(token: string): Promise<string> {
-    const response = await fetchActivityData(token);
+async function fetchJsonData(token: string, cursor?: string): Promise<string> {
+    const response = await fetchActivityData(token, cursor);
     return processActivityData(response);
 }
 
@@ -87,7 +103,7 @@ async function fetchJsonData(token: string): Promise<string> {
  * @return the parsed data as an array
  * @throws error if something doesn't match our expectations
  */
-function parseActivityData(jsonString: string): GoogleActivityData {
+function parseActivityData(jsonString: string): GoogleActivityResponse {
     let obj = JSON.parse(jsonString);
 
     if (!Array.isArray(obj)) {
@@ -99,7 +115,7 @@ function parseActivityData(jsonString: string): GoogleActivityData {
     }
 
     obj = obj as [any, any];
-    if (!Array.isArray(obj[0])) {
+    if (obj[0] && !Array.isArray(obj[0])) {
         throw new Error(
             'unexpected activity response: activity list is not an array'
         );
@@ -110,6 +126,51 @@ function parseActivityData(jsonString: string): GoogleActivityData {
     }
 
     return obj;
+}
+
+/**
+ * Repeatedly query activity endpoint until there's nothing left
+ * @param csrfToken
+ * @returns all activities, concatenated
+ */
+async function downloadAllActivity(
+    csrfToken: string
+): Promise<GoogleActivityList> {
+    let response = await fetchJsonData(csrfToken);
+    let [activities, cursor] = parseActivityData(response);
+
+    if (activities === null) {
+        throw new Error('initial activity response is empty (null)');
+    }
+
+    let requests = 1;
+
+    while (cursor !== null) {
+        // Wait a little bit to avoid sending too many requests at once
+        const waitTime = 100 * Math.log10(requests);
+        await wait(waitTime);
+
+        // Fetch and parse the next round of data
+        response = await fetchJsonData(csrfToken, cursor);
+        const data = parseActivityData(response);
+        cursor = data[1];
+
+        if (data[0] === null) {
+            // We've downloaded all available data. Nothing left.
+            break;
+        } else {
+            // Add the new data to the existing one
+            activities = activities.concat(data[0]);
+        }
+
+        // If we seem to be stuck in a loop, abort
+        if (++requests > TOO_MANY_REQUESTS) {
+            console.warn('aborting fetching because we sent too many requests');
+            break;
+        }
+    }
+
+    return activities;
 }
 
 /**
@@ -292,10 +353,9 @@ async function validateGoogle(): Promise<ValidationResult> {
     }
 
     // Get the interaction data
-    const response = await fetchJsonData(csrfTok);
+    const activities = await downloadAllActivity(csrfTok);
 
-    // Try to parse the interaction data
-    const [activities] = parseActivityData(response);
+    // Extract interactions from the data
     const interactions = extractData(activities);
     validateInteractions(interactions);
 

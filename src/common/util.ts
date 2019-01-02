@@ -33,6 +33,13 @@ export function zip<T, U, V>(arr1: T[], arr2: U[], f: (T, U) => V): V[] {
     });
 }
 
+/** Wait for the specified time
+ * @param time number of milliseconds to wait
+ */
+export function wait(time: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
 export function summarize(interactions: Interaction[]): object {
     const report = {};
     interactions.forEach(interaction => {
