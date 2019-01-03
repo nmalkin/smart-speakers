@@ -231,6 +231,20 @@ async function fetchTimestamps(
 }
 
 /**
+ * Update all interactions with given timestamps
+ * @param interactions
+ * @param timestamps
+ */
+function updateInteractionTimestamps(
+    interactions: Interaction[],
+    timestamps: AmazonTimestamp[]
+): void {
+    interactions.forEach((interaction, i) => {
+        interaction.timestamp = timestamps[i].activityTimeStamp;
+    });
+}
+
+/**
  * Get the page with activity data and return the parsed interaction data
  * @param csrfToken the CSRF token to use in the request
  */
@@ -282,6 +296,7 @@ export async function getAllInteractions(
         undefined,
         BATCH_SIZE + 1
     );
+    updateInteractionTimestamps(interactions, timestamps);
 
     let batchesRequested = 1; // how many (groups of) requests we've made
 
@@ -303,6 +318,7 @@ export async function getAllInteractions(
             undefined,
             BATCH_SIZE + 1
         );
+        updateInteractionTimestamps(interactions, timestamps);
 
         // If we seem to be stuck in a loop, abort
         if (++batchesRequested > TOO_MANY_REQUESTS) {
