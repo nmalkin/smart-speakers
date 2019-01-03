@@ -363,14 +363,9 @@ function setupMocha() {
             let page: string | null = null;
 
             it('fetches the activity page without errors', async () => {
-                await reporting.reportExecutionTime(
-                    'fetching Amazon activity page',
-                    async () => {
-                        if (token) {
-                            page = await fetchTranscriptPage(token);
-                        }
-                    }
-                );
+                if (token) {
+                    page = await fetchTranscriptPage(token);
+                }
             });
 
             it('should not report that CSRF validation failed', () => {
@@ -423,7 +418,9 @@ function setupMocha() {
 
         context('testing multi-page queries', () => {
             it('succeeds on repeated queries', async () => {
-                if (!token) { return; }
+                if (!token) {
+                    return;
+                }
 
                 const interactions = await amazon.getAllInteractions(token);
                 if (interactions.length === 0) {
