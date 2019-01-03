@@ -421,6 +421,19 @@ function setupMocha() {
             });
         });
 
+        context('testing multi-page queries', () => {
+            it('succeeds on repeated queries', async () => {
+                if (!token) { return; }
+
+                const interactions = await amazon.getAllInteractions(token);
+                if (interactions.length === 0) {
+                    throw new Error(
+                        'failed to find any interactions when making multi-page queries;'
+                    );
+                }
+            });
+        });
+
         context('finished Amazon tests', () => {
             it('All tests passed!', done => {
                 done();
