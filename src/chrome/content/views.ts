@@ -16,7 +16,41 @@ function displayVerificationMessage(message: string): void {
  */
 export function displayVerificationPlaceholder(): void {
     displayVerificationMessage(
-        '<b>Status:</b><br><br>Verifying study eligibility'
+        `<b>Status:</b><br>
+        Verifying study eligibility. <br>
+        (This may take up to a couple of minutes. Thank you for your patience!)
+        <br><br>
+        <!-- spinner, courtesy of https://loading.io/css/ -->
+        <style>
+        .lds-dual-ring {
+            display: inline-block;
+            width: 64px;
+            height: 64px;
+          }
+          .lds-dual-ring:after {
+            content: " ";
+            display: block;
+            width: 46px;
+            height: 46px;
+            margin: 1px;
+            border-radius: 50%;
+            border: 5px solid #c4820e;
+            border-color: #c4820e transparent #c4820e transparent;
+            animation: lds-dual-ring 1.2s linear infinite;
+          }
+          @keyframes lds-dual-ring {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        </style>
+        <div style="width: 100%; text-align: center;">
+            <div class="lds-dual-ring"></div>
+        </div>
+        `
     );
 }
 
