@@ -18,6 +18,10 @@ const TOO_MANY_REQUESTS = 500;
 const csrfReg = /csrfToken = "(.*)"/g;
 const expReg = /<audio id="audio-(.+)"> <source[\w\W]*?(?:<div class="summaryCss">|<div class="summaryNotAvailableCss">)\s*(.*?)\s*<\/div/g;
 
+interface AlexaInteraction extends Interaction {
+    audioID: string;
+}
+
 /**
  * Extract CSRF token from page contents
  *
@@ -65,7 +69,7 @@ export function timestampFromAudioID(id: string): number {
  *
  * @see expReg
  */
-function getInteractionFromMatch(match: RegExpMatchArray): Interaction {
+function getInteractionFromMatch(match: RegExpMatchArray): AlexaInteraction {
     if (match.length < 3) {
         throw new Error('matched interaction but missing fields');
     }
@@ -78,7 +82,7 @@ function getInteractionFromMatch(match: RegExpMatchArray): Interaction {
     const transcript = match[2];
     const url = `https://www.amazon.com/hz/mycd/playOption?id=${audioID}`;
     const timestamp = timestampFromAudioID(audioID);
-    return { url, transcript, timestamp, recordingAvailable: true };
+    return { audioID, url, transcript, timestamp, recordingAvailable: true };
 }
 
 /**
@@ -87,8 +91,8 @@ function getInteractionFromMatch(match: RegExpMatchArray): Interaction {
  * @param pageText the raw HTML of the page
  * @returns an object with keys as the URL and transcripts as value, or an empty object if those could not be found
  */
-export function extractAudio(pageText: string): Interaction[] {
-    const interactions: Interaction[] = [];
+export function extractAudio(pageText: string): AlexaInteraction[] {
+    const interactions: AlexaInteraction[] = [];
     let match = expReg.exec(pageText);
     while (match) {
         const interaction = getInteractionFromMatch(match);
@@ -236,7 +240,7 @@ async function fetchTimestamps(
  * @param timestamps
  */
 function updateInteractionTimestamps(
-    interactions: Interaction[],
+    interactions: AlexaInteraction[],
     timestamps: AmazonTimestamp[]
 ): void {
     interactions.forEach((interaction, i) => {
@@ -252,7 +256,7 @@ async function getAudio(
     csrfToken: string,
     endTimestamp?: number,
     startTimestamp?: number
-): Promise<Interaction[]> {
+): Promise<AlexaInteraction[]> {
     const text = await fetchTranscriptPage(
         csrfToken,
         endTimestamp,
@@ -273,8 +277,8 @@ async function getAudio(
  */
 export async function getAllInteractions(
     csrfToken: string
-): Promise<Interaction[]> {
-    let allInteractions: Interaction[] = [];
+): Promise<AlexaInteraction[]> {
+    let allInteractions: AlexaInteraction[] = [];
 
     // Make initial request for activity data, asking at first for all time
     // i.e., beginning of time to now
