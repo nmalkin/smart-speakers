@@ -1,9 +1,9 @@
 import {
     matchCSRF,
-    validAudioID,
     getInteractionFromMatch,
     extractAudio,
-    timestampFromAudioID
+    timestampFromAudioID,
+    filterUsableInteractions
 } from '../src/common/alexa/amazon';
 
 const sampleCSRF =
@@ -41,21 +41,62 @@ describe('matchCSRF', () => {
     });
 });
 
-describe('validAudioID', () => {
-    test('it matches a valid ID', () => {
+describe('filterUsableInteractions', () => {
+    test('it filters interactions where the transcripts says Text not available', () => {
         expect(
-            validAudioID(
-                'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1'
-            )
-        ).toBeTruthy();
+            filterUsableInteractions([
+                {
+                    audioID: 'IGNORED',
+                    url: 'IGNORED',
+                    timestamp: 0,
+                    recordingAvailable: true,
+                    transcript: 'something'
+                },
+                {
+                    audioID: 'IGNORED',
+                    url: 'IGNORED',
+                    timestamp: 0,
+                    recordingAvailable: true,
+                    transcript:
+                        'Text not available – audio was not intended for Alexa'
+                },
+                {
+                    audioID: 'IGNORED',
+                    url: 'IGNORED',
+                    timestamp: 0,
+                    recordingAvailable: true,
+                    transcript: 'something else'
+                }
+            ]).length
+        ).toEqual(2);
     });
 
-    test('it rejects an invalid ID', () => {
+    test("it filters interactions even when the Text not available isn't the exact full string", () => {
         expect(
-            validAudioID(
-                '_A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1'
-            )
-        ).toBeFalsy();
+            filterUsableInteractions([
+                {
+                    audioID: 'IGNORED',
+                    url: 'IGNORED',
+                    timestamp: 0,
+                    recordingAvailable: true,
+                    transcript: 'something'
+                },
+                {
+                    audioID: 'IGNORED',
+                    url: 'IGNORED',
+                    timestamp: 0,
+                    recordingAvailable: true,
+                    transcript: 'Text not available'
+                },
+                {
+                    audioID: 'IGNORED',
+                    url: 'IGNORED',
+                    timestamp: 0,
+                    recordingAvailable: true,
+                    transcript: 'something else'
+                }
+            ]).length
+        ).toEqual(2);
     });
 });
 

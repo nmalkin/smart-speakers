@@ -35,16 +35,6 @@ function matchCSRF(pageText: string): string {
     return encodeURIComponent(match[0].slice(13, -1));
 }
 
-/**
- * Return true if the audio id is well-formed
- *
- * A well-formed audio ID is expected to have a / as its next-to-last (104th) character.
- * TODO: why? Is there anything more stable we can check for?
- */
-function validAudioID(id: string): boolean {
-    return id.length >= 104 && id[104] === '/';
-}
-
 /** Regular expression for extracting the timestamp from an audio ID */
 const timestampRegex = /^A\w+:1.0\/(20\d\d)\/(\d\d)\/(\d\d)\/(\d\d)\/\w+\/(\d\d):(\d\d):/;
 
@@ -75,10 +65,6 @@ function getInteractionFromMatch(match: RegExpMatchArray): AlexaInteraction {
     }
 
     const audioID = match[1];
-    if (!validAudioID(audioID)) {
-        console.warn(`encountered invalid audio ID: ${audioID}`);
-        // TODO: this used to be an error, but I'm currently not clear if this validation is necessary, so I'm disabling it for now.
-    }
     const transcript = match[2];
     const url = `https://www.amazon.com/hz/mycd/playOption?id=${audioID}`;
     const timestamp = timestampFromAudioID(audioID);
@@ -275,7 +261,7 @@ async function getAudio(
  * Repeatedly query activity endpoint until we get all data
  * @param csrfToken
  */
-export async function getAllInteractions(
+export async function downloadAllInteractions(
     csrfToken: string
 ): Promise<AlexaInteraction[]> {
     let allInteractions: AlexaInteraction[] = [];
@@ -335,6 +321,66 @@ export async function getAllInteractions(
 }
 
 /**
+ * Given a list of Alexa interactions, return only those we want to use in the survey
+ */
+export function filterUsableInteractions(
+    interactions: AlexaInteraction[]
+): AlexaInteraction[] {
+    /*
+    Audio+transcript pairs (interactions) returned by Amazon fall into one of several categories.
+
+    The most straightforward example is a clear request, e.g., "Alexa turn off the lights."
+    This will produce an interaction with that phrase in the transcript and an audioID
+    that looks like:
+    A4S8BH2HV9VAXD:1.0/2018/08/17/02/G090LF1964950234/40:08::TNIH_2V.c987650f-ab19-4572-824c-20d14dff2840ZXV/0
+
+    However, a lot of times, we actually skip a beat when addressing Alexa:
+    "Alexa-" [beep] "turn off the lights"
+    This actually produces two separate audio elements in Amazon's response.
+    The first one will be "turn off the lights" and have an audioID like the one above,
+    except it will end in a trailing /1.
+    The second one will have an identical audioID, except it will end in /0.
+    The URL of the audio for that one will be to the recording of you saying "hey Alexa."
+    However, the transcript will be "Text not available – audio was not intended for Alexa."
+
+    (TODO: how do multi-step interactions work? I'm not sure.)
+
+    There are also some failure cases.
+
+    If Alexa couldn't understand the command, the response will look like the second half of the last example:
+    /0 and and "Text not available" -- but there won't be a corresponding /1 with the actual request.
+
+    In some cases, the audioID might be missing the trailing /0 entirely.
+    In that case (as far as I've observed), it's another misfire,
+    and the transcript is "Text not available" again.
+    When this happens, I've also seen it followed by another /0 with the same audioID and "Text not available."
+
+    - - -
+
+    So which of these interactions do we actually want to use?
+
+    For the purposes of our survey, we prefer to ask about "real" requests
+    (or ones Alexa thinks is real),
+    so we can just filter out anything where the text isn't available.
+    This conveniently gets rid of all the edge cases above.
+    */
+    return interactions.filter(
+        interaction => !interaction.transcript.startsWith('Text not available')
+    );
+}
+
+/**
+ * Download all interactions, then return only those of them useful for the study
+ * @param csrfToken
+ */
+export async function getAllInteractions(
+    csrfToken: string
+): Promise<AlexaInteraction[]> {
+    const interactions = await downloadAllInteractions(csrfToken);
+    return filterUsableInteractions(interactions);
+}
+
+/**
  * Validate Echo user status and eligibility
  *
  * Determines whether a user can proceed with the survey
@@ -372,7 +418,6 @@ export const Alexa: Device = {
 };
 
 export {
-    validAudioID,
     getInteractionFromMatch,
     getCSRF,
     getCSRFPage,
