@@ -400,15 +400,10 @@ async function validateAmazon(): Promise<ValidationResult> {
 
     const interactions = await getAllInteractions(csrfTok);
 
-    // Validate quantity of interactions
-    if (interactions.length > 10) {
-        return {
-            status: VerificationState.loggedIn,
-            interactions
-        };
-    } else {
-        return { status: VerificationState.ineligible };
-    }
+    return {
+        status: VerificationState.loggedIn,
+        interactions
+    };
 }
 
 export const Alexa: Device = {

@@ -110,7 +110,7 @@ export function displayVerificationResults(
         displayVerificationMessage(msg + retry);
     } else if (value === VerificationState.ineligible) {
         const msg = `<b>Status:</b><br><br>
-            Unfortunately, our tests show you don't meet our study's eligibility criteria
+            Unfortunately, our tests show that you don't meet our study's eligibility criteria
             because you haven't used your smart speaker enough.
             Mistakes do happen, so please reach out to us
             if you believe this is an error.`;

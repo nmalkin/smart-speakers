@@ -359,12 +359,7 @@ async function validateGoogle(): Promise<ValidationResult> {
     const interactions = extractData(activities);
     validateInteractions(interactions);
 
-    // Check eligibility
-    if (interactions.length > 0) {
-        return { status: VerificationState.loggedIn, interactions };
-    } else {
-        return { status: VerificationState.ineligible };
-    }
+    return { status: VerificationState.loggedIn, interactions };
 }
 
 export const Google: Device = {
