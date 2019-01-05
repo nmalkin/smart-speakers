@@ -47,7 +47,7 @@
                 "tslint -c tslint.json 'src/**/*.ts' --fix",
                 "git add"
             ],
-            "*.{js,ts,json,css,md}": [
+            "*.{js,ts,json,css,md,html}": [
                 "prettier --write",
                 "git add"
             ]
