@@ -9,6 +9,7 @@ import * as amazon from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
 import * as reporting from '../common/errors';
 import { summarize } from '../../common/util';
+import { getDebugStatus, setDebugStatus } from '../common/debug';
 
 enum Tests {
     google = 'google',
@@ -446,8 +447,6 @@ function runTests(testSuite: Tests) {
 }
 
 function setupDiagnostics() {
-    reporting.initErrorHandling();
-
     document.getElementById('google')!.onclick = () => {
         runTests(Tests.google);
     };
@@ -456,6 +455,36 @@ function setupDiagnostics() {
     };
 }
 
-setupDiagnostics();
+function displayDebugStatus(status: boolean) {
+    const text = status ? 'on' : 'off';
+    document.getElementById('debug-status')!.innerText = text;
+}
+
+/**
+ * Set up the on-screen debug mode toggle
+ *
+ * Sets its initial status and updates local storage with new settings.
+ */
+async function setupDebugToggle() {
+    const debugControl = document.getElementById('debug') as HTMLInputElement;
+
+    const initialStatus = await getDebugStatus();
+    displayDebugStatus(initialStatus);
+    debugControl.checked = initialStatus;
+
+    debugControl.onchange = event => {
+        const el = event.target as HTMLInputElement;
+        const newStatus = el.checked;
+        displayDebugStatus(newStatus);
+        setDebugStatus(newStatus);
+    };
+}
+
+window.onload = () => {
+    reporting.initErrorHandling();
+
+    setupDebugToggle();
+    setupDiagnostics();
+};
 
 export { setupDiagnostics };

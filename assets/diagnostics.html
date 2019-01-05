@@ -25,10 +25,12 @@
                 <div class="container">
                     <div class="navbar-header one-line">
                         <h1>
+                            <a href="index.html">
                             <span class="b-wordmark" aria-hidden="true"></span
                             ><span class="dept-title one"
                                 >Smart Speaker Study</span
                             >
+                            </a>
                         </h1>
                     </div>
                 </div>
@@ -37,7 +39,24 @@
 
         <div id="content" role="main">
             <div class="container" style="height: 100%; overflow:hidden">
-                <h1>Diagnostics</h1>
+                <h2>Debug mode</h2>
+                <p>
+                    Turn on debug mode to go through the survey even if you're
+                    not signed in to a Google or Amazon account.
+                </p>
+                <div class="checkbox">
+                    <label style="font-weight: bold">
+                        <input id="debug" type="checkbox" /> Debug mode is
+                        <span id="debug-status"></span>
+                    </label>
+                </div>
+
+                <hr>
+
+                <h2>Diagnostics</h2>
+                <p>
+                    The purpose of the diagnostics tool is to test the interaction between our extension and your Amazon or Google account. We might ask you to run it if something went wrong during the study or simply to test that everything is working correctly. In either case, thank you for your help!
+                </p>
                 <p>
                     Start a diagnostics test by clicking the appropriate button
                     for your device.
