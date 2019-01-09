@@ -1,6 +1,19 @@
 import { initErrorHandling } from '../common/errors';
 
 /**
+ * Load and display the MOTD
+ */
+function loadMOTD() {
+    fetch('https://b3s.research.icsi.institute/motd.html')
+        .then(response => {
+            return response.text();
+        })
+        .then(text => {
+            document.getElementById('motd')!.innerHTML = text;
+        });
+}
+
+/**
  * Try accessing the study URLs and show an error if that fails
  */
 function testPermissions() {
@@ -35,5 +48,6 @@ function testPermissions() {
 
 window.onload = () => {
     initErrorHandling();
+    loadMOTD();
     testPermissions();
 };
