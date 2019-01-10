@@ -252,7 +252,12 @@ function setupMocha() {
         context('Checking interactions', () => {
             let interactions: google.GoogleInteraction[];
             it('creates interaction objects without errors', () => {
-                interactions = google.GoogleInteraction.fromArray(entries);
+                const result = google.GoogleInteraction.fromArray(entries);
+                interactions = result[0];
+                const errors = result[1];
+                if (errors.length > 0) {
+                    throw errors[0];
+                }
             });
 
             it('returns valid transcripts from the interactions', () => {
@@ -301,6 +306,9 @@ function setupMocha() {
         context('End-to-end test', async () => {
             it('the full pipeline runs without errors', async () => {
                 const result = await google.validateGoogle();
+                if (result.errors && result.errors.length > 0) {
+                    throw result.errors[0];
+                }
             });
         });
 
@@ -387,7 +395,7 @@ function setupMocha() {
             it('expects to extract at least one interaction', () => {
                 let interactions: Interaction[] = [];
                 if (page !== null) {
-                    interactions = extractAudio(page);
+                    [interactions] = extractAudio(page);
                 }
 
                 if (interactions.length === 0) {
@@ -400,7 +408,7 @@ function setupMocha() {
             it('finds reasonable timestamps for interactions', () => {
                 let interactions: Interaction[] = [];
                 if (page !== null) {
-                    interactions = extractAudio(page);
+                    [interactions] = extractAudio(page);
                 }
 
                 interactions.forEach(interaction => {
@@ -415,19 +423,40 @@ function setupMocha() {
                     }
                 });
             });
+
+            it("didn't encounter any errors when extracting audio", () => {
+                if (page !== null) {
+                    const [, errors] = extractAudio(page);
+                    if (errors.length > 0) {
+                        throw errors[0];
+                    }
+                }
+            });
         });
 
         context('testing multi-page queries', () => {
+            let aggregatedErrors: Error[] = [];
+
             it('succeeds on repeated queries', async () => {
                 if (!token) {
                     return;
                 }
 
-                const interactions = await amazon.getAllInteractions(token);
+                const [interactions, errors] = await amazon.getAllInteractions(
+                    token
+                );
                 if (interactions.length === 0) {
                     throw new Error(
                         'failed to find any interactions when making multi-page queries;'
                     );
+                }
+
+                aggregatedErrors = errors;
+            });
+
+            it("didn't encounter any errors across all of the data", () => {
+                if (aggregatedErrors.length > 0) {
+                    throw aggregatedErrors[0];
                 }
             });
         });

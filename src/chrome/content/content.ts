@@ -95,13 +95,15 @@ function checkEligibility(result: ValidationResult): void {
     // Check eligibility
     // A user is eligible if they have:
     // 1) At least 30 recordings
-    if ( (!result.interactions) || (result.interactions.length < 30)) {
+    if (!result.interactions || result.interactions.length < 30) {
         result.status = VerificationState.ineligible;
         return;
     }
 
     // 2) Had the device for at least 30 days
-    const oldestInteraction = result.interactions.map(interaction => interaction.timestamp).sort()[0];
+    const oldestInteraction = result.interactions
+        .map(interaction => interaction.timestamp)
+        .sort()[0];
     const elapsedMilliseconds = Date.now() - oldestInteraction;
     const elapsedDays = elapsedMilliseconds / (1000 * 60 * 60 * 24);
     if (elapsedDays < 30) {
@@ -129,6 +131,15 @@ async function processVerify(state: SurveyState) {
 
     if (result.interactions) {
         state.interactions = result.interactions;
+    }
+
+    if (result.errors) {
+        console.error(
+            'Errors happened earlier, while processing interactions.'
+        );
+        result.errors.forEach(error => {
+            reportError(error);
+        });
     }
 
     // If debug is on, always report status as logged in

@@ -131,11 +131,13 @@ function parseActivityData(jsonString: string): GoogleActivityResponse {
 /**
  * Repeatedly query activity endpoint until there's nothing left
  * @param csrfToken
- * @returns all activities, concatenated
+ * @returns all activities, concatenated; plus any errors encountered
  */
 async function downloadAllActivity(
     csrfToken: string
-): Promise<GoogleActivityList> {
+): Promise<[GoogleActivityList, Error[]]> {
+    const errors: Error[] = [];
+
     let response = await fetchJsonData(csrfToken);
     let [activities, cursor] = parseActivityData(response);
 
@@ -151,18 +153,22 @@ async function downloadAllActivity(
         await wait(waitTime);
 
         // Fetch and parse the next round of data
-        response = await fetchJsonData(csrfToken, cursor);
-        const data = parseActivityData(response);
-        cursor = data[1];
+        try {
+            response = await fetchJsonData(csrfToken, cursor);
+            const data = parseActivityData(response);
+            cursor = data[1];
 
-        if (data[0] === null) {
-            // We've downloaded all available data. Nothing left.
+            if (data[0] === null) {
+                // We've downloaded all available data. Nothing left.
+                break;
+            } else {
+                // Add the new data to the existing one
+                activities = activities.concat(data[0]);
+            }
+        } catch (error) {
+            errors.push(error);
             break;
-        } else {
-            // Add the new data to the existing one
-            activities = activities.concat(data[0]);
         }
-
         // If we seem to be stuck in a loop, abort
         if (++requests > TOO_MANY_REQUESTS) {
             console.warn('aborting fetching because we sent too many requests');
@@ -170,7 +176,7 @@ async function downloadAllActivity(
         }
     }
 
-    return activities;
+    return [activities, errors];
 }
 
 /**
@@ -192,7 +198,9 @@ class GoogleInteraction implements Interaction {
     public static TIMESTAMP_INDEX = 4;
     public static SOURCE_INDEX = 19;
 
-    public static fromArray(rawJson: GoogleActivityList): GoogleInteraction[] {
+    public static fromArray(
+        rawJson: GoogleActivityList
+    ): [GoogleInteraction[], Error[]] {
         if (!rawJson) {
             throw new Error('raw Google interaction data is empty');
         } else if (!Array.isArray(rawJson)) {
@@ -201,10 +209,20 @@ class GoogleInteraction implements Interaction {
             );
         }
 
-        return rawJson.map(item => {
-            const interaction = new GoogleInteraction(item);
-            return interaction;
-        });
+        const errors: Error[] = [];
+        const interactions: GoogleInteraction[] = rawJson
+            .map(item => {
+                try {
+                    return new GoogleInteraction(item);
+                } catch (error) {
+                    errors.push(error);
+                }
+            })
+            .filter(
+                (interaction): interaction is GoogleInteraction =>
+                    interaction !== undefined
+            );
+        return [interactions, errors];
     }
 
     private json: any[];
@@ -319,15 +337,19 @@ class GoogleInteraction implements Interaction {
     }
 }
 
-function extractData(data: GoogleActivityList): Interaction[] {
-    const interactions = GoogleInteraction.fromArray(data);
+function extractData(data: GoogleActivityList): [GoogleInteraction[], Error[]] {
+    const [interactions, errors] = GoogleInteraction.fromArray(data);
 
-    return interactions.filter(interaction => {
-        return interaction.isGoogleHome;
-    });
+    return [
+        interactions.filter(interaction => {
+            return interaction.isGoogleHome;
+        }),
+        errors
+    ];
 }
 
-function validateInteractions(interactions: Interaction[]): void {
+function validateInteractions(interactions: Interaction[]): Error[] {
+    const errors: Error[] = [];
     interactions.forEach(interaction => {
         // The purpose of this loop is to access the fields of the Interaction.
         // Because the implementation of GoogleInteraction uses getters,
@@ -335,8 +357,13 @@ function validateInteractions(interactions: Interaction[]): void {
         // accessing them whether they're valid or not.
         // We want to know that *now* rather than later,
         // so we try accessing them now.
-        const { transcript, timestamp } = interaction;
+        try {
+            const { transcript, timestamp } = interaction;
+        } catch (error) {
+            errors.push(error);
+        }
     });
+    return errors;
 }
 
 /**
@@ -353,13 +380,15 @@ async function validateGoogle(): Promise<ValidationResult> {
     }
 
     // Get the interaction data
-    const activities = await downloadAllActivity(csrfTok);
+    const [activities, downloadErrors] = await downloadAllActivity(csrfTok);
 
     // Extract interactions from the data
-    const interactions = extractData(activities);
-    validateInteractions(interactions);
+    const [interactions, extractErrors] = extractData(activities);
+    const validationErrors = validateInteractions(interactions);
 
-    return { status: VerificationState.loggedIn, interactions };
+    const errors = downloadErrors.concat(extractErrors, validationErrors);
+
+    return { status: VerificationState.loggedIn, interactions, errors };
 }
 
 export const Google: Device = {

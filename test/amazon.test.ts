@@ -130,9 +130,7 @@ describe('getInteractionFromMatch', () => {
 
 describe('extractAudio', () => {
     test('returns the correct transcript', () => {
-        const id =
-            'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
-        const result = extractAudio(sampleTranscript);
+        const [result] = extractAudio(sampleTranscript);
         expect(result[0].transcript).toEqual(
             '“when is kingdom hearts three coming out”'
         );
@@ -141,7 +139,7 @@ describe('extractAudio', () => {
     test('returns the correct URL', () => {
         const id =
             'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
-        const result = extractAudio(sampleTranscript);
+        const [result] = extractAudio(sampleTranscript);
         expect(result[0].url).toEqual(
             `https://www.amazon.com/hz/mycd/playOption?id=${id}`
         );
@@ -150,7 +148,7 @@ describe('extractAudio', () => {
     test('returns the correct interaction', () => {
         const id =
             'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1';
-        const result = extractAudio(sampleTranscript);
+        const [result] = extractAudio(sampleTranscript);
         expect(result[0]).toMatchObject({
             url: `https://www.amazon.com/hz/mycd/playOption?id=${id}`,
             transcript: '“when is kingdom hearts three coming out”',
@@ -158,7 +156,7 @@ describe('extractAudio', () => {
         });
     });
 
-    test('throws error if audio ID is malformed', () => {
+    test('returns an error if audio ID is malformed', () => {
         const page =
             '<audio id="audio-A3S5BH2HU6VAYF::1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1"> <source id="audioSource-A3S5BH2HU6VAYF::1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1"></audio>\n' +
             '                     <span class="playButton" id="playIcon-50" attr="A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1" onclick="playOption(\'A3S5BH2HU6VAYF:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1\', 50)">\n' +
@@ -168,9 +166,8 @@ describe('extractAudio', () => {
             '                          “when is kingdom hearts three coming out”</div>\n' +
             '                      </span>\n';
 
-        expect(() => {
-            extractAudio(page);
-        }).toThrowError('audio ID');
+        const [, errors] = extractAudio(page);
+        expect(errors.length).toBeGreaterThan(0);
     });
 
     test('handles TextClient audioIDs', () => {
@@ -182,11 +179,13 @@ describe('extractAudio', () => {
             '                    <div class="summaryCss">\n' +
             '                          “this is a textclient example”</div>\n' +
             '                      </span>\n';
-        expect(extractAudio(page)).toBeTruthy();
+        const [interactions] = extractAudio(page);
+        expect(interactions.length).toBeGreaterThan(0);
     });
 
     test('returns empty array if nothing is found', () => {
-        expect(extractAudio('a test string without audio')).toEqual([]);
+        const [interactions] = extractAudio('a test string without audio');
+        expect(interactions).toEqual([]);
     });
 });
 

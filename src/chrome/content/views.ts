@@ -110,10 +110,16 @@ export function displayVerificationResults(
         displayVerificationMessage(msg + retry);
     } else if (value === VerificationState.ineligible) {
         const msg = `<b>Status:</b><br><br>
-            Unfortunately, our tests show that you don't meet our study's eligibility criteria
-            because you haven't used your smart speaker enough.
-            Mistakes do happen, so please reach out to us
-            if you believe this is an error.`;
+            Unfortunately, our tests show that you don't meet our study's eligibility criteria.
+            Specifically, you've had your smart speaker for less than a month
+            or you've used it fewer than 30 times.
+            If that sounds incorrect, then it's an error
+            either on our end
+            or on the side of Amazon/Google
+            (we check with them for this information).
+            Either way, we're sorry for the inconvenience!
+            If you'd like, you can reach out to us,
+            and we'll try to figure out what happened.`;
         displayVerificationMessage(msg);
     } else {
         const msg = `<b>Status:</b><br><br>

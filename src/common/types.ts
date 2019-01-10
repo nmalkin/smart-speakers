@@ -36,6 +36,7 @@ export enum VerificationState {
 export interface ValidationResult {
     status: VerificationState;
     interactions?: Interaction[];
+    errors?: Error[];
 }
 
 /**

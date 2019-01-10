@@ -77,8 +77,9 @@ function getInteractionFromMatch(match: RegExpMatchArray): AlexaInteraction {
  * @param pageText the raw HTML of the page
  * @returns an object with keys as the URL and transcripts as value, or an empty object if those could not be found
  */
-export function extractAudio(pageText: string): AlexaInteraction[] {
+export function extractAudio(pageText: string): [AlexaInteraction[], Error[]] {
     const interactions: AlexaInteraction[] = [];
+    const errors: Error[] = [];
 
     // We reuse a global RegExp object to execute our searches.
     // However, RegExp is stateful, so it may currently have the state from a previous invocation of this (or another) function.
@@ -89,13 +90,17 @@ export function extractAudio(pageText: string): AlexaInteraction[] {
 
     let match = expReg.exec(pageText);
     while (match) {
-        const interaction = getInteractionFromMatch(match);
-        if (interaction) {
+        try {
+            const interaction = getInteractionFromMatch(match);
             interactions.push(interaction);
+        } catch (error) {
+            errors.push(error);
         }
+
         match = expReg.exec(pageText);
     }
-    return interactions;
+
+    return [interactions, errors];
 }
 
 /**
@@ -250,7 +255,7 @@ async function getAudio(
     csrfToken: string,
     endTimestamp?: number,
     startTimestamp?: number
-): Promise<AlexaInteraction[]> {
+): Promise<[AlexaInteraction[], Error[]]> {
     const text = await fetchTranscriptPage(
         csrfToken,
         endTimestamp,
@@ -271,15 +276,17 @@ async function getAudio(
  */
 export async function downloadAllInteractions(
     csrfToken: string
-): Promise<AlexaInteraction[]> {
+): Promise<[AlexaInteraction[], Error[]]> {
     let allInteractions: AlexaInteraction[] = [];
+    let allErrors: Error[] = [];
 
     // Make initial request for activity data, asking at first for all time
     // i.e., beginning of time to now
     // We won't get everything, though: only up to BATCH_SIZE interactions.
     let endTimestamp = Date.now();
-    let interactions = await getAudio(csrfToken, endTimestamp);
+    let [interactions, currentErrors] = await getAudio(csrfToken, endTimestamp);
     allInteractions = allInteractions.concat(interactions);
+    allErrors = allErrors.concat(currentErrors);
 
     // Are there more interactions available?
     // To find out, we will query for the same time range but with a batch size of n+1.
@@ -308,15 +315,33 @@ export async function downloadAllInteractions(
         endTimestamp = earliestInteraction.activityTimeStamp;
 
         // Make the next pair of requests
-        interactions = await getAudio(csrfToken, endTimestamp);
-        allInteractions = allInteractions.concat(interactions);
-        timestamps = await fetchTimestamps(
-            csrfToken,
-            endTimestamp,
-            undefined,
-            BATCH_SIZE + 1
-        );
-        updateInteractionTimestamps(interactions, timestamps);
+        try {
+            [interactions, currentErrors] = await getAudio(
+                csrfToken,
+                endTimestamp
+            );
+            allInteractions = allInteractions.concat(interactions);
+            allErrors = allErrors.concat(currentErrors);
+
+            timestamps = await fetchTimestamps(
+                csrfToken,
+                endTimestamp,
+                undefined,
+                BATCH_SIZE + 1
+            );
+            updateInteractionTimestamps(interactions, timestamps);
+        } catch (error) {
+            // If something happened during the latest round of downloads,
+            // we'd still like to keep all our previous results.
+            // So we catch it safely and save it.
+            allErrors.push(error);
+            // However, an error thrown at this level wasn't something we anticipated
+            // (e.g., a parse failure).
+            // (Maybe a network request failed?)
+            // So it's probably prudent to stop trying to download more data.
+            // Hopefully we've collected enough at this point to be able to go ahead with the study.
+            break;
+        }
 
         // If we seem to be stuck in a loop, abort
         if (++batchesRequested > TOO_MANY_REQUESTS) {
@@ -325,7 +350,7 @@ export async function downloadAllInteractions(
         }
     }
 
-    return allInteractions;
+    return [allInteractions, allErrors];
 }
 
 /**
@@ -383,9 +408,9 @@ export function filterUsableInteractions(
  */
 export async function getAllInteractions(
     csrfToken: string
-): Promise<AlexaInteraction[]> {
-    const interactions = await downloadAllInteractions(csrfToken);
-    return filterUsableInteractions(interactions);
+): Promise<[AlexaInteraction[], Error[]]> {
+    const [interactions, errors] = await downloadAllInteractions(csrfToken);
+    return [filterUsableInteractions(interactions), errors];
 }
 
 /**
@@ -406,11 +431,12 @@ async function validateAmazon(): Promise<ValidationResult> {
 
     const csrfTok = await getCSRF();
 
-    const interactions = await getAllInteractions(csrfTok);
+    const [interactions, errors] = await getAllInteractions(csrfTok);
 
     return {
         status: VerificationState.loggedIn,
-        interactions
+        interactions,
+        errors
     };
 }
 
