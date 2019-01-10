@@ -9,7 +9,7 @@ import * as amazon from '../../common/alexa/amazon';
 import { Interaction } from '../../common/types';
 import * as reporting from '../common/errors';
 import { summarize } from '../../common/util';
-import { getDebugStatus, setDebugStatus } from '../common/debug';
+import * as debug from '../common/debug';
 
 enum Tests {
     google = 'google',
@@ -497,7 +497,7 @@ function displayDebugStatus(status: boolean) {
 async function setupDebugToggle() {
     const debugControl = document.getElementById('debug') as HTMLInputElement;
 
-    const initialStatus = await getDebugStatus();
+    const initialStatus = await debug.getDebugStatus();
     displayDebugStatus(initialStatus);
     debugControl.checked = initialStatus;
 
@@ -505,14 +505,38 @@ async function setupDebugToggle() {
         const el = event.target as HTMLInputElement;
         const newStatus = el.checked;
         displayDebugStatus(newStatus);
-        setDebugStatus(newStatus);
+        debug.setDebugStatus(newStatus);
     };
+}
+
+/**
+ * Send a reporting test
+ */
+async function reportingTest() {
+    if (await debug.getStoredDevEnvironmentStatus()) {
+        alert('No error reports are sent in development mode.');
+    } else if (window.confirm('Send test report now?')) {
+        reporting.reportIssue('error reporting test');
+        const testButton = document.getElementById(
+            'test_error'
+        ) as HTMLButtonElement;
+        testButton.disabled = true;
+        testButton.innerText = 'Sent';
+    }
+}
+
+/**
+ * Set up the error reporting test
+ */
+async function setupReportingTest() {
+    document.getElementById('test_error')!.onclick = reportingTest;
 }
 
 window.onload = () => {
     reporting.initErrorHandling();
 
     setupDebugToggle();
+    setupReportingTest();
     setupDiagnostics();
 };
 
