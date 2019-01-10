@@ -36,7 +36,7 @@ function matchCSRF(pageText: string): string {
 }
 
 /** Regular expression for extracting the timestamp from an audio ID */
-const timestampRegex = /^A\w+:1.0\/(20\d\d)\/(\d\d)\/(\d\d)\/(\d\d)\/\w+\/(\d\d):(\d\d):/;
+const timestampRegex = /^\w+:1.0\/(20\d\d)\/(\d\d)\/(\d\d)\/(\d\d)\/\w+\/(\d\d):(\d\d):/;
 
 /**
  * Given an Amazon audio ID, extracts the approximate timestamp for that interaction

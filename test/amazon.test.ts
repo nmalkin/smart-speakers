@@ -173,6 +173,18 @@ describe('extractAudio', () => {
         }).toThrowError('audio ID');
     });
 
+    test('handles TextClient audioIDs', () => {
+        const page =
+            '<audio id="audio-TextClient:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1"> <source id="audioSource-TextClient:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1"></audio>\n' +
+            '                     <span class="playButton" id="playIcon-50" attr="TextClient:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1" onclick="playOption(\'TextClient:1.0/2018/10/13/20/G090LF1181840BFC/57:10::TNIH_2V.a9baef64-be15-4776-8e84-f1830509730bZXV/1\', 50)">\n' +
+            '                     <img id="playOptionIcon-50" style="width: 20px;" src = "https://m.media-amazon.com/images/G/01/digital/fiona/myx/ic_play_normal._CB1531740338_.png" />\n' +
+            '                     </span>\n' +
+            '                    <div class="summaryCss">\n' +
+            '                          “this is a textclient example”</div>\n' +
+            '                      </span>\n';
+        expect(extractAudio(page)).toBeTruthy();
+    });
+
     test('returns empty array if nothing is found', () => {
         expect(extractAudio('a test string without audio')).toEqual([]);
     });
