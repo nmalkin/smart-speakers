@@ -79,6 +79,14 @@ function getInteractionFromMatch(match: RegExpMatchArray): AlexaInteraction {
  */
 export function extractAudio(pageText: string): AlexaInteraction[] {
     const interactions: AlexaInteraction[] = [];
+
+    // We reuse a global RegExp object to execute our searches.
+    // However, RegExp is stateful, so it may currently have the state from a previous invocation of this (or another) function.
+    // This will affect the subsequent searches, because it may skip over matches.
+    // (See, for example, https://stackoverflow.com/q/1520800)
+    // We therefore need to reset it.
+    expReg.lastIndex = 0;
+
     let match = expReg.exec(pageText);
     while (match) {
         const interaction = getInteractionFromMatch(match);
