@@ -40,6 +40,31 @@ const ERROR_INTERACTION: Interaction = {
 };
 
 /**
+ * Select a valid recording
+ *
+ * Processes the current state to find valid recording we haven't seen
+ *
+ * @param state the current state of the survey
+ */
+async function selectValid(state: SurveyState): Promise<Interaction> {
+    let foundValid = false;
+    let interaction;
+    while (!foundValid) {
+        const index = selectUnseen(state.interactions.length, state.seen);
+        state.seen.push(index);
+        interaction = state.interactions[index];
+        const response = await fetch(interaction.url);
+        const contentType = response.headers.get('content-type');
+
+        /* checks to make sure the response has the standard audio content-type header */
+        foundValid =
+            contentType !== null &&
+            contentType.indexOf('audio/wav;charset=UTF-8') !== -1;
+    }
+    return interaction;
+}
+
+/**
  * Process request for a recording
  *
  * Selects a recording and adds it to the survey page
@@ -60,9 +85,7 @@ async function processRecordingRequest(
         // Choose a new interaction
         try {
             // Try to get an interaction that hasn't been seen before
-            const index = selectUnseen(state.interactions.length, state.seen);
-            state.seen.push(index);
-            interaction = state.interactions[index];
+            interaction = await selectValid(state);
         } catch {
             // All available interactions have already been seen!
             if (await getDebugStatus()) {
