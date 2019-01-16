@@ -53,13 +53,17 @@ async function selectValid(state: SurveyState): Promise<Interaction> {
         const index = selectUnseen(state.interactions.length, state.seen);
         state.seen.push(index);
         interaction = state.interactions[index];
+        if (!interaction.recordingAvailable) {
+            break;
+        }
         const response = await fetch(interaction.url);
         const contentType = response.headers.get('content-type');
 
         /* checks to make sure the response has the standard audio content-type header */
         foundValid =
             contentType !== null &&
-            contentType.indexOf('audio/wav;charset=UTF-8') !== -1;
+            (contentType.indexOf('audio/wav;charset=UTF-8') !== -1 ||
+                contentType.indexOf('audio/mpeg') !== -1);
     }
     return interaction;
 }
