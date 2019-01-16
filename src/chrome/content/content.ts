@@ -60,10 +60,7 @@ async function selectValid(state: SurveyState): Promise<Interaction> {
         const contentType = response.headers.get('content-type');
 
         /* checks to make sure the response has the standard audio content-type header */
-        foundValid =
-            contentType !== null &&
-            (contentType.indexOf('audio/wav;charset=UTF-8') !== -1 ||
-                contentType.indexOf('audio/mpeg') !== -1);
+        foundValid = contentType !== null;
     }
     return interaction;
 }
