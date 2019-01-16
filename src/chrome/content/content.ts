@@ -239,6 +239,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
     try {
         await processMessages(event);
     } catch (error) {
+        reportError(error);
         const message = `We're really sorry, but something in our extension went wrong. This is unexpected, and we'll try to fix the problem as soon as possible.
 
 In some cases, you may be able to continue, and everything will keep working. However, it's likely other things will break too.
@@ -247,7 +248,6 @@ We suggest pausing the study and sending an email either through the Mechanical 
 
 We apologize for the inconvenience!`;
         alert(message);
-        reportError(error);
     }
 }
 
