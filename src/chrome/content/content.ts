@@ -1,9 +1,9 @@
 import {
-    Device,
     Interaction,
     ValidationResult,
     VerificationState
 } from '../../common/types';
+import { Device } from '../../common/device';
 import { Google } from '../../common/google/google';
 import { Alexa } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';

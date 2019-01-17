@@ -1,9 +1,9 @@
 import {
     ValidationResult,
     VerificationState,
-    Interaction,
-    Device
+    Interaction
 } from '../../common/types';
+import { Device } from '../device';
 import { wait } from '../util';
 
 /** Batch size when querying Amazon */

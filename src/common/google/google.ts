@@ -1,9 +1,9 @@
 import {
     ValidationResult,
     VerificationState,
-    Device,
     Interaction
 } from '../../common/types';
+import { Device } from '../device';
 import { wait } from '../util';
 
 type GoogleActivityList = any[];
