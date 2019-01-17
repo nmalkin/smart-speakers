@@ -1,3 +1,17 @@
+import { getDebugStatus } from '../common/debug';
+
+const SURVEY_URL =
+    'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05?test=';
+
+// Reflect debug status in survey URL
+window.onload = async () => {
+    const debug: boolean = await getDebugStatus();
+    const debugStr: string = String(debug);
+    const url = SURVEY_URL + debugStr;
+    const frame = document.getElementById('survey') as HTMLIFrameElement;
+    frame.src = url;
+};
+
 // Dynamically adjust frame size.
 // The new frame size is sent by the enclosed frame.
 window.addEventListener(
