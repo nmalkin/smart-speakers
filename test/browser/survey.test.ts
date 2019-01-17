@@ -3,7 +3,8 @@ import * as puppeteer from 'puppeteer';
 import { getBrowser } from './browser';
 import { readFileSync } from 'fs';
 
-const SURVEY_URL = 'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05';
+const SURVEY_URL =
+    'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05?test=true';
 
 /** Default timeout for tests, in ms */
 const DEFAULT_TIMEOUT = 5000;
