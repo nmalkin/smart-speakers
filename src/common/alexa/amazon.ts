@@ -441,6 +441,7 @@ async function validateAmazon(): Promise<ValidationResult> {
 }
 
 export const Alexa: Device = {
+    serialize: () => 'alexa',
     accountName: 'Amazon',
     loginURL: upgradeUrl,
     validate: validateAmazon

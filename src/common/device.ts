@@ -1,4 +1,6 @@
 import { ValidationResult } from './types';
+import { Alexa } from './alexa/amazon';
+import { Google } from './google/google';
 
 /**
  * A Device used in our study
@@ -17,4 +19,27 @@ export interface Device {
      * Validate the login status of the current user
      */
     validate(): Promise<ValidationResult>;
+
+    /**
+     * Produce an object representing this device
+     */
+    serialize(): any;
+}
+
+/**
+ * Given a serialized instance of a device, returns the corresponding object
+ *
+ * This relies on us knowing that there are only two devices
+ * and therefore breaks the Device abstractions.
+ * Still, it *is* convenient.
+ */
+export function unserializeDevice(serializedDevice: any): Device {
+    switch (serializedDevice) {
+        case Alexa.serialize():
+            return Alexa;
+        case Google.serialize():
+            return Google;
+        default:
+            throw new Error(`unknown device ${serializedDevice}`);
+    }
 }

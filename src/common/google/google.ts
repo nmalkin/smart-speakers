@@ -392,6 +392,7 @@ async function validateGoogle(): Promise<ValidationResult> {
 }
 
 export const Google: Device = {
+    serialize: () => 'google',
     accountName: 'Google',
     loginURL: 'https://accounts.google.com/ServiceLogin',
     validate: validateGoogle

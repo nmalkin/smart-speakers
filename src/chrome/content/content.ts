@@ -106,6 +106,20 @@ async function processRecordingRequest(
 }
 
 /**
+ * Tell the background script to perform validation, then return the result
+ */
+async function validate(device: Device): Promise<ValidationResult> {
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+            { type: 'validate', device: device.serialize() },
+            response => {
+                resolve(response);
+            }
+        );
+    });
+}
+
+/**
  * Process 'verify' message
  */
 async function processVerify(state: SurveyState) {
@@ -113,8 +127,7 @@ async function processVerify(state: SurveyState) {
 
     let result: ValidationResult;
     try {
-        result = await state.device.validate();
-        checkEligibility(result);
+        result = await validate(state.device);
     } catch (error) {
         reportError(error);
         result = { status: VerificationState.error };
