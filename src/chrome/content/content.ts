@@ -56,12 +56,21 @@ async function selectValid(state: SurveyState): Promise<Interaction> {
         if (!interaction.recordingAvailable) {
             break;
         }
-        const response = await fetch(interaction.url);
-        const contentType = response.headers.get('content-type');
 
-        /* checks to make sure the response has the standard audio content-type header */
-        foundValid = contentType !== null;
+        try {
+            const response = await fetch(interaction.url);
+            const contentType = response.headers.get('content-type');
+
+            /* checks to make sure the response has the standard audio content-type header */
+            foundValid = contentType !== null;
+        } catch (error) {
+            // Something weird happened when trying to fetch the recording URL.
+            // Report the error and try to find another recording,
+            // in case there's actually something wrong with this one.
+            reportError(error);
+        }
     }
+
     return interaction;
 }
 
