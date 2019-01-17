@@ -1,9 +1,9 @@
 import {
     ValidationResult,
     VerificationState,
-    Interaction,
-    Device
+    Interaction
 } from '../../common/types';
+import { Device } from '../device';
 import { wait } from '../util';
 
 /** Batch size when querying Amazon */
@@ -441,6 +441,7 @@ async function validateAmazon(): Promise<ValidationResult> {
 }
 
 export const Alexa: Device = {
+    serialize: () => 'alexa',
     accountName: 'Amazon',
     loginURL: upgradeUrl,
     validate: validateAmazon

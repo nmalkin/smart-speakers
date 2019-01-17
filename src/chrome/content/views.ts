@@ -1,4 +1,5 @@
-import { VerificationState, Interaction, Device } from '../../common/types';
+import { VerificationState, Interaction } from '../../common/types';
+import { Device } from '../../common/device';
 import { summarize } from '../../common/util';
 
 /**

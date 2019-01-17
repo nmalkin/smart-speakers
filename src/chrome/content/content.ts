@@ -1,9 +1,9 @@
 import {
-    Device,
     Interaction,
     ValidationResult,
     VerificationState
 } from '../../common/types';
+import { Device } from '../../common/device';
 import { Google } from '../../common/google/google';
 import { Alexa } from '../../common/alexa/amazon';
 import { getDebugStatus } from '../common/debug';
@@ -12,7 +12,7 @@ import {
     displayInteraction,
     displayVerificationPlaceholder
 } from './views';
-import { selectUnseen, zip } from '../../common/util';
+import { selectUnseen } from '../../common/util';
 import { reportError, initErrorHandling } from '../common/errors';
 
 class SurveyState {
@@ -56,12 +56,21 @@ async function selectValid(state: SurveyState): Promise<Interaction> {
         if (!interaction.recordingAvailable) {
             break;
         }
-        const response = await fetch(interaction.url);
-        const contentType = response.headers.get('content-type');
 
-        /* checks to make sure the response has the standard audio content-type header */
-        foundValid = contentType !== null;
+        try {
+            const response = await fetch(interaction.url);
+            const contentType = response.headers.get('content-type');
+
+            /* checks to make sure the response has the standard audio content-type header */
+            foundValid = contentType !== null;
+        } catch (error) {
+            // Something weird happened when trying to fetch the recording URL.
+            // Report the error and try to find another recording,
+            // in case there's actually something wrong with this one.
+            reportError(error);
+        }
     }
+
     return interaction;
 }
 
@@ -105,37 +114,17 @@ async function processRecordingRequest(
 }
 
 /**
- * Check the current user's eligibility for the study.
- * If validation failed, then that status is preserved.
- * If validation succeeded but the user is ineligible, their status is updated.
+ * Tell the background script to perform validation, then return the result
  */
-function checkEligibility(result: ValidationResult): void {
-    if (result.status !== VerificationState.loggedIn) {
-        // Validation failed, so we keep the status as-is.
-        // Then the appropriate error message can be displayed to the user.
-        return;
-    }
-
-    // Check eligibility
-    // A user is eligible if they have:
-    // 1) At least 30 recordings
-    if (!result.interactions || result.interactions.length < 30) {
-        result.status = VerificationState.ineligible;
-        return;
-    }
-
-    // 2) Had the device for at least 30 days
-    const oldestInteraction = result.interactions
-        .map(interaction => interaction.timestamp)
-        .sort()[0];
-    const elapsedMilliseconds = Date.now() - oldestInteraction;
-    const elapsedDays = elapsedMilliseconds / (1000 * 60 * 60 * 24);
-    if (elapsedDays < 30) {
-        result.status = VerificationState.ineligible;
-        return;
-    }
-
-    // Good news! Validation succeeded.
+async function validate(device: Device): Promise<ValidationResult> {
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+            { type: 'validate', device: device.serialize() },
+            response => {
+                resolve(response);
+            }
+        );
+    });
 }
 
 /**
@@ -146,8 +135,7 @@ async function processVerify(state: SurveyState) {
 
     let result: ValidationResult;
     try {
-        result = await state.device.validate();
-        checkEligibility(result);
+        result = await validate(state.device);
     } catch (error) {
         reportError(error);
         result = { status: VerificationState.error };
@@ -239,6 +227,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
     try {
         await processMessages(event);
     } catch (error) {
+        reportError(error);
         const message = `We're really sorry, but something in our extension went wrong. This is unexpected, and we'll try to fix the problem as soon as possible.
 
 In some cases, you may be able to continue, and everything will keep working. However, it's likely other things will break too.
@@ -247,7 +236,6 @@ We suggest pausing the study and sending an email either through the Mechanical 
 
 We apologize for the inconvenience!`;
         alert(message);
-        reportError(error);
     }
 }
 

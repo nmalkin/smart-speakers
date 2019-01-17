@@ -1,9 +1,9 @@
 import {
     ValidationResult,
     VerificationState,
-    Device,
     Interaction
 } from '../../common/types';
+import { Device } from '../device';
 import { wait } from '../util';
 
 type GoogleActivityList = any[];
@@ -392,6 +392,7 @@ async function validateGoogle(): Promise<ValidationResult> {
 }
 
 export const Google: Device = {
+    serialize: () => 'google',
     accountName: 'Google',
     loginURL: 'https://accounts.google.com/ServiceLogin',
     validate: validateGoogle
