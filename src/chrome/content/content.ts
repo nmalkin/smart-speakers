@@ -12,9 +12,8 @@ import {
     displayInteraction,
     displayVerificationPlaceholder
 } from './views';
-import { selectUnseen, zip } from '../../common/util';
+import { selectUnseen } from '../../common/util';
 import { reportError, initErrorHandling } from '../common/errors';
-import { checkEligibility } from '../../common/eligibility';
 
 class SurveyState {
     public device: Device;
