@@ -124,7 +124,9 @@ export function displayVerificationResults(
         displayVerificationMessage(msg);
     } else {
         const msg = `<b>Status:</b><br><br>
-             There may have been an error in fetching your device recordings. Please try again.
+             There may have been an error in fetching your device recordings.
+             We're sorry for the inconvience!
+             Please wait a few seconds, then try again using the button below.
              If the error persists, please contact us.
              <br><br>`;
         displayVerificationMessage(msg + retry);
