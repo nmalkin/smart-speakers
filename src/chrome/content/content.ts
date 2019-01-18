@@ -85,6 +85,7 @@ async function processRecordingRequest(
     state: SurveyState,
     questionNumber: number
 ): Promise<void> {
+    console.log(state);
     // Select recording to show
     let interaction: Interaction;
     if (questionNumber <= state.seen.length) {
@@ -150,7 +151,7 @@ async function processVerify(state: SurveyState) {
         state.interactions = result.interactions;
     }
 
-    if (result.errors) {
+    if (result.errors && result.errors.length > 0) {
         console.error(
             'Errors happened earlier, while processing interactions.'
         );
@@ -165,6 +166,7 @@ async function processVerify(state: SurveyState) {
         ? VerificationState.loggedIn
         : result.status;
 
+    console.log(state);
     displayVerificationResults(
         verificationStatus,
         state.device,
