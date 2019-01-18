@@ -78,39 +78,48 @@ export function displayVerificationResults(
         '<button style = "border-radius: 18px; border-style: solid; border-width: 2px; font-size: 18px; padding: 13px; \
          background-color: #FAFAFA;" onClick="window.postMessage({ type: \'verify\' }, \'*\');">Retry</button>';
 
-    if (value === VerificationState.loggedIn) {
-        const timestampField = document.querySelector(
-            `input#${CSS.escape('QR~QID58')}`
-        ) as HTMLInputElement;
-        timestampField.value = String(
-            interactions.map(interaction => interaction.timestamp).sort()[0]
-        );
+    let message: string;
+    switch (value) {
+        case VerificationState.loggedIn:
+            const timestampField = document.querySelector(
+                `input#${CSS.escape('QR~QID58')}`
+            ) as HTMLInputElement;
+            timestampField.value = String(
+                interactions.map(interaction => interaction.timestamp).sort()[0]
+            );
 
-        const countField = document.querySelector(
-            `input#${CSS.escape('QR~QID60')}`
-        ) as HTMLInputElement;
-        countField.value = String(interactions.length);
+            const countField = document.querySelector(
+                `input#${CSS.escape('QR~QID60')}`
+            ) as HTMLInputElement;
+            countField.value = String(interactions.length);
 
-        const sumField = document.querySelector(
-            `input#${CSS.escape('QR~QID61')}`
-        ) as HTMLInputElement;
-        sumField.value = JSON.stringify(summarize(interactions));
+            const sumField = document.querySelector(
+                `input#${CSS.escape('QR~QID61')}`
+            ) as HTMLInputElement;
+            sumField.value = JSON.stringify(summarize(interactions));
 
-        nextButton.disabled = false;
-        nextButton.click();
-    } else if (value === VerificationState.loggedOut) {
-        const msg = `<b>Status:</b><br><br> \
+            nextButton.disabled = false;
+            nextButton.click();
+
+            return;
+
+        case VerificationState.loggedOut:
+            message =
+                `<b>Status:</b><br><br> \
              It looks like you are logged out of your ${account} account.
              You need to be logged in so that we can customize our questions to your specific device.
-             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>`;
-        displayVerificationMessage(msg + retry);
-    } else if (value === VerificationState.upgradeRequired) {
-        const msg = `<b>Status:</b><br><br>
+             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>` +
+                retry;
+            break;
+        case VerificationState.upgradeRequired:
+            message =
+                `<b>Status:</b><br><br>
              It looks like you need to re-enter the password for your ${account} account.
-             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>`;
-        displayVerificationMessage(msg + retry);
-    } else if (value === VerificationState.ineligible) {
-        const msg = `<b>Status:</b><br><br>
+             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>` +
+                retry;
+            break;
+        case VerificationState.ineligible:
+            message = `<b>Status:</b><br><br>
             Unfortunately, our tests show that you don't meet our study's eligibility criteria.
             Specifically, you've had your smart speaker for less than a month
             or you've used it fewer than 30 times.
@@ -121,16 +130,18 @@ export function displayVerificationResults(
             Either way, we're sorry for the inconvenience!
             If you'd like, you can reach out to us,
             and we'll try to figure out what happened.`;
-        displayVerificationMessage(msg);
-    } else {
-        const msg = `<b>Status:</b><br><br>
+            break;
+        default:
+            message =
+                `<b>Status:</b><br><br>
              There may have been an error in fetching your device recordings.
              We're sorry for the inconvience!
              Please wait a few seconds, then try again using the button below.
              If the error persists, please contact us.
-             <br><br>`;
-        displayVerificationMessage(msg + retry);
+             <br><br>` + retry;
     }
+
+    displayVerificationMessage(message);
 }
 
 /**
