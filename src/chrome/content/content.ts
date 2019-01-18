@@ -134,7 +134,12 @@ async function processVerify(state: SurveyState) {
     displayVerificationPlaceholder();
 
     let result: ValidationResult;
+
     try {
+        if (!state.device) {
+            throw new Error('device never set');
+        }
+
         result = await validate(state.device);
     } catch (error) {
         reportError(error);
