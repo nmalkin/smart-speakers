@@ -25,7 +25,7 @@ const consentChoiceSelector = '#QID12-1-label';
 const speakerChoiceAmazon = '#QID5-1-label';
 const speakerChoiceGoogle = '#QID5-2-label';
 
-describe('test in browser', () => {
+describe.skip('test in browser', () => {
     let browser: puppeteer.Browser;
     let backgroundPage: puppeteer.Page; // currently unused
     let page: puppeteer.Page;
@@ -201,184 +201,184 @@ function getCredentials(device: Device): Credentials {
     }
 }
 
-describe('test using Amazon credentials', () => {
-    let browser: puppeteer.Browser;
-    let page: puppeteer.Page;
+// describe('test using Amazon credentials', () => {
+//     let browser: puppeteer.Browser;
+//     let page: puppeteer.Page;
 
-    beforeAll(async () => {
-        browser = await getBrowser();
-        const credentials = getCredentials(Device.alexa);
+//     beforeAll(async () => {
+//         browser = await getBrowser();
+//         const credentials = getCredentials(Device.alexa);
 
-        page = await browser.newPage();
+//         page = await browser.newPage();
 
-        await page.goto(
-            'https://www.amazon.com/ap/signin?_encoding=UTF8&openid.assoc_handle=usflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0'
-        );
-        await page.waitForSelector('#ap_email');
-        await page.type('#ap_email', credentials.username);
-        await page.type('#ap_password', credentials.password);
-        await page.click('#signInSubmit');
-        await page.waitForSelector('#nav-recently-viewed');
+//         await page.goto(
+//             'https://www.amazon.com/ap/signin?_encoding=UTF8&openid.assoc_handle=usflex&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0'
+//         );
+//         await page.waitForSelector('#ap_email');
+//         await page.type('#ap_email', credentials.username);
+//         await page.type('#ap_password', credentials.password);
+//         await page.click('#signInSubmit');
+//         await page.waitForSelector('#nav-recently-viewed');
 
-        await page.close();
-    }, 100000);
+//         await page.close();
+//     }, 100000);
 
-    beforeEach(async () => {
-        page = await browser.newPage();
-        // await page.goto(SURVEY_URL);
-    });
+//     beforeEach(async () => {
+//         page = await browser.newPage();
+//         // await page.goto(SURVEY_URL);
+//     });
 
-    afterEach(async () => {
-        await page.close();
-    });
+//     afterEach(async () => {
+//         await page.close();
+//     });
 
-    afterAll(() => {
-        browser.close();
-    });
+//     afterAll(() => {
+//         browser.close();
+//     });
 
-    test(
-        'test for successful login',
-        async () => {
-            await page.goto('https://www.amazon.com');
-            expect(await page.$('#nav-recently-viewed')).toBeTruthy();
-        },
-        DEFAULT_TIMEOUT * 10
-    );
+//     test(
+//         'test for successful login',
+//         async () => {
+//             await page.goto('https://www.amazon.com');
+//             expect(await page.$('#nav-recently-viewed')).toBeTruthy();
+//         },
+//         DEFAULT_TIMEOUT * 10
+//     );
 
-    describe('survey flow', () => {
-        test(
-            'you get through to the first recording page',
-            async () => {
-                await page.goto(SURVEY_URL);
+//     describe('survey flow', () => {
+//         test(
+//             'you get through to the first recording page',
+//             async () => {
+//                 await page.goto(SURVEY_URL);
 
-                // Provide consent
-                await page.waitForSelector(consentChoiceSelector);
-                await page.click(consentChoiceSelector);
-                await clickNext(page);
+//                 // Provide consent
+//                 await page.waitForSelector(consentChoiceSelector);
+//                 await page.click(consentChoiceSelector);
+//                 await clickNext(page);
 
-                // Select speaker
-                await page.waitForSelector(speakerChoiceAmazon);
-                await page.click(speakerChoiceAmazon);
+//                 // Select speaker
+//                 await page.waitForSelector(speakerChoiceAmazon);
+//                 await page.click(speakerChoiceAmazon);
 
-                // Enter some stuff into the other text field (optional)
-                const input = '#QID18 input';
-                await page.waitForSelector(input);
-                await page.type(input, 'test');
+//                 // Enter some stuff into the other text field (optional)
+//                 const input = '#QID18 input';
+//                 await page.waitForSelector(input);
+//                 await page.type(input, 'test');
 
-                // Wait a little bit to make sure the previous action takes effect.
-                // Test seems to fail without this.
-                // My suspicion is that the validation after the required field has been updated needs a cycles to take effect.
-                // TODO: it would be nice to wait for specific events, if there are any.
-                await page.waitFor(1000);
+//                 // Wait a little bit to make sure the previous action takes effect.
+//                 // Test seems to fail without this.
+//                 // My suspicion is that the validation after the required field has been updated needs a cycles to take effect.
+//                 // TODO: it would be nice to wait for specific events, if there are any.
+//                 await page.waitFor(1000);
 
-                await clickNext(page);
+//                 await clickNext(page);
 
-                // Acknowledge the account access
-                await page.waitForSelector('#QID19');
-                await page.waitFor(2000);
-                await clickNext(page);
-                await page.waitFor(4000);
+//                 // Acknowledge the account access
+//                 await page.waitForSelector('#QID19');
+//                 await page.waitFor(2000);
+//                 await clickNext(page);
+//                 await page.waitFor(4000);
 
-                // Recording check happens now
+//                 // Recording check happens now
 
-                await page.waitForSelector('[questionid="1_QID30"]');
-                // Note: could also look for #1_QID30, but that's technically
-                // not a valid selector, presumably because it starts with a number
-            },
-            DEFAULT_TIMEOUT * 10
-        );
-    });
-});
+//                 await page.waitForSelector('[questionid="1_QID30"]');
+//                 // Note: could also look for #1_QID30, but that's technically
+//                 // not a valid selector, presumably because it starts with a number
+//             },
+//             DEFAULT_TIMEOUT * 10
+//         );
+//     });
+// });
 
-describe('test using Google credentials', () => {
-    let browser: puppeteer.Browser;
-    let page: puppeteer.Page;
+// describe('test using Google credentials', () => {
+//     let browser: puppeteer.Browser;
+//     let page: puppeteer.Page;
 
-    beforeAll(async () => {
-        browser = await getBrowser();
-        const credentials = getCredentials(Device.google);
+//     beforeAll(async () => {
+//         browser = await getBrowser();
+//         const credentials = getCredentials(Device.google);
 
-        page = await browser.newPage();
+//         page = await browser.newPage();
 
-        await page.goto('https://accounts.google.com/ServiceLogin');
-        await page.waitForSelector('#identifierId');
-        await page.type('#identifierId', credentials.username);
-        await page.click('#identifierNext');
-        await page.waitFor(2000); // the timeouts are necessary even with the waitForSelector calls
-        await page.waitForSelector('input[type=password]');
-        await page.type('input[type=password]', credentials.password);
-        await page.waitFor(1000);
-        await page.waitForSelector('#passwordNext');
-        await page.click('#passwordNext');
-        await page.waitFor(4000);
-        await page.waitForSelector('.gb_cb');
+//         await page.goto('https://accounts.google.com/ServiceLogin');
+//         await page.waitForSelector('#identifierId');
+//         await page.type('#identifierId', credentials.username);
+//         await page.click('#identifierNext');
+//         await page.waitFor(2000); // the timeouts are necessary even with the waitForSelector calls
+//         await page.waitForSelector('input[type=password]');
+//         await page.type('input[type=password]', credentials.password);
+//         await page.waitFor(1000);
+//         await page.waitForSelector('#passwordNext');
+//         await page.click('#passwordNext');
+//         await page.waitFor(4000);
+//         await page.waitForSelector('.gb_cb');
 
-        await page.close();
-    }, 100000);
+//         await page.close();
+//     }, 100000);
 
-    beforeEach(async () => {
-        page = await browser.newPage();
-        // await page.goto(SURVEY_URL);
-    });
+//     beforeEach(async () => {
+//         page = await browser.newPage();
+//         // await page.goto(SURVEY_URL);
+//     });
 
-    afterEach(async () => {
-        await page.close();
-    });
+//     afterEach(async () => {
+//         await page.close();
+//     });
 
-    afterAll(() => {
-        browser.close();
-    });
+//     afterAll(() => {
+//         browser.close();
+//     });
 
-    test(
-        'test for successful login',
-        async () => {
-            await page.goto('https://www.google.com');
-            expect(await page.$('.gb_cb')).toBeTruthy();
-        },
-        DEFAULT_TIMEOUT
-    );
+//     test(
+//         'test for successful login',
+//         async () => {
+//             await page.goto('https://www.google.com');
+//             expect(await page.$('.gb_cb')).toBeTruthy();
+//         },
+//         DEFAULT_TIMEOUT
+//     );
 
-    describe('survey flow', () => {
-        test(
-            'you get through to the first recording page',
-            async () => {
-                await page.goto(SURVEY_URL);
+//     describe('survey flow', () => {
+//         test(
+//             'you get through to the first recording page',
+//             async () => {
+//                 await page.goto(SURVEY_URL);
 
-                // Provide consent
-                await page.waitForSelector(consentChoiceSelector);
-                await page.click(consentChoiceSelector);
-                await clickNext(page);
+//                 // Provide consent
+//                 await page.waitForSelector(consentChoiceSelector);
+//                 await page.click(consentChoiceSelector);
+//                 await clickNext(page);
 
-                // Select speaker
-                await page.waitForSelector(speakerChoiceGoogle);
-                await page.click(speakerChoiceGoogle);
+//                 // Select speaker
+//                 await page.waitForSelector(speakerChoiceGoogle);
+//                 await page.click(speakerChoiceGoogle);
 
-                // Enter some stuff into the other text field (optional)
-                const input = '#QID18 input';
-                await page.waitForSelector(input);
-                await page.type(input, 'test');
+//                 // Enter some stuff into the other text field (optional)
+//                 const input = '#QID18 input';
+//                 await page.waitForSelector(input);
+//                 await page.type(input, 'test');
 
-                // Wait a little bit to make sure the previous action takes effect.
-                // Test seems to fail without this.
-                // My suspicion is that the validation after the required field has been updated needs a cycles to take effect.
-                // TODO: it would be nice to wait for specific events, if there are any.
-                await page.waitFor(1000);
+//                 // Wait a little bit to make sure the previous action takes effect.
+//                 // Test seems to fail without this.
+//                 // My suspicion is that the validation after the required field has been updated needs a cycles to take effect.
+//                 // TODO: it would be nice to wait for specific events, if there are any.
+//                 await page.waitFor(1000);
 
-                await clickNext(page);
+//                 await clickNext(page);
 
-                // Acknowledge the account access
-                await page.waitForSelector('#QID19');
-                await page.waitFor(2000);
-                await clickNext(page);
-                await page.waitFor(4000);
+//                 // Acknowledge the account access
+//                 await page.waitForSelector('#QID19');
+//                 await page.waitFor(2000);
+//                 await clickNext(page);
+//                 await page.waitFor(4000);
 
-                // Recording check happens now
+//                 // Recording check happens now
 
-                await page.waitForSelector('[questionid="1_QID30"]');
-                // Note: could also look for #1_QID30, but that's technically
-                // not a valid selector, presumably because it starts with a number
-            },
-            DEFAULT_TIMEOUT * 10
-        );
-    });
-});
+//                 await page.waitForSelector('[questionid="1_QID30"]');
+//                 // Note: could also look for #1_QID30, but that's technically
+//                 // not a valid selector, presumably because it starts with a number
+//             },
+//             DEFAULT_TIMEOUT * 10
+//         );
+//     });
+// });
