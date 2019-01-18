@@ -96,14 +96,14 @@ async function processRecordingRequest(
         try {
             // Try to get an interaction that hasn't been seen before
             interaction = await selectValid(state);
-        } catch {
+        } catch (error) {
             // All available interactions have already been seen!
             if (await getDebugStatus()) {
                 // Substitute dummy recording if we're in debug mode
                 interaction = DUMMY_INTERACTION;
             } else {
                 // This shouldn't happen, but if we end up in this state, we should handle it as gracefully as possible.
-                reportError('No available recordings to show');
+                reportError(error);
                 interaction = ERROR_INTERACTION;
             }
         }
