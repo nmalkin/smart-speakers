@@ -29,5 +29,5 @@ describe('test installation', () => {
         const browser = await getBrowser();
         expect(browser).toBeTruthy();
         await browser.close();
-    }, 3000);
+    }, 5000);
 });
