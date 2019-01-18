@@ -225,6 +225,11 @@ class GoogleInteraction implements Interaction {
         return [interactions, errors];
     }
 
+    public readonly recordingAvailable: boolean;
+    public readonly url: string;
+    public readonly transcript: string;
+    public readonly timestamp: number;
+
     private json: any[];
 
     constructor(rawJson: any[]) {
@@ -235,9 +240,8 @@ class GoogleInteraction implements Interaction {
             );
         }
         this.json = rawJson;
-    }
 
-    get transcript() {
+        // Set transcript
         if (this.json.length <= GoogleInteraction.TRANSCRIPT_INDEX) {
             throw new Error(
                 `interaction missing transcript at ${
@@ -249,36 +253,33 @@ class GoogleInteraction implements Interaction {
         ) {
             throw new Error('transcript is not an array');
         }
+        this.transcript = this.json[GoogleInteraction.TRANSCRIPT_INDEX][0];
 
-        return this.json[GoogleInteraction.TRANSCRIPT_INDEX][0];
-    }
-
-    /**
-     * Return true if the interaction contains a recording URL
-     */
-    get recordingAvailable(): boolean {
+        // Set recordingVailable
         if (this.json.length <= GoogleInteraction.URL_INDEX) {
-            return false;
+            this.recordingAvailable = false;
         } else if (!Array.isArray(this.json[GoogleInteraction.URL_INDEX])) {
-            return false;
+            this.recordingAvailable = false;
+        } else {
+            this.recordingAvailable = true;
         }
 
-        return true;
-    }
+        // Set url
+        if (this.recordingAvailable) {
+            if (this.json.length <= GoogleInteraction.URL_INDEX) {
+                throw new Error(
+                    `interaction missing url at ${GoogleInteraction.URL_INDEX}`
+                );
+            } else if (!Array.isArray(this.json[GoogleInteraction.URL_INDEX])) {
+                throw new Error('interaction missing url');
+            }
 
-    get url() {
-        if (this.json.length <= GoogleInteraction.URL_INDEX) {
-            throw new Error(
-                `interaction missing url at ${GoogleInteraction.URL_INDEX}`
-            );
-        } else if (!Array.isArray(this.json[GoogleInteraction.URL_INDEX])) {
-            throw new Error('interaction missing url');
+            this.url = this.json[GoogleInteraction.URL_INDEX][0];
+        } else {
+            this.url = '';
         }
 
-        return this.json[GoogleInteraction.URL_INDEX][0];
-    }
-
-    get timestamp() {
+        // Set timestamp
         if (this.json.length <= GoogleInteraction.TIMESTAMP_INDEX) {
             throw new Error(
                 `interaction missing timestamp at ${
@@ -287,7 +288,9 @@ class GoogleInteraction implements Interaction {
             );
         }
 
-        return parseTimestamp(this.json[GoogleInteraction.TIMESTAMP_INDEX]);
+        this.timestamp = parseTimestamp(
+            this.json[GoogleInteraction.TIMESTAMP_INDEX]
+        );
     }
 
     /**
@@ -348,24 +351,6 @@ function extractData(data: GoogleActivityList): [GoogleInteraction[], Error[]] {
     ];
 }
 
-function validateInteractions(interactions: Interaction[]): Error[] {
-    const errors: Error[] = [];
-    interactions.forEach(interaction => {
-        // The purpose of this loop is to access the fields of the Interaction.
-        // Because the implementation of GoogleInteraction uses getters,
-        // they are lazy-evaluated, so we wouldn't know until we tried
-        // accessing them whether they're valid or not.
-        // We want to know that *now* rather than later,
-        // so we try accessing them now.
-        try {
-            const { transcript, timestamp } = interaction;
-        } catch (error) {
-            errors.push(error);
-        }
-    });
-    return errors;
-}
-
 /**
  * Validate Home user status and eligibility and get interaction data
  *
@@ -384,9 +369,8 @@ async function validateGoogle(): Promise<ValidationResult> {
 
     // Extract interactions from the data
     const [interactions, extractErrors] = extractData(activities);
-    const validationErrors = validateInteractions(interactions);
 
-    const errors = downloadErrors.concat(extractErrors, validationErrors);
+    const errors = downloadErrors.concat(extractErrors);
 
     return { status: VerificationState.loggedIn, interactions, errors };
 }
