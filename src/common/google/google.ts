@@ -142,7 +142,9 @@ async function downloadAllActivity(
     let [activities, cursor] = parseActivityData(response);
 
     if (activities === null) {
-        throw new Error('initial activity response is empty (null)');
+        // Initial activity response is empty (null)
+        // This means the user has no activity saved.
+        return [[], []];
     }
 
     let requests = 1;
