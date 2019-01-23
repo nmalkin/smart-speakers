@@ -489,6 +489,8 @@ function displayDebugStatus(status: boolean) {
     document.getElementById('debug-status')!.innerText = text;
 }
 
+let debugWarningShown = false;
+
 /**
  * Set up the on-screen debug mode toggle
  *
@@ -506,6 +508,13 @@ async function setupDebugToggle() {
         const newStatus = el.checked;
         displayDebugStatus(newStatus);
         debug.setDebugStatus(newStatus);
+
+        if (newStatus === true && !debugWarningShown) {
+            debugWarningShown = true;
+            alert(
+                'Warning! Turning on debug mode unless otherwise instructed by the research team will make you ineligible to receive compensation for your participation in our study.'
+            );
+        }
     };
 }
 
