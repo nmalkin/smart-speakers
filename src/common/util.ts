@@ -46,7 +46,8 @@ export function summarize(interactions: Interaction[]): object {
         const date = new Date(interaction.timestamp);
         const day = date.getUTCDate();
         const week = Math.floor(day / 7);
-        const tag = `${date.getUTCFullYear()}-${date.getUTCMonth()}.${week}`;
+        const tag = `${date.getUTCFullYear()}-${date.getUTCMonth() +
+            1}.${week}`;
         if (!(tag in report)) {
             report[tag] = { interactions: 0, recordings: 0 };
         }
