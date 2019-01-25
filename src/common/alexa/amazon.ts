@@ -376,7 +376,9 @@ export function filterUsableInteractions(
     The URL of the audio for that one will be to the recording of you saying "hey Alexa."
     However, the transcript will be "Text not available – audio was not intended for Alexa."
 
-    (TODO: how do multi-step interactions work? I'm not sure.)
+    (Multi-step interactions only display the first interaction,
+    with additional information being loaded only after a separate request (see #64).
+    We don't handle them.)
 
     There are also some failure cases.
 
