@@ -58,7 +58,7 @@
         ]
     },
     "scripts": {
-        "lint": "tslint -c tslint.json 'src/**/*.ts' && eslint test",
+        "lint": "tslint -c tslint.json 'src/**/*.ts' && eslint src",
         "build": "webpack",
         "package": "mkdir -p build && cd chrome_extension && zip -r --exclude=*.DS_Store* ../build/chrome_extension.zip *",
         "test": "jest --env=jsdom --verbose",

@@ -1,4 +1,4 @@
-/* global Qualtrics, $ */
+/* global Qualtrics */
 
 /**
  * This code triggers the extension's validation of the user's login status and recordings.

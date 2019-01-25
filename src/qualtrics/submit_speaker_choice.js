@@ -16,6 +16,7 @@ Qualtrics.SurveyEngine.addOnUnload(() => {
     /* Place your JavaScript here to run when the page is unloaded */
 });
 
+// eslint-disable-next-line prefer-arrow-callback
 Qualtrics.SurveyEngine.addOnPageSubmit(function submitSpeakerChoice(type) {
     if (type === 'next') {
         window.postMessage({ type: 'device' }, '*');
