@@ -237,7 +237,7 @@ async function messageListener(event: MessageEvent): Promise<void> {
 
 In some cases, you may be able to continue, and everything will keep working. However, it's likely other things will break too.
 
-We suggest pausing the study and sending an email either through the Mechanical Turk system or directly to usablesec@icsi.berkeley.edu
+We suggest pausing the study and sending an email either through the Mechanical Turk system or directly to researchlab@icsi.berkeley.edu
 
 We apologize for the inconvenience!`;
         alert(message);
