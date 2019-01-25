@@ -11,13 +11,19 @@ export function checkEligibility(result: ValidationResult): void {
         // Then the appropriate error message can be displayed to the user.
         return;
     }
+
     // Check eligibility
     // A user is eligible if they have:
     // 1) At least 30 recordings
-    if (!result.interactions || result.interactions.length < 30) {
+    if (
+        !result.interactions ||
+        !Array.isArray(result.interactions) ||
+        result.interactions.length < 30
+    ) {
         result.status = VerificationState.ineligible;
         return;
     }
+
     // 2) Had the device for at least 30 days
     const oldestInteraction = result.interactions
         .map(interaction => interaction.timestamp)
