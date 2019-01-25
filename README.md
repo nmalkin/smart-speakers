@@ -1,4 +1,8 @@
-# Smart Speakers
+# Smart Speaker Study
+
+This repository contains the source code of the browser extension for the Smart Speaker Study. Please feel free to examine it.
+
+# Developing and building the extension
 
 ## Prerequisites
 
@@ -22,16 +26,6 @@ The linters will run automatically when you commit any code. However, you can al
 
     npm run lint
 
-## Jest
+## Testing
 
-Running the test suite is possible with npm but can also be run by installing [yarn](https://yarnpkg.com/lang/en/docs/install/#debian-stable). With one of these, you can run one of the following:
-
-    yarn add --dev jest
-
-    npm install --save-dev jest
-
-to install the Jest package. The entire suite can then be run with one of the following:
-
-    yarn test
-
-    npm test
+To run the tests for this project, execute `npm test` (or `yarn test` if you use [yarn](https://yarnpkg.com/)). Additional diagnostics tests can be run from the options page of the installed extension.
