@@ -1,7 +1,10 @@
 import { getDebugStatus } from '../common/debug';
+import { set } from '../common/storage';
 
 const SURVEY_URL =
     'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05?test=';
+
+let notifyOnLeave = true;
 
 // Reflect debug status in survey URL
 window.onload = async () => {
@@ -23,9 +26,13 @@ window.addEventListener(
                     event.data.height + 'px';
             } else if (event.data.hasOwnProperty('type')) {
                 switch (event.data.type) {
-                    case 'finished':
-                        // If survey reports being completed, don't warn on leaving
+                    case 'finished': // Survey reports being completed
+                        // Don't warn on leaving
                         notifyOnLeave = false;
+
+                        // Remember, in the extension, that the survey has been finished
+                        set({ finished: true });
+
                         break;
                 }
             }
@@ -35,7 +42,6 @@ window.addEventListener(
 );
 
 // Warn people who are about to leave the survey
-let notifyOnLeave = true;
 window.addEventListener('beforeunload', event => {
     if (notifyOnLeave) {
         event.returnValue =

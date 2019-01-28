@@ -1,4 +1,5 @@
 import { initErrorHandling } from '../common/errors';
+import { get } from '../common/storage';
 
 /**
  * Load and display the MOTD
@@ -11,6 +12,16 @@ function loadMOTD() {
         .then(text => {
             document.getElementById('motd')!.innerHTML = text;
         });
+}
+
+/**
+ * Show a message to those who have completed the survey
+ */
+async function showCompletionMessage() {
+    const storage = await get('finished');
+    if (storage.finished && storage.finished === true) {
+        document.getElementById('completion_warning')!.style.display = 'block';
+    }
 }
 
 /**
@@ -49,5 +60,6 @@ function testPermissions() {
 window.onload = () => {
     initErrorHandling();
     loadMOTD();
+    showCompletionMessage();
     testPermissions();
 };
