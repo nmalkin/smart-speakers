@@ -12,14 +12,23 @@ export function checkEligibility(result: ValidationResult): void {
         return;
     }
 
+    // Report error if interactions array is not set at this point
+    if (!result.interactions || !Array.isArray(result.interactions)) {
+        result.status = VerificationState.error;
+
+        const error = new Error('malformed interactions array');
+        if (result.errors) {
+            result.errors.push(error);
+        } else {
+            result.errors = [error];
+        }
+        return;
+    }
+
     // Check eligibility
     // A user is eligible if they have:
     // 1) At least 30 recordings
-    if (
-        !result.interactions ||
-        !Array.isArray(result.interactions) ||
-        result.interactions.length < 30
-    ) {
+    if (result.interactions.length < 30) {
         result.status = VerificationState.ineligible;
         return;
     }
