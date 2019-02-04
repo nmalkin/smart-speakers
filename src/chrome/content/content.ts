@@ -154,9 +154,6 @@ async function processVerify(state: SurveyState) {
         console.error(
             'Errors happened earlier, while processing interactions.'
         );
-        result.errors.forEach(error => {
-            reportError(error);
-        });
     }
 
     // If debug is on, always report status as logged in

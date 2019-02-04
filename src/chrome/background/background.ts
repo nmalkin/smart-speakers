@@ -14,6 +14,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             .then((result: ValidationResult) => {
                 checkEligibility(result);
                 sendResponse(result);
+
+                if (result.errors && result.errors.length > 0) {
+                    console.error(
+                        'Errors happened earlier, while processing interactions.'
+                    );
+                    result.errors.forEach(error => {
+                        reportError(error);
+                    });
+                }
             })
             .catch(error => {
                 reportError(error);
