@@ -16,6 +16,7 @@ export interface ValidationResult {
     status: VerificationState;
     interactions?: Interaction[];
     errors?: Error[];
+    ineligiblityReason?: string;
 }
 
 /**

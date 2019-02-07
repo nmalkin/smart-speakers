@@ -1,4 +1,8 @@
-import { VerificationState, Interaction } from '../../common/types';
+import {
+    VerificationState,
+    Interaction,
+    ValidationResult
+} from '../../common/types';
 import { Device } from '../../common/device';
 import { summarize } from '../../common/util';
 
@@ -59,13 +63,10 @@ export function displayVerificationPlaceholder(): void {
  * Update the survey webpage based on the user's VerificationState
  *
  * Checks whether the user has been verified, and prompts a retry if not
- *
- * @param value the user's verification status
  */
 export function displayVerificationResults(
-    value: VerificationState,
-    device: Device,
-    interactions: Interaction[]
+    result: ValidationResult,
+    device: Device
 ): void {
     const account = device.accountName;
     const url = device.loginURL;
@@ -79,8 +80,15 @@ export function displayVerificationResults(
          background-color: #FAFAFA;" onClick="window.postMessage({ type: \'verify\' }, \'*\');">Retry</button>`;
 
     let message: string;
-    switch (value) {
+    switch (result.status) {
         case VerificationState.loggedIn:
+            if (!result.interactions) {
+                throw new Error(
+                    'missing interactions though they existed at validation time'
+                );
+            }
+            const interactions = result.interactions;
+
             const timestampField = document.querySelector(
                 `input#${CSS.escape('QR~QID58')}`
             ) as HTMLInputElement;
@@ -117,8 +125,8 @@ export function displayVerificationResults(
         case VerificationState.ineligible:
             message = `<b>Status:</b><br><br>
             Unfortunately, our tests show that you don't meet our study's eligibility criteria.
-            Specifically, you've had your smart speaker for less than a month
-            or you've used it fewer than 30 times.
+            Specifically,
+            ${result.ineligiblityReason}.
             <br><br>
             If that sounds incorrect, then it's an error
             either on our end

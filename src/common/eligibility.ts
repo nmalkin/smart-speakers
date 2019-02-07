@@ -28,8 +28,15 @@ export function checkEligibility(result: ValidationResult): void {
     // Check eligibility
     // A user is eligible if they have:
     // 1) At least 30 recordings
-    if (result.interactions.length < 30) {
+    if (result.interactions.length === 0) {
         result.status = VerificationState.ineligible;
+        result.ineligiblityReason =
+            'the currently signed in account has not interacted with your device at all';
+        return;
+    } else if (result.interactions.length < 30) {
+        result.status = VerificationState.ineligible;
+        result.ineligiblityReason =
+            "you've used your smart speaker fewer than 30 times";
         return;
     }
 
@@ -41,6 +48,8 @@ export function checkEligibility(result: ValidationResult): void {
     const elapsedDays = elapsedMilliseconds / (1000 * 60 * 60 * 24);
     if (elapsedDays < 30) {
         result.status = VerificationState.ineligible;
+        result.ineligiblityReason =
+            "you've had your smart speaker for less than a month";
         return;
     }
     // Good news! Validation succeeded.

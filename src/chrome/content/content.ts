@@ -158,15 +158,11 @@ async function processVerify(state: SurveyState) {
 
     // If debug is on, always report status as logged in
     const debug = await getDebugStatus();
-    const verificationStatus = debug
-        ? VerificationState.loggedIn
-        : result.status;
+    if (debug) {
+        result.status = VerificationState.loggedIn;
+    }
 
-    displayVerificationResults(
-        verificationStatus,
-        state.device,
-        state.interactions
-    );
+    displayVerificationResults(result, state.device);
 }
 
 /**
