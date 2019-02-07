@@ -74,9 +74,9 @@ export function displayVerificationResults(
         'NextButton'
     )! as HTMLInputElement;
 
-    const retry =
-        '<button style = "border-radius: 18px; border-style: solid; border-width: 2px; font-size: 18px; padding: 13px; \
-         background-color: #FAFAFA;" onClick="window.postMessage({ type: \'verify\' }, \'*\');">Retry</button>';
+    const retry = `<br><br>
+         <button style = "border-radius: 18px; border-style: solid; border-width: 2px; font-size: 18px; padding: 13px; \
+         background-color: #FAFAFA;" onClick="window.postMessage({ type: \'verify\' }, \'*\');">Retry</button>`;
 
     let message: string;
     switch (value) {
@@ -104,44 +104,49 @@ export function displayVerificationResults(
             return;
 
         case VerificationState.loggedOut:
-            message =
-                `<b>Status:</b><br><br> \
+            message = `<b>Status:</b><br><br>
              It looks like you are logged out of your ${account} account.
              You need to be logged in so that we can customize our questions to your specific device.
-             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>` +
-                retry;
+             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.`;
             break;
         case VerificationState.upgradeRequired:
-            message =
-                `<b>Status:</b><br><br>
+            message = `<b>Status:</b><br><br>
              It looks like you need to re-enter the password for your ${account} account.
-             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.<br><br>` +
-                retry;
+             Please <a href="${url}" target="_blank">click here to open the login page</a>, log in, then come back and click on the retry button below.`;
             break;
         case VerificationState.ineligible:
             message = `<b>Status:</b><br><br>
             Unfortunately, our tests show that you don't meet our study's eligibility criteria.
             Specifically, you've had your smart speaker for less than a month
             or you've used it fewer than 30 times.
+            <br><br>
             If that sounds incorrect, then it's an error
             either on our end
             or on the side of Amazon/Google
             (we check with them for this information).
             Either way, we're sorry for the inconvenience!
-            If you'd like, you can reach out to us,
-            and we'll try to figure out what happened.`;
+            <br><br>
+            One possible cause of this error is
+            if you have more than one Amazon/Google account,
+            then our extension may have been checking with the wrong one.
+            Try signing out of every account except the one linked to your device,
+            then click the retry button below.
+            <br><br>
+            If that still doesn't help, you can reach out to us,
+            and we'll try to figure out what happened.
+            (Please be aware that we strictly limit what information we collect from you,
+            so it can be hard for us to know what went wrong.)
+            `;
             break;
         default:
-            message =
-                `<b>Status:</b><br><br>
+            message = `<b>Status:</b><br><br>
              There may have been an error in fetching your device recordings.
              We're sorry for the inconvience!
              Please wait a few seconds, then try again using the button below.
-             If the error persists, please contact us.
-             <br><br>` + retry;
+             If the error persists, please contact us.`;
     }
 
-    displayVerificationMessage(message);
+    displayVerificationMessage(message + retry);
 }
 
 /**
