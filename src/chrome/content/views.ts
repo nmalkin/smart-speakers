@@ -184,4 +184,11 @@ export function displayInteraction(
     document
         .getElementById(targetElement)!
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
+
+    const field = document.querySelector(
+        `input#${CSS.escape('QR~QID59')}`
+    ) as HTMLInputElement;
+    field.value = String(
+        interaction.timestamp - (interaction.timestamp % (60 * 60 * 1000))
+    );
 }
