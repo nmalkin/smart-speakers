@@ -46,14 +46,12 @@ describe('filterUsableInteractions', () => {
         expect(
             filterUsableInteractions([
                 {
-                    audioID: 'IGNORED',
                     url: 'IGNORED',
                     timestamp: 0,
                     recordingAvailable: true,
                     transcript: 'something'
                 },
                 {
-                    audioID: 'IGNORED',
                     url: 'IGNORED',
                     timestamp: 0,
                     recordingAvailable: true,
@@ -61,7 +59,6 @@ describe('filterUsableInteractions', () => {
                         'Text not available – audio was not intended for Alexa'
                 },
                 {
-                    audioID: 'IGNORED',
                     url: 'IGNORED',
                     timestamp: 0,
                     recordingAvailable: true,
@@ -75,21 +72,18 @@ describe('filterUsableInteractions', () => {
         expect(
             filterUsableInteractions([
                 {
-                    audioID: 'IGNORED',
                     url: 'IGNORED',
                     timestamp: 0,
                     recordingAvailable: true,
                     transcript: 'something'
                 },
                 {
-                    audioID: 'IGNORED',
                     url: 'IGNORED',
                     timestamp: 0,
                     recordingAvailable: true,
                     transcript: 'Text not available'
                 },
                 {
-                    audioID: 'IGNORED',
                     url: 'IGNORED',
                     timestamp: 0,
                     recordingAvailable: true,
