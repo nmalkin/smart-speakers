@@ -143,15 +143,15 @@ async function downloadAllActivity(
     csrfToken: string
 ): Promise<GoogleValidationResult> {
     let allActivities: GoogleActivityList = [];
-    const errors: Error[] = [];
+    const allErrors: Error[] = [];
     let downloadStatus: DownloadStatus = DownloadStatus.success;
 
     const startTime = performance.now();
 
     let response = await fetchJsonData(csrfToken);
-    let [activities, cursor] = parseActivityData(response);
+    let [currentActivities, cursor] = parseActivityData(response);
 
-    if (activities === null) {
+    if (currentActivities === null) {
         // Initial activity response is empty (null)
         // This means the user has no activity saved.
         allActivities = [];
@@ -162,7 +162,7 @@ async function downloadAllActivity(
             cursor = null;
         }
     } else {
-        allActivities = allActivities.concat(activities);
+        allActivities = allActivities.concat(currentActivities);
     }
 
     let requests = 1;
@@ -175,17 +175,17 @@ async function downloadAllActivity(
         // Fetch and parse the next round of data
         try {
             response = await fetchJsonData(csrfToken, cursor);
-            [activities, cursor] = parseActivityData(response);
+            [currentActivities, cursor] = parseActivityData(response);
 
-            if (activities === null) {
+            if (currentActivities === null) {
                 // We've downloaded all available data. Nothing left.
                 break;
             } else {
                 // Add the new data to the existing one
-                allActivities = allActivities.concat(activities);
+                allActivities = allActivities.concat(currentActivities);
             }
         } catch (error) {
-            errors.push(error);
+            allErrors.push(error);
             break;
         }
 
@@ -211,7 +211,7 @@ async function downloadAllActivity(
         downloadStatus,
         activities: allActivities,
         interactions: [],
-        errors
+        errors: allErrors
     };
 }
 

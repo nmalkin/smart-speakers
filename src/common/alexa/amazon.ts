@@ -289,8 +289,11 @@ export async function downloadAllInteractions(
     // i.e., beginning of time to now
     // We won't get everything, though: only up to BATCH_SIZE interactions.
     let endTimestamp = Date.now();
-    let [interactions, currentErrors] = await getAudio(csrfToken, endTimestamp);
-    allInteractions = allInteractions.concat(interactions);
+    let [currentInteractions, currentErrors] = await getAudio(
+        csrfToken,
+        endTimestamp
+    );
+    allInteractions = allInteractions.concat(currentInteractions);
     allErrors = allErrors.concat(currentErrors);
 
     // Are there more interactions available?
@@ -306,7 +309,7 @@ export async function downloadAllInteractions(
         undefined,
         BATCH_SIZE + 1
     );
-    updateInteractionTimestamps(interactions, timestamps);
+    updateInteractionTimestamps(currentInteractions, timestamps);
 
     let batchesRequested = 1; // how many (groups of) requests we've made
 
@@ -321,11 +324,11 @@ export async function downloadAllInteractions(
 
         // Make the next pair of requests
         try {
-            [interactions, currentErrors] = await getAudio(
+            [currentInteractions, currentErrors] = await getAudio(
                 csrfToken,
                 endTimestamp
             );
-            allInteractions = allInteractions.concat(interactions);
+            allInteractions = allInteractions.concat(currentInteractions);
             allErrors = allErrors.concat(currentErrors);
 
             timestamps = await fetchTimestamps(
@@ -334,7 +337,7 @@ export async function downloadAllInteractions(
                 undefined,
                 BATCH_SIZE + 1
             );
-            updateInteractionTimestamps(interactions, timestamps);
+            updateInteractionTimestamps(currentInteractions, timestamps);
         } catch (error) {
             // If something happened during the latest round of downloads,
             // we'd still like to keep all our previous results.
