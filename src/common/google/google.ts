@@ -136,6 +136,7 @@ function parseActivityData(jsonString: string): GoogleActivityResponse {
 async function downloadAllActivity(
     csrfToken: string
 ): Promise<[GoogleActivityList, Error[]]> {
+    let allActivities: GoogleActivityList = [];
     const errors: Error[] = [];
 
     let response = await fetchJsonData(csrfToken);
@@ -145,6 +146,8 @@ async function downloadAllActivity(
         // Initial activity response is empty (null)
         // This means the user has no activity saved.
         return [[], []];
+    } else {
+        allActivities = allActivities.concat(activities);
     }
 
     let requests = 1;
@@ -157,20 +160,20 @@ async function downloadAllActivity(
         // Fetch and parse the next round of data
         try {
             response = await fetchJsonData(csrfToken, cursor);
-            const data = parseActivityData(response);
-            cursor = data[1];
+            [activities, cursor] = parseActivityData(response);
 
-            if (data[0] === null) {
+            if (activities === null) {
                 // We've downloaded all available data. Nothing left.
                 break;
             } else {
                 // Add the new data to the existing one
-                activities = activities.concat(data[0]);
+                allActivities = allActivities.concat(activities);
             }
         } catch (error) {
             errors.push(error);
             break;
         }
+
         // If we seem to be stuck in a loop, abort
         if (++requests > TOO_MANY_REQUESTS) {
             console.warn('aborting fetching because we sent too many requests');
@@ -178,7 +181,7 @@ async function downloadAllActivity(
         }
     }
 
-    return [activities, errors];
+    return [allActivities, errors];
 }
 
 /**
