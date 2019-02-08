@@ -23,11 +23,11 @@ async function execAsync(command: string): Promise<void> {
 describe('test installation', () => {
     beforeAll(async () => {
         await execAsync('npm run build');
-    });
+    }, 10000);
 
     test('the extension can be installed', async () => {
         const browser = await getBrowser();
         expect(browser).toBeTruthy();
         await browser.close();
-    }, 30000);
+    }, 15000);
 });
