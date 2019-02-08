@@ -40,11 +40,25 @@ const ERROR_INTERACTION: Interaction = {
     timestamp: 0
 };
 
+const USELESS_TRANSCRIPTS: RegExp[] = [
+    'Google Assistant',
+    'Unknown voice command',
+    'Text not available'
+].map(s => new RegExp(s));
+
 /**
  * Return true if the given interaction should be used in our survey
  * @param interaction the interaction to check
  */
 async function goodInteraction(interaction: Interaction): Promise<boolean> {
+    // Check for transcripts that don't convey any information
+    // The associated audio is typically also missing.
+    USELESS_TRANSCRIPTS.forEach(badTranscript => {
+        if (badTranscript.test(interaction.transcript)) {
+            return false;
+        }
+    });
+
     // We will check if the recording is valid
     // because sometimes Amazon (at least) returns recordings that are empty.
 
