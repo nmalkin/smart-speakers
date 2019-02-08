@@ -5,6 +5,7 @@ import {
 } from '../../common/types';
 import { Device } from '../device';
 import { sleep } from '../util';
+import { MAX_WAIT_SECONDS } from '../settings';
 
 /** Batch size when querying Amazon */
 const BATCH_SIZE = 20;
@@ -280,6 +281,8 @@ export async function downloadAllInteractions(
     let allInteractions: AlexaInteraction[] = [];
     let allErrors: Error[] = [];
 
+    const startTime = performance.now();
+
     // Make initial request for activity data, asking at first for all time
     // i.e., beginning of time to now
     // We won't get everything, though: only up to BATCH_SIZE interactions.
@@ -346,6 +349,14 @@ export async function downloadAllInteractions(
         // If we seem to be stuck in a loop, abort
         if (++batchesRequested > TOO_MANY_REQUESTS) {
             console.warn('aborting fetching because we sent too many requests');
+            break;
+        }
+
+        // If we've taken too long, abort.
+        const timeNow = performance.now();
+        const secondsElapsed = (timeNow - startTime) / 1000;
+        if (secondsElapsed > MAX_WAIT_SECONDS) {
+            console.warn(`exceeded wait time of ${MAX_WAIT_SECONDS} seconds`);
             break;
         }
     }

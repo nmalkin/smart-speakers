@@ -5,6 +5,7 @@ import {
 } from '../../common/types';
 import { Device } from '../device';
 import { sleep } from '../util';
+import { MAX_WAIT_SECONDS } from '../settings';
 
 type GoogleActivityList = any[];
 type GoogleActivityResponse = [GoogleActivityList | null, string | null];
@@ -139,6 +140,8 @@ async function downloadAllActivity(
     let allActivities: GoogleActivityList = [];
     const errors: Error[] = [];
 
+    const startTime = performance.now();
+
     let response = await fetchJsonData(csrfToken);
     let [activities, cursor] = parseActivityData(response);
 
@@ -177,6 +180,14 @@ async function downloadAllActivity(
         // If we seem to be stuck in a loop, abort
         if (++requests > TOO_MANY_REQUESTS) {
             console.warn('aborting fetching because we sent too many requests');
+            break;
+        }
+
+        // If we've taken too long, abort.
+        const timeNow = performance.now();
+        const secondsElapsed = (timeNow - startTime) / 1000;
+        if (secondsElapsed > MAX_WAIT_SECONDS) {
+            console.warn(`exceeded wait time of ${MAX_WAIT_SECONDS} seconds`);
             break;
         }
     }
