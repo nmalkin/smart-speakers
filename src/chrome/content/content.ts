@@ -1,7 +1,8 @@
 import {
     Interaction,
     ValidationResult,
-    VerificationState
+    VerificationState,
+    DownloadStatus
 } from '../../common/types';
 import { Device } from '../../common/device';
 import { Google } from '../../common/google/google';
@@ -143,12 +144,14 @@ async function processVerify(state: SurveyState) {
         result = await validate(state.device);
     } catch (error) {
         reportError(error);
-        result = { status: VerificationState.error };
+        result = {
+            status: VerificationState.error,
+            downloadStatus: DownloadStatus.error,
+            interactions: []
+        };
     }
 
-    if (result.interactions) {
-        state.interactions = result.interactions;
-    }
+    state.interactions = result.interactions;
 
     if (result.errors && result.errors.length > 0) {
         console.error(

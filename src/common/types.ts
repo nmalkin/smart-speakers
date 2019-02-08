@@ -26,7 +26,7 @@ export interface ValidationResult {
     /** Code describing what happened in the download process */
     downloadStatus: DownloadStatus;
     /** Interactions downloaded during validation */
-    interactions?: Interaction[];
+    interactions: Interaction[];
     /** Errors that happened during validation */
     errors?: Error[];
     /** If the user is ineligible, this text string explains why */

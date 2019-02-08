@@ -442,16 +442,14 @@ function setupMocha() {
                     return;
                 }
 
-                const [interactions, errors] = await amazon.getAllInteractions(
-                    token
-                );
-                if (interactions.length === 0) {
+                const result = await amazon.getAllInteractions(token);
+                if (result.interactions.length === 0) {
                     throw new Error(
                         'failed to find any interactions when making multi-page queries;'
                     );
                 }
 
-                aggregatedErrors = errors;
+                aggregatedErrors = result.errors!;
             });
 
             it("didn't encounter any errors across all of the data", () => {

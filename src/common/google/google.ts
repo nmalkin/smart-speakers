@@ -210,6 +210,7 @@ async function downloadAllActivity(
         status: VerificationState.loggedIn,
         downloadStatus,
         activities: allActivities,
+        interactions: [],
         errors
     };
 }
@@ -398,7 +399,8 @@ async function validateGoogle(): Promise<ValidationResult> {
     if (!csrfTok || csrfTok === '') {
         return {
             status: VerificationState.loggedOut,
-            downloadStatus: DownloadStatus.notAttempted
+            downloadStatus: DownloadStatus.notAttempted,
+            interactions: []
         };
     }
 

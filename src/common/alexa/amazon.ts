@@ -446,7 +446,8 @@ async function validateAmazon(): Promise<ValidationResult> {
     if (!loggedIn) {
         return {
             status: VerificationState.loggedOut,
-            downloadStatus: DownloadStatus.notAttempted
+            downloadStatus: DownloadStatus.notAttempted,
+            interactions: []
         };
     }
 
@@ -454,7 +455,8 @@ async function validateAmazon(): Promise<ValidationResult> {
     if (upgradeRequired) {
         return {
             status: VerificationState.upgradeRequired,
-            downloadStatus: DownloadStatus.notAttempted
+            downloadStatus: DownloadStatus.notAttempted,
+            interactions: []
         };
     }
 
