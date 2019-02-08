@@ -4,7 +4,7 @@ import {
     Interaction
 } from '../../common/types';
 import { Device } from '../device';
-import { wait } from '../util';
+import { sleep } from '../util';
 
 /** Batch size when querying Amazon */
 const BATCH_SIZE = 20;
@@ -308,7 +308,7 @@ export async function downloadAllInteractions(
     while (timestamps.length > BATCH_SIZE) {
         // Wait a little bit to avoid sending too many requests at once
         const waitTime = 100 * Math.log10(batchesRequested);
-        await wait(waitTime);
+        await sleep(waitTime);
 
         // Ask for everything up to the earliest interaction we saw
         const earliestInteraction = timestamps[BATCH_SIZE - 1];

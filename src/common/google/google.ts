@@ -4,7 +4,7 @@ import {
     Interaction
 } from '../../common/types';
 import { Device } from '../device';
-import { wait } from '../util';
+import { sleep } from '../util';
 
 type GoogleActivityList = any[];
 type GoogleActivityResponse = [GoogleActivityList | null, string | null];
@@ -152,7 +152,7 @@ async function downloadAllActivity(
     while (cursor !== null) {
         // Wait a little bit to avoid sending too many requests at once
         const waitTime = 100 * Math.log10(requests);
-        await wait(waitTime);
+        await sleep(waitTime);
 
         // Fetch and parse the next round of data
         try {
