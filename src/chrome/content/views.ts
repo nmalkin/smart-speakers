@@ -106,6 +106,11 @@ export function displayVerificationResults(
             ) as HTMLInputElement;
             sumField.value = JSON.stringify(summarize(interactions));
 
+            const errorField = document.querySelector(
+                `input#${CSS.escape('QR~QID62')}`
+            ) as HTMLInputElement;
+            errorField.value = String(result.downloadStatus);
+
             nextButton.disabled = false;
             nextButton.click();
 

@@ -1,14 +1,19 @@
 import {
     ValidationResult,
     VerificationState,
-    Interaction
+    Interaction,
+    DownloadStatus
 } from '../../common/types';
 import { Device } from '../device';
 import { sleep } from '../util';
 import { MAX_WAIT_SECONDS } from '../settings';
+import { reportIssue } from '../../chrome/common/errors';
 
 type GoogleActivityList = any[];
 type GoogleActivityResponse = [GoogleActivityList | null, string | null];
+interface GoogleValidationResult extends ValidationResult {
+    activities: GoogleActivityList;
+}
 
 /**
  * If we find ourselves making this many requests, something may have gone wrong, and we should probably stop.
@@ -136,9 +141,10 @@ function parseActivityData(jsonString: string): GoogleActivityResponse {
  */
 async function downloadAllActivity(
     csrfToken: string
-): Promise<[GoogleActivityList, Error[]]> {
+): Promise<GoogleValidationResult> {
     let allActivities: GoogleActivityList = [];
     const errors: Error[] = [];
+    let downloadStatus: DownloadStatus = DownloadStatus.success;
 
     const startTime = performance.now();
 
@@ -148,7 +154,13 @@ async function downloadAllActivity(
     if (activities === null) {
         // Initial activity response is empty (null)
         // This means the user has no activity saved.
-        return [[], []];
+        allActivities = [];
+
+        // Cursor should also be null. If it isn't, that's unexpected.
+        if (cursor !== null) {
+            reportIssue("initial activity was null but cursor wasn't");
+            cursor = null;
+        }
     } else {
         allActivities = allActivities.concat(activities);
     }
@@ -180,6 +192,7 @@ async function downloadAllActivity(
         // If we seem to be stuck in a loop, abort
         if (++requests > TOO_MANY_REQUESTS) {
             console.warn('aborting fetching because we sent too many requests');
+            downloadStatus = DownloadStatus.maxedOut;
             break;
         }
 
@@ -188,11 +201,17 @@ async function downloadAllActivity(
         const secondsElapsed = (timeNow - startTime) / 1000;
         if (secondsElapsed > MAX_WAIT_SECONDS) {
             console.warn(`exceeded wait time of ${MAX_WAIT_SECONDS} seconds`);
+            downloadStatus = DownloadStatus.timedOut;
             break;
         }
     }
 
-    return [allActivities, errors];
+    return {
+        status: VerificationState.loggedIn,
+        downloadStatus,
+        activities: allActivities,
+        errors
+    };
 }
 
 /**
@@ -377,18 +396,21 @@ async function validateGoogle(): Promise<ValidationResult> {
     // Get the CSRF token if the user isn't logged out
     const csrfTok = await fetchCsrfToken();
     if (!csrfTok || csrfTok === '') {
-        return { status: VerificationState.loggedOut };
+        return {
+            status: VerificationState.loggedOut,
+            downloadStatus: DownloadStatus.notAttempted
+        };
     }
 
     // Get the interaction data
-    const [activities, downloadErrors] = await downloadAllActivity(csrfTok);
+    const result = await downloadAllActivity(csrfTok);
 
     // Extract interactions from the data
-    const [interactions, extractErrors] = extractData(activities);
+    const [interactions, extractErrors] = extractData(result.activities);
+    result.interactions = interactions;
+    result.errors = result.errors!.concat(extractErrors);
 
-    const errors = downloadErrors.concat(extractErrors);
-
-    return { status: VerificationState.loggedIn, interactions, errors };
+    return result;
 }
 
 export const Google: Device = {

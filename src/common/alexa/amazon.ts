@@ -1,7 +1,8 @@
 import {
     ValidationResult,
     VerificationState,
-    Interaction
+    Interaction,
+    DownloadStatus
 } from '../../common/types';
 import { Device } from '../device';
 import { sleep } from '../util';
@@ -277,9 +278,10 @@ async function getAudio(
  */
 export async function downloadAllInteractions(
     csrfToken: string
-): Promise<[AlexaInteraction[], Error[]]> {
+): Promise<ValidationResult> {
     let allInteractions: AlexaInteraction[] = [];
     let allErrors: Error[] = [];
+    let downloadStatus: DownloadStatus = DownloadStatus.success;
 
     const startTime = performance.now();
 
@@ -349,6 +351,7 @@ export async function downloadAllInteractions(
         // If we seem to be stuck in a loop, abort
         if (++batchesRequested > TOO_MANY_REQUESTS) {
             console.warn('aborting fetching because we sent too many requests');
+            downloadStatus = DownloadStatus.maxedOut;
             break;
         }
 
@@ -357,19 +360,25 @@ export async function downloadAllInteractions(
         const secondsElapsed = (timeNow - startTime) / 1000;
         if (secondsElapsed > MAX_WAIT_SECONDS) {
             console.warn(`exceeded wait time of ${MAX_WAIT_SECONDS} seconds`);
+            downloadStatus = DownloadStatus.timedOut;
             break;
         }
     }
 
-    return [allInteractions, allErrors];
+    return {
+        status: VerificationState.loggedIn,
+        downloadStatus,
+        interactions: allInteractions,
+        errors: allErrors
+    };
 }
 
 /**
  * Given a list of Alexa interactions, return only those we want to use in the survey
  */
 export function filterUsableInteractions(
-    interactions: AlexaInteraction[]
-): AlexaInteraction[] {
+    interactions: Interaction[]
+): Interaction[] {
     /*
     Audio+transcript pairs (interactions) returned by Amazon fall into one of several categories.
 
@@ -421,9 +430,10 @@ export function filterUsableInteractions(
  */
 export async function getAllInteractions(
     csrfToken: string
-): Promise<[AlexaInteraction[], Error[]]> {
-    const [interactions, errors] = await downloadAllInteractions(csrfToken);
-    return [filterUsableInteractions(interactions), errors];
+): Promise<ValidationResult> {
+    const result = await downloadAllInteractions(csrfToken);
+    result.interactions = filterUsableInteractions(result.interactions!);
+    return result;
 }
 
 /**
@@ -434,23 +444,24 @@ export async function getAllInteractions(
 async function validateAmazon(): Promise<ValidationResult> {
     const loggedIn: boolean = await isLoggedIn();
     if (!loggedIn) {
-        return { status: VerificationState.loggedOut };
+        return {
+            status: VerificationState.loggedOut,
+            downloadStatus: DownloadStatus.notAttempted
+        };
     }
 
     const upgradeRequired: boolean = await requiresPasswordUpgrade();
     if (upgradeRequired) {
-        return { status: VerificationState.upgradeRequired };
+        return {
+            status: VerificationState.upgradeRequired,
+            downloadStatus: DownloadStatus.notAttempted
+        };
     }
 
     const csrfTok = await getCSRF();
 
-    const [interactions, errors] = await getAllInteractions(csrfTok);
-
-    return {
-        status: VerificationState.loggedIn,
-        interactions,
-        errors
-    };
+    const result = await getAllInteractions(csrfTok);
+    return result;
 }
 
 export const Alexa: Device = {
