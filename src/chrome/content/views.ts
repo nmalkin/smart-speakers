@@ -23,7 +23,7 @@ export function displayVerificationPlaceholder(): void {
     displayVerificationMessage(
         `<b>Status:</b><br>
         Verifying study eligibility. <br>
-        (This may take up to a couple of minutes. Thank you for your patience!)
+        This can take up to 90 seconds, but usually takes much less time. Thank you for your patience!
         <br><br>
         <!-- spinner, courtesy of https://loading.io/css/ -->
         <style>
