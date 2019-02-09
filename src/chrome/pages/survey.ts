@@ -2,7 +2,7 @@ import { getDebugStatus } from '../common/debug';
 import { set } from '../common/storage';
 
 const SURVEY_URL =
-    'https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05?test=';
+    'https://berkeley.qualtrics.com/jfe/form/SV_0IXl6YjUBllveiV?test=';
 
 let notifyOnLeave = true;
 
