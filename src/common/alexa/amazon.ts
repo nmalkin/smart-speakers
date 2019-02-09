@@ -9,7 +9,7 @@ import { sleep } from '../util';
 import { MAX_WAIT_SECONDS } from '../settings';
 
 /** Batch size when querying Amazon */
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 100;
 
 /**
  * If we find ourselves making this many requests, something may have gone wrong, and we should probably stop.
