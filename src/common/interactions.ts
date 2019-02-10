@@ -1,0 +1,49 @@
+import { Interaction } from './types';
+import { reportError } from '../chrome/common/errors';
+
+const USELESS_TRANSCRIPTS: RegExp[] = [
+    'Google Assistant',
+    'Unknown voice command',
+    'Text not available'
+].map(s => new RegExp(s));
+
+/**
+ * Return true if the given interaction should be used in our survey
+ * @param interaction the interaction to check
+ */
+export async function goodInteraction(
+    interaction: Interaction
+): Promise<boolean> {
+    // Check for transcripts that don't convey any information
+    // The associated audio is typically also missing.
+    const anyBad: boolean = USELESS_TRANSCRIPTS.reduce(
+        (previousBad: boolean, badTranscript: RegExp): boolean => {
+            return previousBad || badTranscript.test(interaction.transcript);
+        },
+        false
+    );
+    if (anyBad) {
+        return false;
+    }
+
+    // We will check if the recording is valid
+    // because sometimes Amazon (at least) returns recordings that are empty.
+    // If there's no recording at all, though, we will accept it
+    // so as not to exclude the Google interactions that don't save audio.
+    if (!interaction.recordingAvailable) {
+        return true;
+    }
+    try {
+        // Check that the recording URL returns a valid file.
+        const response = await fetch(interaction.url);
+        const contentType = response.headers.get('content-type');
+        // Check to make sure the response has the standard audio content-type header
+        return contentType !== null;
+    } catch (error) {
+        // Something weird happened when trying to fetch the recording URL.
+        // Report the error and try to find another recording,
+        // in case there's actually something wrong with this one.
+        reportError(error);
+        return false;
+    }
+}
