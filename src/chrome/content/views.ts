@@ -107,7 +107,7 @@ export function displayVerificationResults(
             sumField.value = JSON.stringify(summarize(interactions));
 
             const errorField = document.querySelector(
-                `input#${CSS.escape('QR~QID62')}`
+                `input#${CSS.escape('QR~QID80')}`
             ) as HTMLInputElement;
             errorField.value = String(result.downloadStatus);
 
@@ -180,13 +180,12 @@ export function displayInteraction(
         tag = `Transcript: ${interaction.transcript}<br>(Audio not available)`;
     }
 
-    const targetElement = questionNumber + '_QID9';
     document
-        .getElementById(targetElement)!
+        .getElementById(`${questionNumber}_QID9`)!
         .getElementsByClassName('QuestionText')[0].innerHTML = tag;
 
     const field = document.querySelector(
-        `input#${CSS.escape('QR~QID59')}`
+        `input#${CSS.escape(`QR~${questionNumber}_QID77`)}`
     ) as HTMLInputElement;
     field.value = String(
         interaction.timestamp - (interaction.timestamp % (60 * 60 * 1000))
