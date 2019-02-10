@@ -53,11 +53,15 @@ const USELESS_TRANSCRIPTS: RegExp[] = [
 async function goodInteraction(interaction: Interaction): Promise<boolean> {
     // Check for transcripts that don't convey any information
     // The associated audio is typically also missing.
-    USELESS_TRANSCRIPTS.forEach(badTranscript => {
-        if (badTranscript.test(interaction.transcript)) {
-            return false;
-        }
-    });
+    const anyBad: boolean = USELESS_TRANSCRIPTS.reduce(
+        (previousBad: boolean, badTranscript: RegExp): boolean => {
+            return previousBad || badTranscript.test(interaction.transcript);
+        },
+        false
+    );
+    if (anyBad) {
+        return false;
+    }
 
     // We will check if the recording is valid
     // because sometimes Amazon (at least) returns recordings that are empty.
@@ -99,6 +103,7 @@ async function selectValid(state: SurveyState): Promise<Interaction> {
         state.seen.push(index);
         interaction = state.interactions[index];
         foundValid = await goodInteraction(interaction);
+        console.log(foundValid);
     }
 
     return interaction;
