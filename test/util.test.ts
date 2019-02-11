@@ -1,4 +1,9 @@
-import { selectUnseen, zip } from '../src/common/util';
+import {
+    selectUnseen,
+    zip,
+    shuffleArray,
+    isSortedAscending
+} from '../src/common/util';
 
 describe('utility functions', () => {
     describe('selectUnseen', () => {
@@ -46,6 +51,51 @@ describe('utility functions', () => {
                     return 0;
                 });
             }).toThrow('length');
+        });
+    });
+
+    describe('isSorted', () => {
+        test('it returns true on sorted arrays', () => {
+            expect(isSortedAscending([1, 2, 3])).toBeTruthy();
+        });
+
+        test('it returns false if sorted in descending order', () => {
+            expect(isSortedAscending([3, 2, 1])).toBeFalsy();
+        });
+
+        test('it returns false on unsorted arrays', () => {
+            expect(isSortedAscending([1, 3, 2])).toBeFalsy();
+        });
+    });
+
+    describe('shuffleArray', () => {
+        test('it leaves the array in a different order than the one given originally', () => {
+            const test = [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20
+            ];
+
+            expect(isSortedAscending(test)).toBeTruthy(); // sanity check
+            shuffleArray(test);
+            expect(isSortedAscending(test)).toBeFalsy(); // fails with very small probability
         });
     });
 });
