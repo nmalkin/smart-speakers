@@ -35,8 +35,9 @@ describe('interaction-related functions', async () => {
     });
 
     describe('orderInteractions', () => {
+        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         test('it randomizes the order of interactions', () => {
-            const interactions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => {
+            const interactions = numbers.map(i => {
                 return {
                     testId: i,
                     recordingAvailable: false,
@@ -51,6 +52,34 @@ describe('interaction-related functions', async () => {
             orderInteractions(interactions);
             ids = interactions.map(interaction => interaction.testId);
             expect(isSortedAscending(ids)).toBeFalsy(); // will fail with small probability
+        });
+
+        test('it puts interactions with recordings first', () => {
+            const testCutoff = 10;
+            const interactions = numbers.map(i => {
+                return {
+                    testId: i,
+                    recordingAvailable: i <= testCutoff,
+                    transcript: 'a test transcript',
+                    url: '',
+                    timestamp: 0
+                };
+            });
+            let ids = interactions.map(interaction => interaction.testId);
+            expect(isSortedAscending(ids)).toBeTruthy(); // sanity check
+
+            orderInteractions(interactions);
+            ids = interactions.map(interaction => interaction.testId);
+            expect(isSortedAscending(ids)).toBeFalsy(); // will fail with small probability
+
+            numbers.forEach(n => {
+                const index = ids.indexOf(n);
+                if (n <= testCutoff) {
+                    expect(index).toBeLessThan(testCutoff);
+                } else {
+                    expect(index).toBeGreaterThanOrEqual(testCutoff);
+                }
+            });
         });
     });
 });

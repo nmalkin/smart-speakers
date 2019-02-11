@@ -53,9 +53,22 @@ export async function goodInteraction(
  * Given an array of interactions, order it in-place for iteration during the study.
  *
  * Since we want a random sample of the interactions, we shuffle the array.
+ * But because we'd prefer that participants saw interactions with recordings,
+ * we move those to the front (otherwise preserving the random ordering).
  */
-export async function orderInteractions(
-    interactions: Interaction[]
-): Promise<void> {
+export function orderInteractions(interactions: Interaction[]): void {
+    // Randomize the order of interactions of the array
     shuffleArray(interactions);
+
+    // But put all interactions with recordings ahead of those without them,
+    // so that, if possible, those are seen (first).
+    interactions.sort((a, b) => {
+        if (a.recordingAvailable && !b.recordingAvailable) {
+            return -1;
+        } else if (!a.recordingAvailable && b.recordingAvailable) {
+            return 1;
+        } else {
+            return 0;
+        }
+    });
 }
