@@ -15,12 +15,15 @@ import {
 } from './views';
 import { selectUnseen } from '../../common/util';
 import { reportError, initErrorHandling } from '../common/errors';
-import { goodInteraction } from '../../common/interactions';
+import { goodInteraction, orderInteractions } from '../../common/interactions';
 
 class SurveyState {
     public device: Device;
     public interactions: Interaction[] = [];
-    public seen: number[] = [];
+    /** The next interaction to (try) displaying */
+    public nextInteractionIndex: number = 0;
+    /** The previously displayed interactions. */
+    public seenInteractions: Interaction[] = [];
 }
 
 // tslint:disable-next-line:variable-name
@@ -52,11 +55,9 @@ async function selectValid(state: SurveyState): Promise<Interaction> {
     let foundValid = false;
     let interaction;
     while (!foundValid) {
-        const index = selectUnseen(state.interactions.length, state.seen);
-        state.seen.push(index);
-        interaction = state.interactions[index];
+        interaction = state.interactions[state.nextInteractionIndex];
         foundValid = await goodInteraction(interaction);
-        console.log(foundValid);
+        state.nextInteractionIndex++;
     }
 
     return interaction;
@@ -75,10 +76,9 @@ async function processRecordingRequest(
 ): Promise<void> {
     // Select recording to show
     let interaction: Interaction;
-    if (questionNumber <= state.seen.length) {
+    if (questionNumber <= state.seenInteractions.length) {
         // Page is requesting a question/interaction that's already been seen.
-        const index = state.seen[questionNumber - 1];
-        interaction = state.interactions[index];
+        interaction = state.seenInteractions[questionNumber - 1];
     } else {
         // Choose a new interaction
         try {
@@ -95,6 +95,9 @@ async function processRecordingRequest(
                 interaction = ERROR_INTERACTION;
             }
         }
+
+        // Remember that we've seen this interaction
+        state.seenInteractions.push(interaction);
     }
 
     // Display recording on page
@@ -139,6 +142,7 @@ async function processVerify(state: SurveyState) {
     }
 
     state.interactions = result.interactions;
+    orderInteractions(state.interactions);
 
     if (result.errors && result.errors.length > 0) {
         console.error(

@@ -1,5 +1,6 @@
 import { Interaction } from './types';
 import { reportError } from '../chrome/common/errors';
+import { shuffleArray } from './util';
 
 const USELESS_TRANSCRIPTS: RegExp[] = [
     'Google Assistant',
@@ -46,4 +47,15 @@ export async function goodInteraction(
         reportError(error);
         return false;
     }
+}
+
+/**
+ * Given an array of interactions, order it in-place for iteration during the study.
+ *
+ * Since we want a random sample of the interactions, we shuffle the array.
+ */
+export async function orderInteractions(
+    interactions: Interaction[]
+): Promise<void> {
+    shuffleArray(interactions);
 }
