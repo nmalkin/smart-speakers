@@ -17,9 +17,6 @@
             "js": ["content.js"]
         }
     ],
-    "externally_connectable": {
-        "matches": ["https://berkeley.qualtrics.com/*"]
-    },
     "icons": {
         "16": "assets/logo.png",
         "32": "assets/logo.png",
