@@ -12,10 +12,7 @@
     },
     "content_scripts": [
         {
-            "matches": [
-                "https://berkeley.qualtrics.com/jfe/form/SV_7NzNJ4QmCe4uE05?*",
-                "https://berkeley.qualtrics.com/jfe/form/SV_0IXl6YjUBllveiV?*"
-            ],
+            "matches": ["https://berkeley.qualtrics.com/jfe/form/*"],
             "all_frames": true,
             "js": ["content.js"]
         }
