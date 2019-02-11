@@ -1,9 +1,9 @@
-import {
-    VerificationState,
-    Interaction,
-    ValidationResult
-} from '../../common/types';
 import { Device } from '../../common/device';
+import {
+    Interaction,
+    ValidationResult,
+    VerificationState
+} from '../../common/types';
 import { summarize } from '../../common/util';
 
 /**

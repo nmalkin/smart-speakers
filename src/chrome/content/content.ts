@@ -1,21 +1,11 @@
-import {
-    Interaction,
-    ValidationResult,
-    VerificationState,
-    DownloadStatus
-} from '../../common/types';
+import { Alexa } from '../../common/alexa/amazon';
 import { Device } from '../../common/device';
 import { Google } from '../../common/google/google';
-import { Alexa } from '../../common/alexa/amazon';
-import { getDebugStatus } from '../common/debug';
-import {
-    displayVerificationResults,
-    displayInteraction,
-    displayVerificationPlaceholder
-} from './views';
-import { selectUnseen } from '../../common/util';
-import { reportError, initErrorHandling } from '../common/errors';
 import { goodInteraction, orderInteractions } from '../../common/interactions';
+import { DownloadStatus, Interaction, ValidationResult, VerificationState } from '../../common/types';
+import { getDebugStatus } from '../common/debug';
+import { initErrorHandling, reportError } from '../common/errors';
+import { displayInteraction, displayVerificationPlaceholder, displayVerificationResults } from './views';
 
 class SurveyState {
     public device: Device;

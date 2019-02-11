@@ -1,13 +1,13 @@
+import { reportIssue } from '../../chrome/common/errors';
 import {
-    ValidationResult,
-    VerificationState,
+    DownloadStatus,
     Interaction,
-    DownloadStatus
+    ValidationResult,
+    VerificationState
 } from '../../common/types';
 import { Device } from '../device';
-import { sleep } from '../util';
 import { MAX_WAIT_SECONDS } from '../settings';
-import { reportIssue } from '../../chrome/common/errors';
+import { sleep } from '../util';
 
 type GoogleActivityList = any[];
 type GoogleActivityResponse = [GoogleActivityList | null, string | null];

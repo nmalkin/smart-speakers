@@ -1,6 +1,6 @@
-import { ValidationResult } from './types';
 import { Alexa } from './alexa/amazon';
 import { Google } from './google/google';
+import { ValidationResult } from './types';
 
 /**
  * A Device used in our study

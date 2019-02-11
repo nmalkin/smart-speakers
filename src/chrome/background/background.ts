@@ -1,8 +1,8 @@
-import { updateDevEnvironmentStatus } from '../common/debug';
-import { initErrorHandling, reportError, reportIssue } from '../common/errors';
-import { ValidationResult, VerificationState } from '../../common/types';
 import { Device, unserializeDevice } from '../../common/device';
 import { checkEligibility } from '../../common/eligibility';
+import { ValidationResult, VerificationState } from '../../common/types';
+import { updateDevEnvironmentStatus } from '../common/debug';
+import { initErrorHandling, reportError, reportIssue } from '../common/errors';
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     /** Process validation requests */

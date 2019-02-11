@@ -1,12 +1,12 @@
 import {
-    ValidationResult,
-    VerificationState,
+    DownloadStatus,
     Interaction,
-    DownloadStatus
+    ValidationResult,
+    VerificationState
 } from '../../common/types';
 import { Device } from '../device';
-import { sleep } from '../util';
 import { MAX_WAIT_SECONDS } from '../settings';
+import { sleep } from '../util';
 
 /** Batch size when querying Amazon */
 const BATCH_SIZE = 100;
