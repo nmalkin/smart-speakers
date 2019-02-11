@@ -2,10 +2,19 @@ import { Alexa } from '../../common/alexa/amazon';
 import { Device } from '../../common/device';
 import { Google } from '../../common/google/google';
 import { goodInteraction, orderInteractions } from '../../common/interactions';
-import { DownloadStatus, Interaction, ValidationResult, VerificationState } from '../../common/types';
+import {
+    DownloadStatus,
+    Interaction,
+    ValidationResult,
+    VerificationState
+} from '../../common/types';
 import { getDebugStatus } from '../common/debug';
 import { initErrorHandling, reportError } from '../common/errors';
-import { displayInteraction, displayVerificationPlaceholder, displayVerificationResults } from './views';
+import {
+    displayInteraction,
+    displayVerificationPlaceholder,
+    displayVerificationResults
+} from './views';
 
 class SurveyState {
     public device: Device;
@@ -45,9 +54,15 @@ async function selectValid(state: SurveyState): Promise<Interaction> {
     let foundValid = false;
     let interaction;
     while (!foundValid) {
+        if (state.nextInteractionIndex >= state.interactions.length) {
+            throw new Error(
+                'all available interactions have been seen already'
+            );
+        }
+
         interaction = state.interactions[state.nextInteractionIndex];
-        foundValid = await goodInteraction(interaction);
         state.nextInteractionIndex++;
+        foundValid = await goodInteraction(interaction);
     }
 
     return interaction;
