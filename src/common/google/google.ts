@@ -156,10 +156,14 @@ async function downloadAllActivity(
         // This means the user has no activity saved.
         allActivities = [];
 
-        // Cursor should also be null. If it isn't, that's unexpected.
+        // If there are no activities, then you'd expect there to be no further activities either,
+        // so the cursor should be null too.
         if (cursor !== null) {
             reportIssue("initial activity was null but cursor wasn't");
-            cursor = null;
+            // This is weird, but has happened at least once.
+            // Maybe there's more data if we ask for it.
+            // For now, at least, let's continue with trying to download data.
+            // cursor = null;
         }
     } else {
         allActivities = allActivities.concat(currentActivities);
