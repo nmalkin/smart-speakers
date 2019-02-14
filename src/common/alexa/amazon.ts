@@ -261,8 +261,21 @@ function updateInteractionTimestamps(
     interactions: AlexaInteraction[],
     timestamps: AmazonTimestamp[]
 ): void {
+    if (!Array.isArray(timestamps)) {
+        throw new Error('timestamps are not an array');
+    } else if (interactions.length > timestamps.length) {
+        throw new Error('number of interactions exceeds number of timestamps');
+    }
+
     interactions.forEach((interaction, i) => {
-        interaction.timestamp = timestamps[i].activityTimeStamp;
+        const timestamp = timestamps[i];
+        if (!timestamp || !timestamp.activityTimeStamp) {
+            throw new Error(
+                `timestamp missing "activityTimeStamp" in ${timestamp}`
+            );
+        }
+
+        interaction.timestamp = timestamp.activityTimeStamp;
     });
 }
 
