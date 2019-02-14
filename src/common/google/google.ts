@@ -79,6 +79,15 @@ async function fetchActivityData(
             body
         }
     );
+
+    if (!response.ok) {
+        throw new Error(
+            `request for activity failed with status ${response.status}: ${
+                response.statusText
+            }`
+        );
+    }
+
     const restxt = await response.text();
     return restxt;
 }
