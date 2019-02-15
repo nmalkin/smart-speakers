@@ -13,10 +13,31 @@ describe('interaction-related functions', async () => {
             expect(result).toBeFalsy();
         });
 
+        test('the regular expressions catch whitespace', async () => {
+            const result = await goodInteraction({
+                recordingAvailable: false,
+                transcript: `   Alexa
+                 `,
+                url: '',
+                timestamp: 0
+            });
+            expect(result).toBeFalsy();
+        });
+
         test('it allows other interactions', async () => {
             const result = await goodInteraction({
                 recordingAvailable: false,
                 transcript: 'a test transcript',
+                url: '',
+                timestamp: 0
+            });
+            expect(result).toBeTruthy();
+        });
+
+        test("partial matchse don't fail", async () => {
+            const result = await goodInteraction({
+                recordingAvailable: false,
+                transcript: 'Alexa do something',
                 url: '',
                 timestamp: 0
             });

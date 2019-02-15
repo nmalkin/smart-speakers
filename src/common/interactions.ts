@@ -3,6 +3,7 @@ import { reportError } from '../chrome/common/errors';
 import { shuffleArray } from './util';
 
 const USELESS_TRANSCRIPTS: RegExp[] = [
+    '^\\s*Alexa\\s*$',
     'Google Assistant',
     'Unknown voice command',
     'Text not available'
