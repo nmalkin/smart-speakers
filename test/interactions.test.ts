@@ -34,7 +34,7 @@ describe('interaction-related functions', async () => {
             expect(result).toBeTruthy();
         });
 
-        test("partial matchse don't fail", async () => {
+        test("partial matches don't fail", async () => {
             const result = await goodInteraction({
                 recordingAvailable: false,
                 transcript: 'Alexa do something',
