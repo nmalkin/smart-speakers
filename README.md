@@ -1,6 +1,6 @@
 # Smart Speaker Study
 
-This repository contains the source code of the browser extension for the Smart Speaker Study. Please feel free to examine it.
+This repository contains the source code of the browser extension used by the study of [Privacy Attitudes of Smart Speaker Users](https://blues.cs.berkeley.edu/blog/2019/07/01/uninformed-but-unconcerned-privacy-attitudes-of-smart-speaker-users-pets-19/).
 
 # Developing and building the extension
 
